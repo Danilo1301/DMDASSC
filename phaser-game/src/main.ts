@@ -7,7 +7,7 @@ import { GameClient } from "@phaserGame/game"
 function main(): void {
     document.body.style.margin = "0px"
 
-    var address = 'http://' + location.host + '/api/phaserGame'
+    var address = `${location.protocol}//${location.host}/api/phaserGame`
 
     console.log("Connecting to " + address)
 
