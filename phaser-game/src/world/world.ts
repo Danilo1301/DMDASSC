@@ -1,9 +1,12 @@
 import { EntityPlayer } from "@phaserGame/entities";
 import { EntityFactory } from "@phaserGame/entityFactory";
+import { GameClient } from "@phaserGame/game";
 import { PhysicBody } from "@phaserGame/game/components";
 import { TestAI } from "@phaserGame/game/components/testAi";
 import { Server } from "@phaserGame/server";
+import { PacketData, PacketId } from "@phaserGame/server/packets";
 import { Entity } from "@phaserGame/utils";
+import { BodyType } from "matter";
 import { WorldScene } from "./worldScene";
 
 export class World {
@@ -35,10 +38,57 @@ export class World {
 
         this.SetupScene()
 
-        this.Scene.matter.add.rectangle(200, 200, 40, 500, {isStatic: true})
+        this.Scene.matter.add.rectangle(100, 200, 40, 500, {isStatic: true, restitution: 0.5})
+        this.Scene.matter.add.rectangle(700, 200, 40, 500, {isStatic: true, restitution: 0.5})
         
-        this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true})
-        this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true})
+        this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true, restitution: 0.5})
+        this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true, restitution: 0.5})
+
+        this.Scene.add.text(300, 200, "Spawn ball")
+        var ballSensor = this.Scene.matter.add.rectangle(300, 200, 30, 30, {isSensor: true})
+
+        this.Scene.add.text(500, 200, "Spawn bot")
+        var botSensor = this.Scene.matter.add.rectangle(500, 200, 30, 30, {isSensor: true})
+        
+        var world = this
+
+        this.Scene.matter.world.on('collisionstart', function (event, bodyA: BodyType, bodyB: BodyType) {
+            var isCollidingBall = bodyA == ballSensor || bodyB == ballSensor
+            var isCollidingBot = bodyA == botSensor || bodyB == botSensor
+            
+
+            var game = world.Server.Game as GameClient
+
+            if(!game.Network) return
+
+            
+
+            
+            var id = game.Network.ControllingEntityId
+            var player = world.EntityFactory.GetEntity(id) as EntityPlayer
+            var body = player.PhysicBody.Sprite?.body as BodyType
+            
+
+            var ids: number[] = []
+
+            for (const p of body.parts) {
+                ids.push(p.id)
+            }
+
+            var collidingWithPlayer = ids.includes(bodyA.id) || ids.includes(bodyB.id)
+
+
+            if(collidingWithPlayer) {
+   
+                if(isCollidingBall) {
+                    game.Network.Send("newBall", new PacketId(''))
+                }
+
+                if(isCollidingBot) {
+                    game.Network.Send("newBot", new PacketId(''))
+                }
+            }
+        });
 
     }
 
@@ -48,6 +98,7 @@ export class World {
         var load = this.Scene.load;
 
         load.setPath(this.Server.Game.ASSETS_PATH)
+        load.image('ball', 'ball.png')
         load.image('player1', 'player1.png')
         load.image('player2', 'player2.png')
         load.image('block1', 'block1.png')

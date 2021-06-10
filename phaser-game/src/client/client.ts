@@ -98,6 +98,11 @@ export class Client {
             this.World?.EntityFactory.CreateBot(400, 300)
         }
 
+        if(key == "newBall") {
+            console.log("newBall")
+            this.World?.EntityFactory.CreateEntity('EntityCrate', null)
+        }
+
         if(key == "client_entities") this.OnReceivePacket_ClientEntities(data as PacketEntities)
     }
 

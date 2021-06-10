@@ -24,6 +24,8 @@ export class PacketEntityInfo {
         X: 0,
         Y: 0
     }
+    public AngularVelocity: number = 0
+
     public Inputs: InputInfo[] = []
 
     constructor(entity: Entity) {
