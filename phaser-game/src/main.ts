@@ -7,7 +7,11 @@ import { GameClient } from "@phaserGame/game"
 function main(): void {
     document.body.style.margin = "0px"
 
-    var socket = io('http://localhost:3000/api/phaserGame', {path: '/socket'})
+    var address = 'http://' + location.host + '/api/phaserGame'
+
+    console.log("Connecting to " + address)
+
+    var socket = io(address, {path: '/socket'})
     
     var game = new GameClient(socket)
 

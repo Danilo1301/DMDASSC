@@ -4,13 +4,13 @@
     "module": "commonjs",
     "strict": true,
     "noImplicitAny": false,
-    "baseUrl": "./",
+    "baseUrl": "../",
     "paths": {
-      "@phaserGame/*": ["./src/*"]
+      "@phaserGame/*": ["./phaser-game/src/*"]
     },
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"]
+  "include": ["./src/**/*"]
 }

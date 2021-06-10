@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node -r tsconfig-paths/register -r ts-node/register server/server.ts",
     "phaser_game:start": "node -r tsconfig-paths/register -r ts-node/register phaser-game/src/main.ts",
-    "phaser_game:dev": "webpack --config phaser-game/webpack.config.js --watch"
+    "phaser_game:dev": "webpack --config phaser-game/webpack.config.js --watch",
+    "phaser_game:build": "webpack --config phaser-game/webpack.config.js"
   },
   "author": "",
   "license": "ISC",
