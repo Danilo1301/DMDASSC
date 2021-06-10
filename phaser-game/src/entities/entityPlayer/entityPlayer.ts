@@ -19,6 +19,7 @@ export class EntityPlayer extends Entity {
     public Awake() {
         super.Awake()
 
+        this.PhysicBody.SpriteName = "player1"
         this.PhysicBody.AddCollisionCircle('body', 0, 0, 20)
         this.Position.Set(400, 300)
     }

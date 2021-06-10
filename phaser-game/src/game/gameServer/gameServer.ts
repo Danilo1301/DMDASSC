@@ -4,7 +4,7 @@ import { Game } from '@phaserGame/game';
 import { Server } from '@phaserGame/server';
 import { config } from '@phaserGame/game/config'
 import { Host } from '@phaserGame/host';
-import { Client } from '@phaserGame/game/gameServer/client';
+import { Client } from '@phaserGame/client/client';
 
 export class GameServer extends Game {
     public Clients: Phaser.Structs.Map<string, Client>
@@ -23,9 +23,7 @@ export class GameServer extends Game {
         var client = new Client(socket)
 
         var server = this.Servers.values()[0]
-        server.Host!.OnClientJoin(client)
-
-        console.log(`[PhaserGame] Socket ${socket.id} connected`)
+        client.JoinServer(server)
     }
 
     public Start(): void {

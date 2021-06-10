@@ -3,11 +3,14 @@ import { EntityFactory } from "@phaserGame/entityFactory";
 import { PhysicBody } from "@phaserGame/game/components";
 import { TestAI } from "@phaserGame/game/components/testAi";
 import { Server } from "@phaserGame/server";
+import { Entity } from "@phaserGame/utils";
 import { WorldScene } from "./worldScene";
 
 export class World {
     public Server: Server
     public EntityFactory: EntityFactory
+
+    public Events = new Phaser.Events.EventEmitter();
 
     private _id: string;
     private _scene!: WorldScene;
@@ -16,6 +19,10 @@ export class World {
         this.Server = server
         this._id = id
         this.EntityFactory = new EntityFactory(this)
+
+        this.Events.on("entityCreated", (entity: Entity) => {
+            console.log("[World Event] New entity", entity.Id)
+        })
     }
 
     public get Id(): string { return this._id }
@@ -27,6 +34,12 @@ export class World {
         console.log(`World.Start()`)
 
         this.SetupScene()
+
+        this.Scene.matter.add.rectangle(200, 200, 40, 500, {isStatic: true})
+        
+        this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true})
+        this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true})
+
     }
 
     public Preload(): void {
@@ -49,7 +62,6 @@ export class World {
         this._scene = this.Server.Game.scene.add(this.SceneKey, WorldScene) as WorldScene
         this._scene.World = this
         this.Server.Game.scene.start(this.SceneKey)
-
         this.EntityFactory.Scene = this._scene
     }
 

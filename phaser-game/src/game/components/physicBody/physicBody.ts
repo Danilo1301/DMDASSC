@@ -1,9 +1,13 @@
 import { Entity, IComponent } from "@phaserGame/utils"
+import { TestAI } from "../testAi"
 
 export class PhysicBody implements IComponent {
     public Entity!: Entity
     public Matter!: Phaser.Physics.Matter.MatterPhysics
     public Body: MatterJS.BodyType | undefined
+    public Sprite: Phaser.Physics.Matter.Sprite | undefined
+
+    public SpriteName: string = ""
 
     private _bodies = new Phaser.Structs.Map<string, MatterJS.BodyType>([])
 
@@ -28,7 +32,7 @@ export class PhysicBody implements IComponent {
     }
 
     private UpdateBody(): void {
-        if(this.Body) this.Matter.world.remove(this.Body)
+        this.DestroySprites()
 
         this.Body = this.Matter.body.create({
             parts: this._bodies.values()
@@ -37,6 +41,9 @@ export class PhysicBody implements IComponent {
         this.Matter.world.add(this.Body)
         
         this.CenterBody()
+
+        this.Sprite = this.Matter.add.sprite(0, 0, this.SpriteName)
+        this.Sprite.setExistingBody(this.Body)
     }
 
     private CenterBody(): void {
@@ -58,4 +65,12 @@ export class PhysicBody implements IComponent {
         this.Matter.body.setVelocity(this.Body!, {x: velx, y: vely})
     }
 
+    public Destroy(): void {
+        this.DestroySprites()
+    }
+
+    public DestroySprites(): void {
+        if(this.Body) this.Matter.world.remove(this.Body)
+        if(this.Sprite) this.Sprite.destroy()
+    }
 }

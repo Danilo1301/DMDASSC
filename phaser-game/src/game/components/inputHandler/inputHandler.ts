@@ -84,4 +84,8 @@ export class InputHandler implements IComponent {
         var inpuptInfo = new InputInfo(name, keyCode)
         this._inputs.set(name, inpuptInfo)
     }
+
+    public Destroy(): void {
+        
+    }
 }

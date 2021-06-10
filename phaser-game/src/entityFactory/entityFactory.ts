@@ -1,4 +1,4 @@
-import { EntityPlayer } from "@phaserGame/entities"
+import { EntityCrate, EntityPlayer } from "@phaserGame/entities"
 import { TestAI } from "@phaserGame/game/components/testAi"
 import { Entity } from "@phaserGame/utils"
 import { World } from "@phaserGame/world"
@@ -16,42 +16,37 @@ export class EntityFactory {
         this.Scene = this.World.Scene
 
         this.RegisterEntity("EntityPlayer", EntityPlayer)
+        this.RegisterEntity("EntityCrate", EntityCrate)
     }
 
     public get Entities(): Entity[] { return this._entities.values() }
 
     public Update(delta: number): void {
-        for (const entity of this.Entities) {
-            entity.Update(delta)
-        }
+        for (const entity of this.Entities) entity.Update(delta)
     }
 
-    public RegisterEntity(name: string, constr: { new(...args: any[]): Entity }): void {
-        this._registeredEntities.set(name, constr)
+    public RegisterEntity(name: string, constr: { new(...args: any[]): Entity }): void { this._registeredEntities.set(name, constr) }
 
-        console.log(this._registeredEntities)
-    }
+    public HasEntity(id: string): boolean { return this._entities.has(id) }
 
-    public HasEntity(id: string): boolean {
-        return this._entities.has(id)
-    }
+    public GetEntity(id: string): Entity { return this._entities.get(id)! }
 
-    public GetEntity(id: string): Entity {
-        return this._entities.get(id)!
+    public DestroyEntity(entity: Entity): void {
+        this._entities.delete(entity.Id)
+        entity.Destroy();
+
+        this.World.Events.emit("entityDestroyed", entity)
     }
 
     public CreateEntity(name: string, id: string | null, options?: any, ): Entity {
         var constr = this._registeredEntities.get(name)
-
         if(!constr) throw Error("Unknown entity type")
-
         var entity = new constr(this.World, id)
-
         console.log(`EntityFactory.CreateEntity() - ${entity.Id}`)
-
         entity.Awake()
-
         this._entities.set(entity.Id, entity)
+
+        this.World.Events.emit("entityCreated", entity)
 
         return entity
     }

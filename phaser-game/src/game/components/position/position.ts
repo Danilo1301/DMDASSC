@@ -41,4 +41,8 @@ export class Position implements IComponent {
             this._y = body.position.y
         }
     }
+
+    public Destroy(): void {
+        
+    }
 }

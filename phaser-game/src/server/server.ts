@@ -35,6 +35,12 @@ export class Server {
         for (let i = 0; i < 3; i++) {
             world.EntityFactory.CreateBot(400, 300)
         }
+
+        for (let i = 0; i < 6; i++) {
+            world.EntityFactory.CreateEntity("EntityCrate", null)
+        }
+
+ 
     }
 }
 

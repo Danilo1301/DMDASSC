@@ -26,4 +26,7 @@ export class TestAI implements IComponent {
         
     }
 
+    public Destroy(): void {
+        
+    }
 }

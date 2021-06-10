@@ -44,3 +44,12 @@ export class PacketEntityInfo {
 export class PacketEntities extends PacketData {
     public Entities: PacketEntityInfo[] = []
 }
+
+export class PacketId extends PacketData {
+    public Id: string
+
+    constructor(id: string) {
+        super()
+        this.Id = id
+    }
+}

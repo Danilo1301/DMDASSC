@@ -3,7 +3,7 @@ import { Socket } from "socket.io-client";
 import { Game } from "@phaserGame/game";
 import { config } from '@phaserGame/game/config'
 import { Server } from "@phaserGame/server";
-import { Network } from "@phaserGame/game/gameClient";
+import { Network } from "@phaserGame/network";
 
 export class GameClient extends Game {
     public MainServer: Server

@@ -1,11 +1,11 @@
 import { World } from '@phaserGame/world'
 import { WorldScene } from '@phaserGame/world/worldScene'
-import { IAwake, IUpdate } from '../lifecycle'
+import { IAwake, IDestroy, IUpdate } from '../lifecycle'
 import { IComponent } from './component.h'
 
 import { v4 as uuidv4 } from 'uuid';
 
-export abstract class Entity implements IAwake, IUpdate {
+export abstract class Entity implements IAwake, IUpdate, IDestroy {
     public Scene: WorldScene
     public World: World
 
@@ -86,6 +86,12 @@ export abstract class Entity implements IAwake, IUpdate {
     public Update(deltaTime: number): void {
         for(const component of this._components) {
             component.Update(deltaTime)
+        }
+    }
+
+    public Destroy(): void {
+        for(const component of this._components) {
+            component.Destroy()
         }
     }
 }
