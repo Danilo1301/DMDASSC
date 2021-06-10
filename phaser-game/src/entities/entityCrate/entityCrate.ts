@@ -19,7 +19,7 @@ export class EntityCrate extends Entity {
         super.Awake()
 
         this.PhysicBody.SpriteName = "ball"
-        this.PhysicBody.AddCollisionCircle('body', 0, 0, 16, {restitution: 0.8})
+        this.PhysicBody.AddCollisionCircle('body', 0, 0, 16)
         this.Position.Set(400, 300)
     }
 

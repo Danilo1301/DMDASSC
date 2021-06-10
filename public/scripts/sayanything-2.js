@@ -5,7 +5,6 @@ Works in: https://sayanything.ml/edit/hack.html
 Method 1:
 
 <script>
-
 window.onload = function() {
   if(window['forcestop']) return;
 
@@ -14,7 +13,6 @@ window.onload = function() {
   script.id = 'dmdassc-script';
   document.body.prepend(script);
 };
-
 </script>
 
 Method 2:
@@ -33,7 +31,8 @@ async function main()
   document.querySelectorAll("#dmdassc-script-2").forEach((s) => s.remove());
 
   //initChat();
-  initMouseGame();
+  //initMouseGame();
+  initGame();
 }
 
 function initChat()
@@ -74,6 +73,39 @@ function initMouseGame()
   var script = document.createElement('script');
   script.src = 'https://dmdassc.glitch.me/assets/mousegame/main.js';
   document.body.appendChild(script);
+}
+
+function initGame()
+{
+  var div = document.createElement("div");
+  div.id = 'chat-container'
+  div.style.position = 'fixed';
+  div.style.bottom = '0';
+  div.style.left = '0';
+  div.style.width = '100%';
+  div.style.height = 'auto';
+
+  var img = document.createElement('img');
+  img.src = ''
+  img.style.width = '80px';
+  img.style.cursor = 'pointer';
+  img.onclick = function()
+  {
+    var iframe = document.createElement('iframe');
+    iframe.src = 'https://dmdassc.glitch.me/game';
+    iframe.style.width = '400px';
+    iframe.style.height = '300px';
+
+    div.style.height = '30%';
+
+    img.remove();
+    div.appendChild(iframe);
+  }
+
+
+  div.appendChild(img);
+
+  document.body.appendChild(div);
 }
 
 try {

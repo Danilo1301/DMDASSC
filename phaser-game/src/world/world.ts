@@ -38,11 +38,11 @@ export class World {
 
         this.SetupScene()
 
-        this.Scene.matter.add.rectangle(100, 200, 40, 500, {isStatic: true, restitution: 0.5})
-        this.Scene.matter.add.rectangle(700, 200, 40, 500, {isStatic: true, restitution: 0.5})
+        this.Scene.matter.add.rectangle(100, 200, 40, 500, {isStatic: true})
+        this.Scene.matter.add.rectangle(700, 200, 40, 500, {isStatic: true})
         
-        this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true, restitution: 0.5})
-        this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true, restitution: 0.5})
+        this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true})
+        this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true})
 
         this.Scene.add.text(300, 200, "Spawn ball")
         var ballSensor = this.Scene.matter.add.rectangle(300, 200, 30, 30, {isSensor: true})
