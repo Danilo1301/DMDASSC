@@ -27,5 +27,8 @@
     "socket.io-client": "^4.1.2",
     "ts-loader": "^9.2.3",
     "uuid": "^8.3.2"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }
