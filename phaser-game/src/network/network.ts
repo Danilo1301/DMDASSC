@@ -107,7 +107,7 @@ export class Network {
 
                 var distance = Phaser.Math.Distance.BetweenPoints(netPosition, clientPosition)
 
-                if(distance > 20) position.Set(netPosition.x, netPosition.y)
+                //if(distance > 20) position.Set(netPosition.x, netPosition.y)
                 //console.log(distance)
             } else {
                 if(!entity.HasComponent(SyncHelper)) entity.AddComponent(new SyncHelper())
