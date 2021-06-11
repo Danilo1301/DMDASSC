@@ -47,7 +47,7 @@ function initChat()
 
   var img = document.createElement('img');
   img.src = 'https://cms.evup.com.br/api/assets/ecommerce/eaadf1ec-f313-4a27-80da-9a5f173bb024/chat-button.png?sq=48222262-d0cf-36bc-996f-0839304e835d'
-  img.style.width = '80px';
+  img.style.width = '40px';
   img.style.cursor = 'pointer';
   img.onclick = function()
   {

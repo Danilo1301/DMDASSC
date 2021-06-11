@@ -91,12 +91,30 @@ export class Network {
                 packetData.Entities.push(entityInfo)
          
                 this.Send("client_entities", packetData)
+
+                //--
+                var netPosition = {
+                    x: serverEntity.Position.X,
+                    y: serverEntity.Position.Y
+                }
+
+                var position = entity.GetComponent(Position)
+
+                var clientPosition = {
+                    x: position.X,
+                    y: position.Y
+                }
+
+                var distance = Phaser.Math.Distance.BetweenPoints(netPosition, clientPosition)
+
+                if(distance > 20) position.Set(netPosition.x, netPosition.y)
+                //console.log(distance)
             } else {
                 if(!entity.HasComponent(SyncHelper)) entity.AddComponent(new SyncHelper())
 
+    
                 var syncHelper = entity.GetComponent(SyncHelper)
-                syncHelper.Position.X = serverEntity.Position.X
-                syncHelper.Position.Y = serverEntity.Position.Y
+                syncHelper.Data = serverEntity
             }
         }
     }

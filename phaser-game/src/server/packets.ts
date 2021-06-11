@@ -1,4 +1,4 @@
-import { InputHandler, InputInfo, Position } from "@phaserGame/game/components"
+import { InputHandler, InputInfo, PhysicBody, Position } from "@phaserGame/game/components"
 import { Entity } from "@phaserGame/utils"
 
 export class Packet {
@@ -36,6 +36,10 @@ export class PacketEntityInfo {
         var position = entity.GetComponent(Position)
         this.Position.X = position.X
         this.Position.Y = position.Y
+
+        var physicBody = entity.GetComponent(PhysicBody)
+        this.Velocity.X = physicBody.Body!.velocity.x
+        this.Velocity.Y = physicBody.Body!.velocity.y
 
         if(entity.HasComponent(InputHandler)) {
             this.Inputs = entity.GetComponent(InputHandler).GetInputs()

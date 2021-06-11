@@ -28,6 +28,16 @@ export class EntityPlayer extends Entity {
         super.Update(deltaTime)
 
         var speed = 2
-        this.PhysicBody.SetVelocity(this.InputHandler.GetHorizontal() * (speed/10) * deltaTime, this.InputHandler.GetVertical() * (speed/10) * deltaTime)
+
+        var v = {
+            x: this.InputHandler.GetHorizontal() * (speed * 0.00001) * deltaTime,
+            y: this.InputHandler.GetVertical() * (speed * 0.00001) * deltaTime
+        }
+
+        //console.log(v)
+
+        this.PhysicBody.Sprite?.applyForce(new Phaser.Math.Vector2(v.x, v.y))
+
+        //this.PhysicBody.Body?.velocity (this.InputHandler.GetHorizontal() * (speed/10) * deltaTime, this.InputHandler.GetVertical() * (speed/10) * deltaTime)
     }
 }

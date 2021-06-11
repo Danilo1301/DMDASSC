@@ -1,4 +1,6 @@
+import { PacketEntityInfo } from "@phaserGame/server/packets"
 import { Entity, IComponent } from "@phaserGame/utils"
+import { PhysicBody } from "../physicBody"
 import { Position } from "../position"
 
 export class SyncHelper implements IComponent {
@@ -7,31 +9,49 @@ export class SyncHelper implements IComponent {
 
     public Enabled: boolean = true
 
-    public Position = {
-        X: 0,
-        Y: 0
-    }
+    public Data?: PacketEntityInfo
 
     public Awake(): void {
         
     }
 
     public Update(deltaTime: number): void {
+        var data = this.Data
+
+        if(!data) return
+        
         var lerp = Phaser.Math.Interpolation.Bezier
 
-        var entityPosition = this.Entity!.GetComponent(Position)
+        var position = this.Entity!.GetComponent(Position)
+        var physicBody = this.Entity!.GetComponent(PhysicBody)
 
-        var newPosition = {
-            x: lerp([entityPosition.X, this.Position.X], 0.4),
-            y: lerp([entityPosition.Y, this.Position.Y], 0.4)
+        var thisVelocity = physicBody.Body!.velocity;
+
+        var newVelocity = {
+            x: lerp([thisVelocity.x, data.Velocity.X], 0.4),
+            y: lerp([thisVelocity.y, data.Velocity.Y], 0.4)
         }
 
-        var distance = Phaser.Math.Distance.BetweenPoints({x: entityPosition.X, y: entityPosition.Y}, {x: this.Position.X, y: this.Position.Y})
+        physicBody.SetVelocity(newVelocity.x, newVelocity.y)
 
-        entityPosition.Set(newPosition.x, newPosition.y)
+        var newPosition = {
+            x: lerp([position.X, data.Position.X], 0.4),
+            y: lerp([position.Y, data.Position.Y], 0.4)
+        }
 
-        if(distance > 100) {
-            entityPosition.Set(this.Position.X, this.Position.Y)
+        position.Set(newPosition.x, newPosition.y)
+
+        var distance = Phaser.Math.Distance.BetweenPoints({x: position.X, y: position.Y}, {x: data.Position.X, y: data.Position.Y})
+
+        
+
+        //entityPosition.Set(newPosition.x, newPosition.y)
+
+
+
+
+        if(distance > 30) {
+            position.Set(data.Position.X, data.Position.Y)
         }
     }
 

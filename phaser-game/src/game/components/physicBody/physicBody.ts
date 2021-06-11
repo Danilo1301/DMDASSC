@@ -43,7 +43,11 @@ export class PhysicBody implements IComponent {
         this.CenterBody()
 
         this.Sprite = this.Matter.add.sprite(0, 0, this.SpriteName)
-        this.Sprite.setExistingBody(this.Body)
+        this.Body = this.Sprite.body as MatterJS.BodyType
+
+        this.Body.restitution = 0.8
+
+        //this.Sprite.setExistingBody(this.Body)
     }
 
     private CenterBody(): void {

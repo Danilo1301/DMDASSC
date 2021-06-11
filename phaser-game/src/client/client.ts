@@ -122,7 +122,6 @@ export class Client {
         }
 
         var syncHelper = entity.GetComponent(SyncHelper)
-        syncHelper.Position.X = entityData.Position.X
-        syncHelper.Position.Y = entityData.Position.Y
+        syncHelper.Data = entityData
     }
 }
