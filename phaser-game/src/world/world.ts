@@ -41,14 +41,20 @@ export class World {
         this.Scene.matter.add.rectangle(100, 200, 40, 500, {isStatic: true})
         this.Scene.matter.add.rectangle(700, 200, 40, 500, {isStatic: true})
         
-        this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true})
+        var rect = this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true})
         this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true})
 
+        var world = this;
+
+        window['removeWall'] = function() {
+            world.Scene.matter.world.remove(rect)
+        }
+
         this.Scene.add.text(300, 200, "Spawn ball")
-        var ballSensor = this.Scene.matter.add.rectangle(300, 200, 30, 30, {isSensor: true})
+        var ballSensor = this.Scene.matter.add.rectangle(300, 200, 50, 50, {isSensor: true})
 
         this.Scene.add.text(500, 200, "Spawn bot")
-        var botSensor = this.Scene.matter.add.rectangle(500, 200, 30, 30, {isSensor: true})
+        var botSensor = this.Scene.matter.add.rectangle(500, 200, 50, 50, {isSensor: true})
         
         var world = this
 

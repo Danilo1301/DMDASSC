@@ -15,6 +15,7 @@ export abstract class PacketData {}
 
 export class PacketEntityInfo {
     public Id: string
+    public ForceSync: boolean = false
     public EntityType: string
     public Position = {
         X: 0,

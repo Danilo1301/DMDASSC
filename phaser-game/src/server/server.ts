@@ -33,11 +33,11 @@ export class Server {
         var world = this.Worlds.values()[0]
 
         for (let i = 0; i < 3; i++) {
-            world.EntityFactory.CreateBot(400, 300)
+            //world.EntityFactory.CreateBot(400, 300)
         }
 
         for (let i = 0; i < 6; i++) {
-            world.EntityFactory.CreateEntity("EntityCrate", null)
+            //world.EntityFactory.CreateEntity("EntityCrate", null)
         }
 
  

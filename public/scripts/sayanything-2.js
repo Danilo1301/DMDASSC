@@ -93,8 +93,8 @@ function initGame()
   {
     var iframe = document.createElement('iframe');
     iframe.src = 'https://dmdassc.glitch.me/game';
-    iframe.style.width = '400px';
-    iframe.style.height = '300px';
+    iframe.style.width = '600px';
+    iframe.style.height = '450px';
 
     div.style.height = '30%';
 

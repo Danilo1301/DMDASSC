@@ -16,8 +16,13 @@ export class Position implements IComponent {
         return this._y
     }
 
-    public Set(x: number, y: number)
+    public Set(x: number, y: number, broadcast: boolean = true)
     {
+        if(broadcast) {
+            this.Entity.World.Events.emit("entity_set_position", this.Entity, x, y)
+        }
+            
+
         this._x = x
         this._y = y
 

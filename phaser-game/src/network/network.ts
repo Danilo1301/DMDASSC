@@ -36,12 +36,16 @@ export class Network {
             var t = this._now
 
             //console.log(`Sending ${this._packets.length} packets`)
-            this.Socket.emit("packets", this._packets, (packets: Packet[]) => {
 
-                //console.log(`Received ${packets.length} after ${this._now - t}ms`)
-                for (const packet of packets) this.OnReceivePacket(packet.Key, packet.Data)
-                this._canSendPackets = true
-            })
+            setTimeout(() => {
+                this.Socket.emit("packets", this._packets, (packets: Packet[]) => {
+
+                    //console.log(`Received ${packets.length} after ${this._now - t}ms`)
+                    for (const packet of packets) this.OnReceivePacket(packet.Key, packet.Data)
+                    this._canSendPackets = true
+                })
+            }, testDelay);
+            
             this._packets = []
         }
     }
@@ -114,7 +118,13 @@ export class Network {
 
     
                 var syncHelper = entity.GetComponent(SyncHelper)
-                syncHelper.Data = serverEntity
+                syncHelper.SetData(serverEntity)
+            }
+
+            if(serverEntity.ForceSync) {
+                var position = entity.GetComponent(Position)
+
+                position.Set(serverEntity.Position.X, serverEntity.Position.Y)
             }
         }
     }

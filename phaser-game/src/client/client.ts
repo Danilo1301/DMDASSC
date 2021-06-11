@@ -66,21 +66,23 @@ export class Client {
     }
 
     public SendEssentialPackets(): void {
-        this.SendEntities()
+        var packetEntities = this.GetPacketEntities()
+        this.Send("entities", packetEntities)
     }
 
-    public SendEntities(): void {
-        if(!this.World) return
-
+    public GetPacketEntities(): PacketEntities {
+ 
         var data = new PacketEntities()
 
-        for (const entity of this.World.EntityFactory.Entities) {
-            var epacket = new PacketEntityInfo(entity)
+        if(this.World) {
+            for (const entity of this.World.EntityFactory.Entities) {
+                var epacket = new PacketEntityInfo(entity)
 
-            data.Entities.push(epacket)
+                data.Entities.push(epacket)
+            }
         }
 
-        this.Send("entities", data)
+        return data
     }
 
     public Send(key: string, data: PacketData): void {
@@ -118,10 +120,10 @@ export class Client {
         }
 
         if(!entity.HasComponent(SyncHelper)) {
-            entity.AddComponent(new SyncHelper())
+            entity.AddComponent(new SyncHelper(true))
         }
 
         var syncHelper = entity.GetComponent(SyncHelper)
-        syncHelper.Data = entityData
+        syncHelper.SetData(entityData)
     }
 }
