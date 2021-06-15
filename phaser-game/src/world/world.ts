@@ -67,6 +67,8 @@ export class World extends Entity {
             var bot = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
             bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
             bot.AddComponent(new TestAI())
+
+            console.log("bot", bot)
         }
         
     }
