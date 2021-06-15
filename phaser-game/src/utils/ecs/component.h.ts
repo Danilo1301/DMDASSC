@@ -1,6 +1,22 @@
-import { IAwake, IUpdate, Entity } from '@phaserGame/utils'
-import { IDestroy } from '../lifecycle';
+import { Entity } from "./entity";
 
-export interface IComponent extends IAwake, IUpdate, IDestroy {
-    Entity: Entity | undefined
+export abstract class Component {
+    public Entity?: Entity
+    
+    public Awake(): void {
+    }
+    
+    public Update(delta: number): void {
+    }
+
+    public Destroy(): void {
+    }
+
+    public FromData(data: any) {
+       
+    }
+
+    public ToData(): any {
+       
+    }
 }

@@ -1,21 +1,9 @@
 import "phaser";
-import { io } from "socket.io-client";
-
 import { GameClient } from "@phaserGame/game"
-
 
 function main(): void {
     document.body.style.margin = "0px"
-
-    var address = `${location.protocol}//${location.host}/api/phaserGame`
-
-    console.log("Connecting to " + address)
-
-    var socket = io(address, {path: '/socket'})
-    
-    var game = new GameClient(socket)
-
-    window["game"] = game
+    var game = window["game"] = new GameClient()
 }
 
 window.onload = main.bind(this)

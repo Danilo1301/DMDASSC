@@ -1,128 +1,131 @@
-import { EntityPlayer } from "@phaserGame/entities";
+import { InputHandler, PhysicBody, PositionData, TestAI } from "@phaserGame/components";
+import { EntityCrate, EntityPlayer } from "@phaserGame/entities";
 import { EntityFactory } from "@phaserGame/entityFactory";
-import { GameClient } from "@phaserGame/game";
-import { PhysicBody } from "@phaserGame/game/components";
-import { TestAI } from "@phaserGame/game/components/testAi";
 import { Server } from "@phaserGame/server";
-import { PacketData, PacketId } from "@phaserGame/server/packets";
 import { Entity } from "@phaserGame/utils";
-import { BodyType } from "matter";
 import { WorldScene } from "./worldScene";
 
-export class World {
+export class World extends Entity {
+    public Id: string
     public Server: Server
     public EntityFactory: EntityFactory
+    public Scene!: WorldScene
 
     public Events = new Phaser.Events.EventEmitter();
 
-    private _id: string;
-    private _scene!: WorldScene;
-
     constructor(server: Server, id: string) {
+        super()
+
         this.Server = server
-        this._id = id
+        this.Id = id
         this.EntityFactory = new EntityFactory(this)
 
-        this.Events.on("entityCreated", (entity: Entity) => {
-            console.log("[World Event] New entity", entity.Id)
-        })
-    }
+        var game = this.Server.Game;
 
-    public get Id(): string { return this._id }
-    public get Scene(): WorldScene { return this._scene }
+        this.Scene = game.Scene.scene.add(this.SceneKey, WorldScene, true, {world: this}) as WorldScene
+        
+
+
+        
+    }
 
     private get SceneKey(): string { return this.Server.Id + "_" + this.Id }
 
-    public Start(): void {
-        console.log(`World.Start()`)
+    public Awake(): void {
+        super.Awake()
 
-        this.SetupScene()
+        this.Setup()
+        this.Start()
+    }
 
-        this.Scene.matter.add.rectangle(100, 200, 40, 500, {isStatic: true})
-        this.Scene.matter.add.rectangle(700, 200, 40, 500, {isStatic: true})
-        
-        var rect = this.Scene.matter.add.rectangle(500, 600, 1200, 200, {isStatic: true})
-        this.Scene.matter.add.rectangle(500, -100, 1200, 200, {isStatic: true})
+    private Setup() {
+        console.log(`[World] Setup`)
 
         var world = this;
 
-        window['removeWall'] = function() {
-            world.Scene.matter.world.remove(rect)
+        this.Scene.matter.world.pause()
+
+        this.Scene.game.events.on('step', (t, d) => {
+            world.Step(d)
+        });
+        this.Scene.events.on('preupdate', (t, d) => {
+            world.PreUpdate(d)
+        });
+        this.Scene.events.on('update', (t, d) => {
+            world.Update(d)
+        });
+    }
+
+    public CreateTest() {
+        
+
+        for (let i = 0; i < 4; i++) {
+            var crate = this.CreateCrate(0, 0)
         }
 
-        this.Scene.add.text(300, 200, "Spawn ball")
-        var ballSensor = this.Scene.matter.add.rectangle(300, 200, 50, 50, {isSensor: true})
-
-        this.Scene.add.text(500, 200, "Spawn bot")
-        var botSensor = this.Scene.matter.add.rectangle(500, 200, 50, 50, {isSensor: true})
+        for (let i = 0; i < 2; i++) {
+            var bot = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
+            bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
+            bot.AddComponent(new TestAI())
+        }
         
-        var world = this
+    }
 
-        this.Scene.matter.world.on('collisionstart', function (event, bodyA: BodyType, bodyB: BodyType) {
-            var isCollidingBall = bodyA == ballSensor || bodyB == ballSensor
-            var isCollidingBot = bodyA == botSensor || bodyB == botSensor
+    public Start(): void {
+        console.log(`[World] Start`)
+
+        this.Scene.matter.add.rectangle(0, 300, 300, 30, {isStatic: true})
+        
+        
+
+        //var player = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
+        //player.GetComponent(InputHandler).ControlledByPlayer = true
+        //this.Scene.cameras.main.startFollow(player.GetComponent(PhysicBody).Sprite!, true, 0.5, 0.5)
+        
+
+        
+        
+        
+
+        var matter = this.Scene.matter
+
+        matter.world.on('collisionstart', (a, b: MatterJS.BodyType, c: MatterJS.BodyType) => {
+            return;
             
-
-            var game = world.Server.Game as GameClient
-
-            if(!game.Network) return
-
-            
-
-            
-            var id = game.Network.ControllingEntityId
-            var player = world.EntityFactory.GetEntity(id) as EntityPlayer
-            var body = player.PhysicBody.Sprite?.body as BodyType
-            
-
-            var ids: number[] = []
-
-            for (const p of body.parts) {
-                ids.push(p.id)
+            for (const pair of a.pairs) {
+                console.log(pair)
             }
-
-            var collidingWithPlayer = ids.includes(bodyA.id) || ids.includes(bodyB.id)
-
-
-            if(collidingWithPlayer) {
-   
-                if(isCollidingBall) {
-                    game.Network.Send("newBall", new PacketId(''))
-                }
-
-                if(isCollidingBot) {
-                    game.Network.Send("newBot", new PacketId(''))
-                }
-            }
-        });
-
+            console.log(a, b.id, c.id)
+        })
+        
     }
 
-    public Preload(): void {
-        console.log(`World.Preload()`)
-
-        var load = this.Scene.load;
-
-        load.setPath(this.Server.Game.ASSETS_PATH)
-        load.image('ball', 'ball.png')
-        load.image('player1', 'player1.png')
-        load.image('player2', 'player2.png')
-        load.image('block1', 'block1.png')
-        load.image('block2', 'block2.png')
+    public CreateCrate(x: number, y: number): EntityCrate {
+        var crate = this.EntityFactory.CreateEntity("EntityCrate") as EntityCrate
+        return crate
     }
 
-    public Create(): void {
-        console.log(`World.Create()`)
+    public CreateBot(x: number, y: number): EntityPlayer {
+        var bot = this.EntityFactory.CreateEntity("EntityPlayer", {components: {
+            'TestAI': {}
+        }}) as EntityPlayer
+
+        bot.Awake()
+
+        return bot
     }
 
-    private SetupScene(): void {
-        this._scene = this.Server.Game.scene.add(this.SceneKey, WorldScene) as WorldScene
-        this._scene.World = this
-        this.Server.Game.scene.start(this.SceneKey)
-        this.EntityFactory.Scene = this._scene
+    public Step(delta: number): void {
+        this.Scene.matter.world.step(delta)
+    }
+
+    public PreUpdate(delta: number): void {
+
     }
 
     public Update(delta: number): void {
+        super.Update(delta)
+
         this.EntityFactory.Update(delta)
     }
 }

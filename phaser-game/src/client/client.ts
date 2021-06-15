@@ -1,129 +1,124 @@
-import { Server } from '@phaserGame/server';
-
-import { Packet, PacketData, PacketEntities, PacketEntityInfo, PacketId } from '@phaserGame/server/packets';
-import { Entity } from '@phaserGame/utils';
-
+import { Position } from '@phaserGame/components';
+import { NetworkEntity } from '@phaserGame/components/networkEntity';
+import { GameServer } from '@phaserGame/game';
+import { Packet, PacketData, PacketDataEntity, PacketManager } from '@phaserGame/packets';
+import { WorldEntity } from '@phaserGame/utils';
 import { World } from '@phaserGame/world';
-import socketio from 'socket.io';
-import { InputHandler, Position } from '../game/components';
-import { SyncHelper } from '../game/components/syncHelper';
-
-const testDelay = 0
+import { Socket } from 'socket.io';
 
 export class Client {
-    public Socket: socketio.Socket
+    public Socket: Socket
+    public Game: GameServer
 
-    public Server: Server | undefined
-    public World: World | undefined
-    public Entity: Entity | undefined
+    public PacketManager: PacketManager
 
-    private _packets: PacketData[] = []
+    public Entity?: WorldEntity
 
-    public get Id(): string {
-        return this.Socket.id
-    }
+    public World?: World
+    private _entities = new Phaser.Structs.Map<string, WorldEntity>([])
 
-    public get IsConnected(): boolean {
-        return this.Socket.connected
-    }
-
-    constructor(socket: socketio.Socket) {
+    constructor(game: GameServer, socket: Socket) {
+        this.Game = game
         this.Socket = socket
 
-        this.Socket.on('packets', (packets, callback) => {
-            for (const packet of packets) this.OnReceivePacket(packet.Key, packet.Data)
+        this.PacketManager = new PacketManager()
+        this.PacketManager.AutoSend = false
 
-            setTimeout(() => {
-                this.SendEssentialPackets()
-                callback(this._packets)
-                this.ClearPackets()
-            }, testDelay)
-        })
-
-        this.Socket.on('disconnect', this.OnDisconnect.bind(this))
-
-        console.log(`[Client] Client ID ${this.Id} connected`)
-    }
-
-    public JoinServer(server: Server): void {
-        //if can join
-        server.Host!.OnClientJoin(this)
-    }
-
-    public OnJoinServer(server: Server) {
-        
-        this.Send("connected", new PacketId(this.Entity!.Id))
-    }
-
-    public OnDisconnect(): void {
-        console.log(`[Client] Client ID ${this.Id} disconnected`)
-
-        this.Server?.Host?.OnClientLeave(this)
-    }
-
-    public ClearPackets(): void {
-        this._packets = []
-    }
-
-    public SendEssentialPackets(): void {
-        var packetEntities = this.GetPacketEntities()
-        this.Send("entities", packetEntities)
-    }
-
-    public GetPacketEntities(): PacketEntities {
- 
-        var data = new PacketEntities()
-
-        if(this.World) {
-            for (const entity of this.World.EntityFactory.Entities) {
-                var epacket = new PacketEntityInfo(entity)
-
-                data.Entities.push(epacket)
-            }
+        this.PacketManager.fnSendPackets = function (packets: Packet[], callback: (packets: Packet[]) => void) {
+            socket.emit('packets', packets, callback)
         }
 
-        return data
+        game.events.on("step", (time, delta) => this.Update(delta))
+
+        this.Socket.on("packets", (packets: Packet[], callback: (packets: Packet[]) => void) => {
+            for (const packet of packets) {
+                this.OnReceivePacket(packet.Key, packet.Data)
+            }
+
+            this.PacketManager.fnOnReceivePackets(packets, callback)
+        })
+
+        this.Socket.on("disconnect", () => {
+            if(this.Entity) 
+                this.Entity.World.EntityFactory.DestroyEntity(this.Entity)
+        })
     }
+
+    public get Id(): string { return this.Socket.id }
+
+    public get IsConnected(): boolean { return this.Socket.connected }
 
     public Send(key: string, data: PacketData): void {
         var packet = new Packet(key, data)
-        this._packets.push(packet)
+
+        this.PacketManager.AddPacket(packet)
     }
 
-    public OnReceivePacket(key: string, data: PacketData) {
-        if(key == "joinServer") {
-            console.log("joinServer")
-        }
+    public Update(delta: number): void {
+        this.PacketManager.Update(delta)
 
-        if(key == "newBot") {
-            console.log("newBot")
-            this.World?.EntityFactory.CreateBot(400, 300)
-        }
+        if(!this.World) return
 
-        if(key == "newBall") {
-            console.log("newBall")
-            this.World?.EntityFactory.CreateEntity('EntityCrate', null)
+        var worldEntities: WorldEntity[] = []
+        
+        for (const entity of this.World.EntityFactory.ActiveEntities) {
+            if(entity.HasComponent(NetworkEntity)) worldEntities.push(entity)
         }
+       
 
-        if(key == "client_entities") this.OnReceivePacket_ClientEntities(data as PacketEntities)
+        for (const entity of worldEntities) {
+            var myPos = {x: 400, y: 300}
+
+            var entityPositionComponent = entity.GetComponent(Position)
+            var entityPos = {x: entityPositionComponent.X, y: entityPositionComponent.Y}
+
+            var distance = Phaser.Math.Distance.BetweenPoints(myPos, entityPos)
+
+       
+            if(distance < 400) {
+                if(!this._entities.has(entity.Id)) {
+                    this._entities.set(entity.Id, entity)
+    
+                    this.Send("entity_streamed_in", {entity: new PacketDataEntity(entity)})
+
+                    
+                }
+
+                this.Send("entity_data", {entity: new PacketDataEntity(entity)})
+            } else {
+                if(this._entities.has(entity.Id)) {
+                    this._entities.delete(entity.Id)
+    
+                    this.Send("entity_streamed_out", {entityId: entity.Id})
+
+                    setTimeout(() => {
+                        var position = entity.GetComponent(Position)
+                        position.Set(400, 300)
+                    }, 500)
+                }
+            }
+            
+        }
     }
 
-    public OnReceivePacket_ClientEntities(data: PacketEntities) {
-        var entity = this.Entity!
-        var entityData = data.Entities[0]
+    public OnReceivePacket(key: string, data: PacketData): void {
+        if(key == "join_server") {
 
-        var inputHandler = entity.GetComponent(InputHandler)
+            var server = this.Game.Servers.values()[0]
 
+            this.World = server.Worlds.values()[0]
+            this.Entity = this.World.EntityFactory.CreateEntity("EntityPlayer")
 
-        for (const input of entityData.Inputs) {
-            inputHandler.SetKeyDown(input.Name, input.IsDown)
+            this.Send("join_server_status", {
+                entityId: this.Entity.Id
+            })
         }
 
-        if(!entity.HasComponent(SyncHelper)) {
-            entity.AddComponent(new SyncHelper(true))
-        }
+        if(key == "player_data") {
+            var cdata: any = data
 
-        var syncHelper = entity.GetComponent(SyncHelper)
-        syncHelper.SetData(entityData)
+            if(this.Entity) 
+                this.Entity.GetComponent(NetworkEntity).SetComponentsData(cdata)
+        }
     }
 }

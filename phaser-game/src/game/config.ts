@@ -1,3 +1,5 @@
+import { GameScene } from "./gameScene";
+
 export let config: Phaser.Types.Core.GameConfig = {
     title: "Game",
     width: 800,
@@ -22,6 +24,6 @@ export let config: Phaser.Types.Core.GameConfig = {
             },
         }
     },
-    scene: []
+    scene: GameScene
 }
 

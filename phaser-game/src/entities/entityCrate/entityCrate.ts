@@ -1,26 +1,19 @@
-import { Entity } from "@phaserGame/utils"
+import { PhysicBody, Position } from "@phaserGame/components"
+import { NetworkEntity } from "@phaserGame/components/networkEntity"
+import { WorldEntity } from "@phaserGame/utils"
 import { World } from "@phaserGame/world"
-import { PhysicBody, Position } from "@phaserGame/game/components"
 
-export class EntityCrate extends Entity {
-    constructor(world: World, id: string) {
-        super(world, id)
+export class EntityCrate extends WorldEntity {
+    constructor(world: World) {
+        super(world)
 
-        this.AddComponent(new Position())
-        this.AddComponent(new PhysicBody())
-
+        this.AddComponent(new Position({x: 400, y: 300}))
+        this.AddComponent(new PhysicBody({spriteName: "block" + (Math.round(Math.random()) + 1) }))
+        this.AddComponent(new NetworkEntity())
     }
-
-    public get Position(): Position { return this.GetComponent(Position) }
-    public get PhysicBody(): PhysicBody { return this.GetComponent(PhysicBody) }
-
 
     public Awake() {
         super.Awake()
-
-        this.PhysicBody.SpriteName = "ball"
-        this.PhysicBody.AddCollisionCircle('body', 0, 0, 16)
-        this.Position.Set(400, 300)
     }
 
     public Update(deltaTime: number) {

@@ -3,15 +3,12 @@ import { World } from "@phaserGame/world"
 export class WorldScene extends Phaser.Scene {
     public World!: World
 
-    preload() {
-        this.World.Preload()
+    init(data) {
+        this.World = data.world
     }
 
     create() {
-        this.World.Create()
-    }
-
-    update(time: number, delta: number) {
-        this.World.Update(delta)
+        this.World.Scene = this
+        this.World.Awake()
     }
 }

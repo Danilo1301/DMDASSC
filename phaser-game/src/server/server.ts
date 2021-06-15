@@ -1,46 +1,32 @@
 import { Game } from "@phaserGame/game";
 import { World } from "@phaserGame/world";
-import { Host } from "@phaserGame/host";
+import { Entity } from "@phaserGame/utils";
 
-export class Server {
+export class Server extends Entity {
     public Game: Game
     public Worlds = new Phaser.Structs.Map<string, World>([])
-    public Host: Host | undefined
 
-    private _id: string = ""
+    public Id: string
 
     constructor(id: string, game: Game) {
-        this._id = id
+        super()
+
+        this.Id = id
         this.Game = game
     }
 
-    public get Id(): string { return this._id }
+    public Awake() {
+        super.Awake()
 
-    public Start(): void {
-        console.log(`Server.${this.Id}.Start()`)
+        this.Game.Scene.events.on('update', (time, delta) => super.Update(delta) )
 
-        this.CreateWorld("world")
+        this.CreateWorld('world')
     }
 
     public CreateWorld(id: string): World {
         var world = new World(this, id)
         this.Worlds.set(id, world)
-        world.Start()
         return world
-    }
-
-    public SetupDemo() {
-        var world = this.Worlds.values()[0]
-
-        for (let i = 0; i < 3; i++) {
-            //world.EntityFactory.CreateBot(400, 300)
-        }
-
-        for (let i = 0; i < 6; i++) {
-            //world.EntityFactory.CreateEntity("EntityCrate", null)
-        }
-
- 
     }
 }
 

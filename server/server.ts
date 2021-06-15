@@ -51,13 +51,16 @@ import Chat from "./chat";
 const mouse_game = mouseGame(io.of('/api/mousegame'));
 const chat = new Chat(io.of('/api/chat'));
 */
+
+
+
 import '@geckos.io/phaser-on-nodejs'
 global['phaserOnNodeFPS'] = 60
 
 import { GameServer } from '@phaserGame/game/gameServer'
 
 var game_server = new GameServer(
-    io.of('/api/phaserGame'),
-    path.join(__dirname, "..", "static", "phaser", "assets")
+    io.of('/api/phaserGame')
 )
+
 

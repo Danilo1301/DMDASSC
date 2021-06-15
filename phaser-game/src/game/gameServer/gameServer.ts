@@ -1,41 +1,40 @@
-import socketio from 'socket.io';
+import socketio, { Socket } from 'socket.io';
 
 import { Game } from '@phaserGame/game';
 import { Server } from '@phaserGame/server';
 import { config } from '@phaserGame/game/config'
-import { Host } from '@phaserGame/host';
 import { Client } from '@phaserGame/client/client';
+import { ServerHost } from '@phaserGame/server/components';
 
 export class GameServer extends Game {
-    public Clients: Phaser.Structs.Map<string, Client>
-
-    constructor(io: socketio.Namespace, assetsPath: string) {
+    constructor(io: socketio.Namespace) {
         config.type = Phaser.HEADLESS
         super(config)
 
-        this.Clients = new Phaser.Structs.Map<string, Client>([])
-        this.ASSETS_PATH = assetsPath
+        this.Settings.IsServer = true
 
         io.on("connection", this.OnSocketConnect.bind(this))
+
+        
     }
 
-    public OnSocketConnect(socket: socketio.Socket): void {
-        var client = new Client(socket)
+    public OnSocketConnect(socket: Socket): void {
+        var client = new Client(this, socket)
 
-        var server = this.Servers.values()[0]
-        client.JoinServer(server)
+        this.Servers.values()[0].GetComponent(ServerHost).HandleClientConnection(client)
     }
 
     public Start(): void {
         super.Start()
 
-        var server = this.CreateServer("SERVER_1", true)
-        server.SetupDemo()
+        var server = this.CreateServer("SERVER_1")
+        server.Awake()
+        server.Worlds.values()[0].CreateTest()
     }
 
-    public CreateServer(id: string, autoStart?: boolean): Server {
-        var server = super.CreateServer(id, autoStart)
-        server.Host = new Host(server)
+    public CreateServer(id: string): Server {
+        var server = super.CreateServer(id)
+        server.AddComponent(new ServerHost())
         return server
     }
     
