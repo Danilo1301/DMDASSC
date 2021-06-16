@@ -1,4 +1,4 @@
-import { InputHandler, PhysicBody, PositionData, TestAI } from "@phaserGame/components";
+import { InputHandler, PhysicBody, Position, PositionData, TestAI } from "@phaserGame/components";
 import { EntityCrate, EntityPlayer } from "@phaserGame/entities";
 import { EntityFactory } from "@phaserGame/entityFactory";
 import { Server } from "@phaserGame/server";
@@ -60,15 +60,11 @@ export class World extends Entity {
         
 
         for (let i = 0; i < 4; i++) {
-            var crate = this.CreateCrate(0, 0)
+            var crate = this.CreateCrate(400, 300)
         }
 
-        for (let i = 0; i < 2; i++) {
-            var bot = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
-            bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
-            bot.AddComponent(new TestAI())
-
-            console.log("bot", bot)
+        for (let i = 0; i < 3; i++) {
+            var bot = this.CreateBot(400, 300)
         }
         
     }
@@ -77,6 +73,7 @@ export class World extends Entity {
         console.log(`[World] Start`)
 
         this.Scene.matter.add.rectangle(0, 300, 300, 30, {isStatic: true})
+        this.Scene.matter.add.rectangle(500, 380, 300, 30, {isStatic: true})
         
         
 
@@ -104,15 +101,15 @@ export class World extends Entity {
 
     public CreateCrate(x: number, y: number): EntityCrate {
         var crate = this.EntityFactory.CreateEntity("EntityCrate") as EntityCrate
+        crate.GetComponent(Position).Set(x, y)
         return crate
     }
 
     public CreateBot(x: number, y: number): EntityPlayer {
-        var bot = this.EntityFactory.CreateEntity("EntityPlayer", {components: {
-            'TestAI': {}
-        }}) as EntityPlayer
-
-        bot.Awake()
+        var bot = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
+        bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
+        bot.GetComponent(Position).Set(x, y)
+        bot.AddComponent(new TestAI())
 
         return bot
     }
