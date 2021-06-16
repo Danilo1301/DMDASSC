@@ -35,7 +35,7 @@ export class WorldText extends Component {
     }
 
     public Destroy(): void {
-
+        this.Text?.destroy()
     }
 
     public FromData(data: WorldTextData) {

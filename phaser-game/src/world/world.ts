@@ -41,6 +41,20 @@ export class World extends Entity {
                 }
             }
         })
+
+        this.Events.on("entity_streamed_out", (entityId: string) => {
+            console.log('event:entity_streamed_out', entityId)
+            
+            var game = this.Server.Game as GameClient
+
+            if(game.Network) {
+                if(game.Network.ControllingEntityId == entityId) {
+
+                    console.log("stopFollowstopFollowstopFollow")
+                    this.Scene.cameras.main.stopFollow()
+                }
+            }
+        })
         
     }
 
@@ -86,19 +100,32 @@ export class World extends Entity {
     }
 
     public CreateTest() {
-        
-
-        for (let i = 0; i < 4; i++) {
-            var crate = this.CreateCrate(400, 300)
+        if(this.Id == "world") {
+            
+    
+  
         }
 
         for (let i = 0; i < 3; i++) {
             var bot = this.CreateBot(400, 300)
         }
 
+        for (let i = 0; i < 4; i++) {
+            var crate = this.CreateCrate(400, 300)
+        }
+
         var button = this.CreateCrate(200, 300)
         button.GetComponent(PhysicBody).FromData({spriteName: "ball"})
-        button.AddComponent(new WorldText({text: 'thats a ball lol'}))
+        button.AddComponent(new WorldText({text: 'CLICK HERE to teleport\n' + `World: ${this.Id}`}))
+
+        
+        setInterval(() => {
+            var position = button.GetComponent(Position)
+
+            if(Phaser.Math.Distance.BetweenPoints({x: position.X, y: position.Y}, {x: 0, y: 0}) > 100) {
+                position.Set(0, 0)
+            }
+        }, 300)
         
     }
 

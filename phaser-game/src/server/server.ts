@@ -28,6 +28,13 @@ export class Server extends Entity {
         this.Worlds.set(id, world)
         return world
     }
+
+    public CreateServerWorld() {
+        this.CreateWorld('other_world')
+
+        this.Worlds.values()[0].CreateTest()
+        this.Worlds.values()[1].CreateTest()
+    }
 }
 
 

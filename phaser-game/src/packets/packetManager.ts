@@ -22,7 +22,7 @@ export class PacketManager {
         this._packets = []
     }
 
-    public Update(delta: number): void {
+    public Update(): void {
         var now = this.GetTime()
 
         if(now - this._lastSentPackets >= this.SendPacketInterval && this.AutoSend) {

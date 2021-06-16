@@ -29,7 +29,7 @@ export class GameServer extends Game {
 
         var server = this.CreateServer("SERVER_1")
         server.Awake()
-        server.Worlds.values()[0].CreateTest()
+        server.CreateServerWorld()
     }
 
     public CreateServer(id: string): Server {

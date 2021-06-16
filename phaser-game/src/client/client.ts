@@ -54,8 +54,23 @@ export class Client {
         this.PacketManager.AddPacket(packet)
     }
 
+    public ChangeWorld(world: World): void {
+        for (const entity of this._entities.values()) {
+            this.SendStreamOutEntity(entity)
+        }
+
+        this.World = world
+    }
+
+    public SendStreamOutEntity(entity: WorldEntity): void {
+        if(this._entities.has(entity.Id)) {
+            this._entities.delete(entity.Id)
+            this.Send("entity_streamed_out", {entityId: entity.Id})
+        }
+    }
+
     public Update(delta: number): void {
-        this.PacketManager.Update(delta)
+        this.PacketManager.Update()
 
         if(!this.World) return
 
@@ -64,7 +79,6 @@ export class Client {
         for (const entity of this.World.EntityFactory.ActiveEntities) {
             if(entity.HasComponent(NetworkEntity)) worldEntities.push(entity)
         }
-       
 
         for (const entity of worldEntities) {
             var myPos = {x: 0, y: 0}
@@ -92,22 +106,28 @@ export class Client {
 
                 this.Send("entity_data", {entity: new PacketDataEntity(entity)})
             } else {
-                if(this._entities.has(entity.Id)) {
-                    this._entities.delete(entity.Id)
-    
-                    this.Send("entity_streamed_out", {entityId: entity.Id})
-
-                    
-                }
+                this.SendStreamOutEntity(entity)
             }
             
         }
     }
 
     public OnReceivePacket(key: string, data: PacketData): void {
+        if(key == "change_world") {
+            var server = this.Game.Servers.values()[0]
+            
+            if(this.World == server.Worlds.values()[1]) {
+                this.ChangeWorld(server.Worlds.values()[0])
+            } else {
+                this.ChangeWorld(server.Worlds.values()[1])
+            }
+        }
+
         if(key == "join_server") {
 
             var server = this.Game.Servers.values()[0]
+
+
 
             this.World = server.Worlds.values()[0]
             this.Entity = this.World.EntityFactory.CreateEntity("EntityPlayer")

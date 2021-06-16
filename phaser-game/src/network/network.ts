@@ -44,14 +44,17 @@ export class Network {
             }
         }
       
-        game.events.on("step", (time, delta) => this.Update(delta))
+        setInterval(() => {
+            this.Update()
+        },1)
+       
      
     }
 
     public get IsConnected(): boolean { return this.Socket.connected }
 
-    public Update(delta: number): void {
-        this.PacketManager.Update(delta)
+    public Update(): void {
+        this.PacketManager.Update()
 
         
 
@@ -120,8 +123,11 @@ export class Network {
             console.log('entity_streamed_out', data)
 
             var entityFactory = this.Server!.Worlds.values()[0].EntityFactory;
-  
-            entityFactory.DestroyEntity(entityFactory.GetEntity(data['entityId']))
+            
+            var entity = entityFactory.GetEntity(data['entityId']);
+
+
+            entityFactory.DestroyEntity(entity)
         }
 
         if(key == "entity_data") {

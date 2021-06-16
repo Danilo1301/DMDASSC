@@ -45,9 +45,10 @@ export class EntityFactory {
             console.log("[EntityFactory] Deactivate Entity " + entity.Id)
 
             this._activeEntities.delete(entity.Id)
-            entity.Destroy()
 
             this.World.Events.emit("entity_streamed_out", entity.Id)
+
+            entity.Destroy()
         }
     }
 
@@ -102,11 +103,13 @@ export class EntityFactory {
     public GetEntity(id: string): WorldEntity { return this._entities.get(id)! }
 
     public DestroyEntity(entity: WorldEntity): void {
-        this._entities.delete(entity.Id)
-        this._activeEntities.delete(entity.Id)
-        entity.Destroy();
+        if(this._activeEntities.has(entity.Id)) this.DeactivateEntity(entity)
 
-        this.World.Events.emit("entityDestroyed", entity)
+        //entity.Destroy();
+
+        this._entities.delete(entity.Id)
+
+        //this.World.Events.emit("entityDestroyed", entity)
     }
 
     public CreateEntity(name: string, options?: ICreateEntityOptions): WorldEntity {

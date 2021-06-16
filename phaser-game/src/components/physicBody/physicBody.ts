@@ -1,3 +1,4 @@
+import { GameClient } from "@phaserGame/game";
 import { Component, WorldEntity } from "@phaserGame/utils";
 import { NetworkEntity } from "../networkEntity";
 import { Position } from "../position";
@@ -39,8 +40,15 @@ export class PhysicBody extends Component {
 
         var sprite = this.Sprite!.setInteractive()
 
+        var physicBody = this
+
         sprite.on('pointerdown', function (pointer) {
             sprite.setTint(0x000000)
+
+            if(physicBody._spriteName == 'ball') {
+                var game = physicBody.Entity?.World.Server.Game as GameClient
+                game.Network.Send("change_world", {})
+            }
         });
 
         sprite.on('pointerup', function (pointer) {
@@ -94,7 +102,9 @@ export class PhysicBody extends Component {
     }
 
     public Destroy(): void {
-        this.Sprite?.destroy()
+        
+        this.Sprite!.destroy()
+
         this.Sprite = undefined
     }
     
