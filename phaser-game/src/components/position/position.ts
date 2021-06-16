@@ -86,6 +86,11 @@ export class Position extends Component {
 
                 this.Set(newPos.x, newPos.y)
 
+                if(distance > 20) {
+                    this.Set(this._targetX, this._targetY)
+                    this._lerping = false
+                }
+
                 if(distance < 1) {
                     this._lerping = false
                 }

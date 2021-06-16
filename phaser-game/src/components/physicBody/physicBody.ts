@@ -70,7 +70,6 @@ export class PhysicBody extends Component {
         })
 
         sprite.setPosition(pos.x, pos.y)
-
        
     }
     

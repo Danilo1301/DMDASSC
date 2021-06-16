@@ -1,6 +1,7 @@
 import { InputHandler, PhysicBody, Position, PositionData, TestAI } from "@phaserGame/components";
 import { EntityCrate, EntityPlayer } from "@phaserGame/entities";
 import { EntityFactory } from "@phaserGame/entityFactory";
+import { GameClient } from "@phaserGame/game";
 import { Server } from "@phaserGame/server";
 import { Entity } from "@phaserGame/utils";
 import { WorldScene } from "./worldScene";
@@ -11,7 +12,11 @@ export class World extends Entity {
     public EntityFactory: EntityFactory
     public Scene!: WorldScene
 
+
     public Events = new Phaser.Events.EventEmitter();
+
+    public _test1!: Phaser.GameObjects.Arc;
+    public _test2!: Phaser.GameObjects.Arc;
 
     constructor(server: Server, id: string) {
         super()
@@ -25,7 +30,17 @@ export class World extends Entity {
         this.Scene = game.Scene.scene.add(this.SceneKey, WorldScene, true, {world: this}) as WorldScene
         
 
+        this.Events.on("entity_streamed_in", (entityId: string) => {
+            console.log('event:entity_streamed_in', entityId)
 
+            var game = this.Server.Game as GameClient
+
+            if(game.Network) {
+                if(game.Network.ControllingEntityId == entityId) {
+                    this.Scene.cameras.main.startFollow(this.EntityFactory.GetEntity(entityId).GetComponent(PhysicBody).Sprite!)
+                }
+            }
+        })
         
     }
 
@@ -53,6 +68,20 @@ export class World extends Entity {
         });
         this.Scene.events.on('update', (t, d) => {
             world.Update(d)
+        });
+
+        this._test2 = this.Scene.add.circle(400, 300, 400, 0x51204F);
+
+        this._test1 = this.Scene.add.circle(400, 300, 200, 0x1D1A3F);
+
+        this.Scene.tweens.add({
+
+            targets: this._test1,
+            alpha: 0.2,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+    
         });
     }
 

@@ -65,6 +65,10 @@ export class Network {
                 var data = playerEntity.GetComponent(NetworkEntity).GetComponentsData()
 
                 this.Send("player_data", data)
+
+
+                var position = playerEntity.GetComponent(Position)
+                world._test1.setPosition(position.X, position.Y)
             }
         }
         

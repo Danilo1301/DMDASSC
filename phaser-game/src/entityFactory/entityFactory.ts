@@ -43,6 +43,8 @@ export class EntityFactory {
 
             this._activeEntities.delete(entity.Id)
             entity.Destroy()
+
+            this.World.Events.emit("entity_streamed_out", entity.Id)
         }
     }
 
@@ -52,6 +54,9 @@ export class EntityFactory {
 
             this._activeEntities.set(entity.Id, entity)
             entity.Awake()
+
+
+            this.World.Events.emit("entity_streamed_in", entity.Id)
         }
     }
 
@@ -67,7 +72,7 @@ export class EntityFactory {
 
             var d = Math.Distance.BetweenPoints({x: position.X, y: position.Y}, {x: 400, y: 300})
 
-            if(d > 250) {
+            if(d > 400) {
 
                 position.Set(400, 300)
 
