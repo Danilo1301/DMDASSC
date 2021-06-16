@@ -47,11 +47,12 @@ export class PhysicBody extends Component {
             sprite.setTint(0xFFFFFF)
         });
 
-        var opt: MatterJS.IChamferableBodyDefinition = {mass: 10, frictionAir: 0.1, restitution: 0.99}
+        var opt: MatterJS.IChamferableBodyDefinition = {mass: 10, frictionAir: 0.1, restitution: 0.2}
         
         if(this._spriteName == 'ball') {
-            opt.restitution = 0.99
+            opt.restitution = 1
             opt.frictionAir = 0.01
+            opt.mass = 2
         }
 
         

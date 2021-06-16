@@ -84,6 +84,7 @@ function initGame()
   div.style.left = '0';
   div.style.width = '100%';
   div.style.height = 'auto';
+  div.style.filter = 'invert(1)';
 
   var img = document.createElement('img');
   img.src = ''

@@ -1,13 +1,10 @@
-import { Component } from "@phaserGame/utils";
-import { Position } from "../position";
+import { EntityFactory } from "@phaserGame/entityFactory";
+import { Component, WorldEntity } from "@phaserGame/utils";
 
-class SyncComponent {
-    constructor(componentName: string) {
-
-    }
-}
 
 export class NetworkEntity extends Component {
+    public Entity: WorldEntity | undefined
+
     public SyncEnabled: boolean = false
 
     constructor() {
@@ -43,11 +40,34 @@ export class NetworkEntity extends Component {
         var entity = this.Entity!
 
         for (const componentName in componentsData) {
+            var toSetComponent: Component | undefined = undefined;
+
             for (const component of entity.Components) {
                 if(componentName == component.constructor.name) {
-                    component.FromData(componentsData[componentName])
+                    //sconsole.log(`${componentName} == ${component.constructor.name}`)
+
+                    toSetComponent = component
+                    break;
                 }
             }
+
+            ///console.log(this.Entity!.constructor.name, componentName, toSetComponent != undefined)
+
+           // console.log(toSetComponent)
+
+            if(!toSetComponent) {
+                var component_construct = EntityFactory.GetComponentByName(componentName)
+                
+                console.log(toSetComponent)
+                
+                toSetComponent = new component_construct()
+
+                
+
+                this.Entity!.AddComponent(toSetComponent)
+            }
+
+            toSetComponent.FromData(componentsData[componentName])
         }
     }
 

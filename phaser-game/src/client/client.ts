@@ -1,4 +1,4 @@
-import { Position } from '@phaserGame/components';
+import { Position, WorldText } from '@phaserGame/components';
 import { NetworkEntity } from '@phaserGame/components/networkEntity';
 import { GameServer } from '@phaserGame/game';
 import { Packet, PacketData, PacketDataEntity, PacketManager } from '@phaserGame/packets';
@@ -67,7 +67,7 @@ export class Client {
        
 
         for (const entity of worldEntities) {
-            var myPos = {x: 400, y: 300}
+            var myPos = {x: 0, y: 0}
 
             if(this.Entity) {
                 var position = this.Entity.GetComponent(Position)
@@ -81,7 +81,7 @@ export class Client {
             var distance = Phaser.Math.Distance.BetweenPoints(myPos, entityPos)
 
        
-            if(distance < 200) {
+            if(distance < 2000) {
                 if(!this._entities.has(entity.Id)) {
                     this._entities.set(entity.Id, entity)
     
@@ -111,6 +111,7 @@ export class Client {
 
             this.World = server.Worlds.values()[0]
             this.Entity = this.World.EntityFactory.CreateEntity("EntityPlayer")
+            this.Entity.GetComponent(WorldText).FromData({text: "Player " + this.Id})
 
             this.Send("join_server_status", {
                 entityId: this.Entity.Id

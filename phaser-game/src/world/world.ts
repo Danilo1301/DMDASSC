@@ -1,4 +1,4 @@
-import { InputHandler, PhysicBody, Position, PositionData, TestAI } from "@phaserGame/components";
+import { InputHandler, PhysicBody, Position, PositionData, TestAI, WorldText } from "@phaserGame/components";
 import { EntityCrate, EntityPlayer } from "@phaserGame/entities";
 import { EntityFactory } from "@phaserGame/entityFactory";
 import { GameClient } from "@phaserGame/game";
@@ -70,9 +70,9 @@ export class World extends Entity {
             world.Update(d)
         });
 
-        this._test2 = this.Scene.add.circle(400, 300, 400, 0x51204F);
+        this._test2 = this.Scene.add.circle(0, 0, 600, 0x51204F);
 
-        this._test1 = this.Scene.add.circle(400, 300, 200, 0x1D1A3F);
+        this._test1 = this.Scene.add.circle(0, 0, 0, 0x1D1A3F);
 
         this.Scene.tweens.add({
 
@@ -95,6 +95,10 @@ export class World extends Entity {
         for (let i = 0; i < 3; i++) {
             var bot = this.CreateBot(400, 300)
         }
+
+        var button = this.CreateCrate(200, 300)
+        button.GetComponent(PhysicBody).FromData({spriteName: "ball"})
+        button.AddComponent(new WorldText({text: 'thats a ball lol'}))
         
     }
 
@@ -111,9 +115,6 @@ export class World extends Entity {
         //this.Scene.cameras.main.startFollow(player.GetComponent(PhysicBody).Sprite!, true, 0.5, 0.5)
         
 
-        
-        
-        
 
         var matter = this.Scene.matter
 
@@ -136,8 +137,10 @@ export class World extends Entity {
 
     public CreateBot(x: number, y: number): EntityPlayer {
         var bot = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
+        bot.GetComponent(WorldText).FromData({text: "BOT"})
         bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
         bot.GetComponent(Position).Set(x, y)
+        
         bot.AddComponent(new TestAI())
         return bot
     }

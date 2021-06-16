@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { Server } from "@phaserGame/server";
 import { GameScene } from './gameScene';
 import { GameServer } from './gameServer';
+import { EntityFactory } from '@phaserGame/entityFactory';
 
 
 
@@ -16,6 +17,8 @@ export abstract class Game extends Phaser.Game {
     
     constructor(config: Phaser.Types.Core.GameConfig) {
         super(config)
+
+        EntityFactory.Setup()
 
         this.events.on("ready", () => {
             //console.log("READY")
