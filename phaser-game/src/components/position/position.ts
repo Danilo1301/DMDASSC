@@ -15,6 +15,10 @@ export class Position extends Component {
     private _targetX: number = 0
     private _targetY: number = 0
 
+
+    private _timeToLerp = 0
+    private _lerping = false
+
     constructor(data?: PositionData) {
         super()
 
@@ -64,19 +68,34 @@ export class Position extends Component {
     public Update(deltaTime: number): void {
         this.UpdatePosition()
 
+        this._timeToLerp += deltaTime
+
+        if(this._timeToLerp > 300 && !this._lerping) {
+            this._lerping = true
+            this._timeToLerp = 0
+        }
 
         if(this.CanSync()) {
             var distance = Phaser.Math.Distance.BetweenPoints({x: this.X, y: this.Y}, {x: this._targetX, y: this._targetY});
 
-            var newPos = {
-                x: Phaser.Math.Interpolation.Linear([this.X, this._targetX], 0.5),
-                y: Phaser.Math.Interpolation.Linear([this.Y, this._targetY], 0.5)
-            }
+            if(this._lerping) {
+                var newPos = {
+                    x: Phaser.Math.Interpolation.Linear([this.X, this._targetX], 0.15),
+                    y: Phaser.Math.Interpolation.Linear([this.Y, this._targetY], 0.15)
+                }
 
-            this.Set(newPos.x, newPos.y)
+                this.Set(newPos.x, newPos.y)
+
+                if(distance < 1) {
+                    this._lerping = false
+                }
+            }
+            
+
+            //
 
             if(distance > 10) {
-                this.Set(this._targetX, this._targetY)
+                //this.Set(this._targetX, this._targetY)
             }
             
             

@@ -69,13 +69,19 @@ export class Client {
         for (const entity of worldEntities) {
             var myPos = {x: 400, y: 300}
 
+            if(this.Entity) {
+                var position = this.Entity.GetComponent(Position)
+                myPos.x = position.X
+                myPos.y = position.Y
+            }
+
             var entityPositionComponent = entity.GetComponent(Position)
             var entityPos = {x: entityPositionComponent.X, y: entityPositionComponent.Y}
 
             var distance = Phaser.Math.Distance.BetweenPoints(myPos, entityPos)
 
        
-            if(distance < 400) {
+            if(distance < 200) {
                 if(!this._entities.has(entity.Id)) {
                     this._entities.set(entity.Id, entity)
     
@@ -91,10 +97,7 @@ export class Client {
     
                     this.Send("entity_streamed_out", {entityId: entity.Id})
 
-                    setTimeout(() => {
-                        var position = entity.GetComponent(Position)
-                        position.Set(400, 300)
-                    }, 500)
+                    
                 }
             }
             

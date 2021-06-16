@@ -1,4 +1,5 @@
 import { Component, WorldEntity } from "@phaserGame/utils";
+import { NetworkEntity } from "../networkEntity";
 import { Position } from "../position";
 
 export interface PhysicBodyData {
@@ -11,6 +12,10 @@ export interface PhysicBodyData {
 export class PhysicBody extends Component {
     public Entity: WorldEntity | undefined
     public Sprite?: Phaser.Physics.Matter.Sprite
+
+    private _targetVelocityX: number = 0
+    private _targetVelocityY: number = 0
+    private _targetAngle: number = 0
 
     private _spriteName: string = ""
 
@@ -70,19 +75,49 @@ export class PhysicBody extends Component {
     }
     
     public Update(delta: number): void {
+        if(this.CanSync() && this.Sprite) {
+            var currentVelocity = this.Sprite.body.velocity
+            var currentAngle = this.Sprite.angle
 
+            var newVelocity = {
+                x: Phaser.Math.Interpolation.Linear([currentVelocity.x, this._targetVelocityX], 1),
+                y: Phaser.Math.Interpolation.Linear([currentVelocity.y, this._targetVelocityY], 1)
+            }
+
+            var newAngle = Phaser.Math.Interpolation.Linear([currentAngle, this._targetAngle], 0.5)
+
+            if(Math.abs(Math.abs(currentAngle) - Math.abs(this._targetAngle)) > 10) newAngle = this._targetAngle
+
+            this.Sprite.setAngle(newAngle)
+            this.Sprite.setVelocity(newVelocity.x, newVelocity.y)
+        }
     }
 
     public Destroy(): void {
         this.Sprite?.destroy()
         this.Sprite = undefined
     }
+    
+    public CanSync(): boolean {
+        var networkEntity = this.Entity?.GetComponent(NetworkEntity)
+        if(!networkEntity) return false
+        return networkEntity.SyncEnabled
+    }
 
     public FromData(data: PhysicBodyData) {
         if(data.spriteName) this._spriteName = data.spriteName
-        if(data.velocityX) this.Sprite?.setVelocityX(data.velocityX)
-        if(data.velocityY) this.Sprite?.setVelocityY(data.velocityY)
-        if(data.angle) this.Sprite?.setAngle(data.angle)
+        
+        if(this.CanSync()) {
+            this._targetVelocityX = data.velocityX || 0
+            this._targetVelocityY = data.velocityY || 0
+            this._targetAngle = data.angle || 0
+        } else {
+            if(data.velocityX) this.Sprite?.setVelocityX(data.velocityX)
+            if(data.velocityY) this.Sprite?.setVelocityY(data.velocityY)
+            if(data.angle) this.Sprite?.setAngle(data.angle)
+        }
+
+        
 
         //console.log(data)
     }

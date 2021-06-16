@@ -53,6 +53,7 @@ const chat = new Chat(io.of('/api/chat'));
 */
 
 
+console.log("Starting game...")
 
 import '@geckos.io/phaser-on-nodejs'
 global['phaserOnNodeFPS'] = 60

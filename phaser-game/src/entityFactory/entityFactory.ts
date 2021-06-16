@@ -62,17 +62,20 @@ export class EntityFactory {
             
             this.ActivateEntity(entity)
 
-            /*
+            
             var position = entity.GetComponent(Position)
 
             var d = Math.Distance.BetweenPoints({x: position.X, y: position.Y}, {x: 400, y: 300})
 
-            if(d > 200) {
-                this.DeactivateEntity(entity)
+            if(d > 250) {
+
+                position.Set(400, 300)
+
+                //this.DeactivateEntity(entity)
             } else {
-                this.ActivateEntity(entity)
+                //this.ActivateEntity(entity)
             }
-            */
+            
             
 
 

@@ -110,7 +110,6 @@ export class World extends Entity {
         bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
         bot.GetComponent(Position).Set(x, y)
         bot.AddComponent(new TestAI())
-
         return bot
     }
 
