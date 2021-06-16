@@ -7,7 +7,7 @@ export class EntityPlayer extends WorldEntity {
     constructor(world: World) {
         super(world)
 
-        this.AddComponent(new Position({x: 400, y: 300}))
+        this.AddComponent(new Position({x: 0, y: 0}))
         this.AddComponent(new PhysicBody({spriteName: "player1"}))
         this.AddComponent(new InputHandler())
         this.AddComponent(new WorldText())

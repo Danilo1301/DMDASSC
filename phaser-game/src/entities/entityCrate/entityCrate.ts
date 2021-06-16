@@ -7,7 +7,7 @@ export class EntityCrate extends WorldEntity {
     constructor(world: World) {
         super(world)
 
-        this.AddComponent(new Position({x: 400, y: 300}))
+        this.AddComponent(new Position({x: 0, y: 0}))
         this.AddComponent(new PhysicBody({spriteName: "block" + (Math.round(Math.random()) + 1) }))
         this.AddComponent(new NetworkEntity())
     }
