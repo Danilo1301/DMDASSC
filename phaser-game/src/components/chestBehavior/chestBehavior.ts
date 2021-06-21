@@ -42,7 +42,7 @@ export class ChestBehaviorComponent extends Component {
         if(key == 'OPEN_CHEST') {
             console.log("NOW ILL OPEN THIS MDKC SHIEET")
 
-            alert("Lets pretend you opened the chest /o")
+            alert("Lets pretend you opened the chest \\o/")
         }
     }
 

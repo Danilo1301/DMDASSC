@@ -23,13 +23,15 @@ export class MainMenuScene extends Phaser.Scene {
         this.load.image('chest1', 'chest1.png')
         this.load.image('player1', 'player1.png')
         this.load.image('block64', 'block64.png')
+        this.load.image('multiplayer', 'multiplayer.png')
+        this.load.image('singleplayer', 'singleplayer.png')
     }
 
     create() {
         console.log(`[MainMenuScene] Create`)
 
-        var spriteSingleplayer = this.add.sprite(200, 200, "block1").setInteractive()
-        var spriteMultiplayer = this.add.sprite(200, 250, "block2").setInteractive()
+        var spriteSingleplayer = this.add.sprite(500, 60, "singleplayer").setInteractive()
+        var spriteMultiplayer = this.add.sprite(500, 200, "multiplayer").setInteractive()
 
         spriteSingleplayer.on("pointerdown", () => {
             console.log(`[MainMenuScene] Singleplayer`)
