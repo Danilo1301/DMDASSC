@@ -1,14 +1,14 @@
-import { World } from "@phaserGame/world"
+import { World } from "./world"
 
 export class WorldScene extends Phaser.Scene {
-    public World!: World
+    private _world?: World
 
     init(data) {
-        this.World = data.world
+        //console.log("[WorldScene] Initialized")
+        //this._world = data.world
     }
 
     create() {
-        this.World.Scene = this
-        this.World.Awake()
+        //this._world?.OnSceneLoad(this)
     }
 }

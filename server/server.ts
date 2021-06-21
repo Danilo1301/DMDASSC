@@ -53,15 +53,20 @@ const chat = new Chat(io.of('/api/chat'));
 */
 
 
-console.log("Starting game...")
+
+
+
+
+
+console.log("Starting geckos...")
 
 import '@geckos.io/phaser-on-nodejs'
 global['phaserOnNodeFPS'] = 60
 
-import { GameServer } from '@phaserGame/game/gameServer'
+console.log("Starting game...")
 
-var game_server = new GameServer(
-    io.of('/api/phaserGame')
-)
+import { GameServer } from '@phaserGame/game'
 
+var game = new GameServer(io.of('/api/phaserGame'))
+game.Start()
 

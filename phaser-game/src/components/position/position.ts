@@ -1,141 +1,147 @@
-import { Component } from "@phaserGame/utils";
-import { NetworkEntity } from "../networkEntity";
-import { PhysicBody } from "../physicBody";
+import { WorldEntity } from "@phaserGame/utils";
+import { Component } from "@phaserGame/utils/component";
+import { PhysicBodyComponent } from "@phaserGame/components";
 
-export interface PositionData {
+interface PositionComponentData {
     x?: number
     y?: number
 }
 
-export class Position extends Component {
+export class PositionComponent extends Component {
+    public Entity!: WorldEntity
+
+    private _targetx: number = 0
+    private _targety: number = 0
+
     private _x: number = 0
     private _y: number = 0
 
-
-    private _targetX: number = 0
-    private _targetY: number = 0
-
-
-    private _timeToLerp = 0
-    private _lerping = false
-
-    constructor(data?: PositionData) {
+    constructor() {
         super()
 
-        if(data) this.FromData(data)
+        this.WatchDataValue('x', {minDifference: 0.1})
+        this.WatchDataValue('y', {minDifference: 0.1})
+    }
+
+    public Step(delta) {
+        super.Step(delta)
+
+
+        if(this.CanSyncronize()) {
+            var distance = Phaser.Math.Distance.BetweenPoints({x: this.X, y: this.Y}, {x: this._targetx, y: this._targety});
+
+            var newPos = {
+                x: Phaser.Math.Interpolation.Linear([this.X, this._targetx], 0.01 * delta),
+                y: Phaser.Math.Interpolation.Linear([this.Y, this._targety], 0.01 * delta)
+            }
+
+            //console.log(this.X, this._targetx)
+
+            this.Set(newPos.x, newPos.y)
+
+            if(distance > 80) {
+                this.Set(this._targetx, this._targety)
+            }
+        }
+    }
+
+    public Update(delta: number) {
+        super.Update(delta)
+
+        
     }
 
     public get X(): number {
-        this.UpdatePosition()
+        this.GetPhysicBodyPosition()
         return this._x
     }
 
     public get Y(): number {
-        this.UpdatePosition()
+        this.GetPhysicBodyPosition()
         return this._y
     }
 
+    public SetTarget(x: number, y: number) {
+        this._targetx = x
+        this._targety = y
+    }
+
     public Set(x: number, y: number) {
+        this.SetX(x)
+        this.SetY(y)
+    }
+
+    public CanSyncronize(): boolean {
+        return this.Entity.IsNetworkEntity
+
+        /*
+        var networkEntityComponent = this.Entity.GetComponent(NetworkEntityComponent)
+
+        if(!networkEntityComponent) return false
+
+        return networkEntityComponent.CanSyncronize
+        */
+    }
+
+    public SetX(x: number) {
         this._x = x
+        
+        this.SetPhysicBodyPosition()
+    }
+
+    public SetY(y: number) {
         this._y = y
 
-        var physicBody = this.Entity?.HasComponent(PhysicBody) ? this.Entity.GetComponent(PhysicBody) : undefined
-
-        if(!physicBody) return
-        if(!physicBody.Sprite) return
-
-        physicBody.Sprite.setPosition(x, y)
-
-        this.UpdatePosition()
+        this.SetPhysicBodyPosition()
     }
 
-    private UpdatePosition() {
-        var physicBody = this.Entity?.HasComponent(PhysicBody) ? this.Entity.GetComponent(PhysicBody) : undefined
+    private GetPhysicBodyPosition() {
+        
+        if(!this.Entity.HasComponent(PhysicBodyComponent)) return
+        
+        var physicBody = this.Entity.GetComponent(PhysicBodyComponent)
 
-        if(!physicBody) return
-        if(!physicBody.Sprite) return
+        if(!physicBody.DefaultBody) return
 
-        var body = physicBody.Sprite!.body
+        var pos = physicBody.DefaultBody.position
 
-        this._x = body.position.x
-        this._y = body.position.y
+        this._x = pos.x
+        this._y = pos.y
+        
     }
 
-    public Awake(): void {
-   
-    }
     
-    public Update(deltaTime: number): void {
-        this.UpdatePosition()
+    private SetPhysicBodyPosition() {
 
-        this._timeToLerp += deltaTime
+        if(!this.Entity.HasComponent(PhysicBodyComponent)) return
+        
+        var physicBody = this.Entity.GetComponent(PhysicBodyComponent)
 
-        if(this._timeToLerp > 300 && !this._lerping) {
-            this._lerping = true
-            this._timeToLerp = 0
-        }
+        if(!physicBody.DefaultBody) return
 
-        if(this.CanSync()) {
-            var distance = Phaser.Math.Distance.BetweenPoints({x: this.X, y: this.Y}, {x: this._targetX, y: this._targetY});
-
-            if(this._lerping) {
-                var newPos = {
-                    x: Phaser.Math.Interpolation.Linear([this.X, this._targetX], 0.15),
-                    y: Phaser.Math.Interpolation.Linear([this.Y, this._targetY], 0.15)
-                }
-
-                this.Set(newPos.x, newPos.y)
-
-                if(distance > 20) {
-                    this.Set(this._targetX, this._targetY)
-                    this._lerping = false
-                }
-
-                if(distance < 1) {
-                    this._lerping = false
-                }
-            }
-            
-
-            //
-
-            if(distance > 10) {
-                //this.Set(this._targetX, this._targetY)
-            }
-            
-            
-        }
+        physicBody.SetPosition(this._x, this._y)
+        
     }
 
-    public Destroy(): void {
-    
-    }
-
-    public CanSync(): boolean {
-        var networkEntity = this.Entity?.GetComponent(NetworkEntity)
-        if(!networkEntity) return false
-        return networkEntity.SyncEnabled
-    }
-
-    public FromData(data: PositionData) {
-
-        if(this.CanSync()) {
-            this._targetX = data.x || this._x
-            this._targetY = data.y || this._y
-            return
-        }
-
-        if(data.x) this._x = data.x
-        if(data.y) this._y = data.y
-
-        this.Set(this._x, this._y)
-    }
-
-    public ToData(): PositionData {
-        var data: PositionData = {
+    public ToData(): PositionComponentData {
+        var data: PositionComponentData = {
             x: this.X,
             y: this.Y
         }
+
+        return data
+    }
+
+    public FromData(data: PositionComponentData) {
+        if(this.CanSyncronize()) {
+            if(data.x) this._targetx = data.x
+            if(data.y) this._targety = data.y
+        } else {
+            if(data.x) this.SetX(data.x)
+            if(data.y) this.SetY(data.y)
+        }
+        
+       
 
         return data
     }

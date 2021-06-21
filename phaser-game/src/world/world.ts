@@ -1,188 +1,141 @@
-import { InputHandler, PhysicBody, Position, PositionData, TestAI, WorldText } from "@phaserGame/components";
-import { EntityCrate, EntityPlayer } from "@phaserGame/entities";
-import { EntityFactory } from "@phaserGame/entityFactory";
-import { GameClient } from "@phaserGame/game";
+import { Entity } from "@phaserGame/utils/entity";
 import { Server } from "@phaserGame/server";
-import { Entity } from "@phaserGame/utils";
-import { WorldScene } from "./worldScene";
+import { EntityManager } from "@phaserGame/entityManager";
+import { GameClient } from "@phaserGame/game";
+import { EntityFactory } from "@phaserGame/entityFactory";
+import { PhysicBodyComponent, PositionComponent, InputHandlerComponent, RandomMovementComponent } from "@phaserGame/components";
+
 
 export class World extends Entity {
-    public Id: string
     public Server: Server
+
+    private _id: string
+    private _scene?: Phaser.Scene
+
+    public EntityManager: EntityManager
+
     public EntityFactory: EntityFactory
-    public Scene!: WorldScene
 
-
-    public Events = new Phaser.Events.EventEmitter();
-
-    public _test1!: Phaser.GameObjects.Arc;
-    public _test2!: Phaser.GameObjects.Arc;
-
-    constructor(server: Server, id: string) {
+    constructor(id: string, server: Server) {
         super()
 
         this.Server = server
-        this.Id = id
-        this.EntityFactory = new EntityFactory(this)
+        this._id = id 
 
-        var game = this.Server.Game;
+        this.EntityManager = new EntityManager()
+        this.EntityManager.AddEntity(this)
 
-        this.Scene = game.Scene.scene.add(this.SceneKey, WorldScene, true, {world: this}) as WorldScene
-        
+        this.EntityFactory = new EntityFactory(this.EntityManager, this)
+    }
 
-        this.Events.on("entity_streamed_in", (entityId: string) => {
-            console.log('event:entity_streamed_in', entityId)
+    public get Scene(): Phaser.Scene { return this._scene! }
 
+    public Init(): void {
+        console.log(`[World] Init (${this.Server.Game.IsServer})`)
+
+        if(this.Server.Game.IsServer) {
+            console.log(`[World] Creating phaser...`)
+
+            var phaserGame = this.Server.Game.CreatePhaserInstance(true)
+            
+
+   
+            phaserGame.events.on("ready", () => {
+                console.log(`[World] ServerGame ready`)
+
+                var scene = this._scene = phaserGame.scene.getAt(0)!
+                this.SetupListeners(phaserGame, scene)
+            })
+            
+        } else {
             var game = this.Server.Game as GameClient
+            this.SetupListeners(game.PhaserGame, game.Scene)
 
-            if(game.Network) {
-                if(game.Network.ControllingEntityId == entityId) {
-                    this.Scene.cameras.main.startFollow(this.EntityFactory.GetEntity(entityId).GetComponent(PhysicBody).Sprite!)
-                }
-            }
-        })
+            this._scene = game.Scene
+        }
+    }
 
-        this.Events.on("entity_streamed_out", (entityId: string) => {
-            console.log('event:entity_streamed_out', entityId)
-            
-            var game = this.Server.Game as GameClient
-
-            if(game.Network) {
-                if(game.Network.ControllingEntityId == entityId) {
-
-                    console.log("stopFollowstopFollowstopFollow")
-                    this.Scene.cameras.main.stopFollow()
-                }
-            }
-        })
+    private SetupListeners(phaserGame: Phaser.Game, scene: Phaser.Scene) {
+        phaserGame.events.on("prestep", (time, delta) => this.EntityManager.PreStep(delta))
+        phaserGame.events.on("step", (time, delta) => this.EntityManager.Step(delta))
+        phaserGame.events.on("poststep", (time, delta) => this.EntityManager.PostStep(delta))
         
+        scene.events.on("preupdate", (time, delta) => this.EntityManager.PreUpdate(delta))
+        scene.events.on("update", (time, delta) => this.EntityManager.Update(delta))
+        scene.events.on("postupdate", (time, delta) => this.EntityManager.PostUpdate(delta))
     }
 
-    private get SceneKey(): string { return this.Server.Id + "_" + this.Id }
-
-    public Awake(): void {
-        super.Awake()
-
-        this.Setup()
-        this.Start()
-    }
-
-    private Setup() {
-        console.log(`[World] Setup`)
-
-        var world = this;
-
-        this.Scene.matter.world.pause()
-
-        this.Scene.game.events.on('step', (t, d) => {
-            world.Step(d)
-        });
-        this.Scene.events.on('preupdate', (t, d) => {
-            world.PreUpdate(d)
-        });
-        this.Scene.events.on('update', (t, d) => {
-            world.Update(d)
-        });
-
-        this._test2 = this.Scene.add.circle(0, 0, 600, 0x51204F);
-
-        this._test1 = this.Scene.add.circle(0, 0, 0, 0x1D1A3F);
-
-        this.Scene.tweens.add({
-
-            targets: this._test1,
-            alpha: 0.2,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
+    public SetupBaseWorld() {
     
-        });
+        for (let i = 0; i < 2; i++) {
+            var bot = this.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+            bot.AddComponent(new RandomMovementComponent())
+            bot.GetComponent(PositionComponent).Set(Math.random()*200, 100)
+        }
     }
 
-    public CreateTest() {
-        if(this.Id == "world") {
-            
+    public Start() {
+        super.Start()
+
+        var scene = this._scene!
+
+
+        //y10 x14
+        for (let y = 0; y < 2; y++) {
+            for (let x = 0; x < 2; x++) {
+
+                //var block = this.EntityFactory.CreateEntity("EntityBlock", {autoActivate: true})
+                //block.GetComponent(PositionComponent).Set((x - 7)*64, (y - 5)*64)
+            }
+        }
+
+        var floorLeft = scene.matter.add.rectangle(0, 230, 500, 50, {isStatic: true})
+        scene.matter.body.setAngle(floorLeft, 0.2)
+
+        var floorRight = scene.matter.add.rectangle(700, 230, 500, 50, {isStatic: true})
+        scene.matter.body.setAngle(floorRight, 1.2)
+
+
+        if(this.Server.IsOnlineServer) {
+            /*
+            var player = this.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+            player.GetComponent(PositionComponent).Set(0, 50)
+            player.GetComponent(InputHandlerComponent).ControlledByPlayer = true
+            console.log(player)
     
-  
-        }
-
-        for (let i = 0; i < 3; i++) {
-            var bot = this.CreateBot(400, 300)
-        }
-
-        for (let i = 0; i < 4; i++) {
-            var crate = this.CreateCrate(400, 300)
-        }
-
-        var button = this.CreateCrate(200, 300)
-        button.GetComponent(PhysicBody).FromData({spriteName: "ball"})
-        button.AddComponent(new WorldText({text: 'CLICK HERE to teleport\n' + `World: ${this.Id}`}))
-
-        
-        setInterval(() => {
-            var position = button.GetComponent(Position)
-
-            if(Phaser.Math.Distance.BetweenPoints({x: position.X, y: position.Y}, {x: 0, y: 0}) > 100) {
-                position.Set(0, 0)
-            }
-        }, 300)
-        
-    }
-
-    public Start(): void {
-        console.log(`[World] Start`)
-
-        this.Scene.matter.add.rectangle(0, 300, 300, 30, {isStatic: true})
-        this.Scene.matter.add.rectangle(500, 380, 300, 30, {isStatic: true})
-        
-        
-
-        //var player = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
-        //player.GetComponent(InputHandler).ControlledByPlayer = true
-        //this.Scene.cameras.main.startFollow(player.GetComponent(PhysicBody).Sprite!, true, 0.5, 0.5)
-        
-
-
-        var matter = this.Scene.matter
-
-        matter.world.on('collisionstart', (a, b: MatterJS.BodyType, c: MatterJS.BodyType) => {
-            return;
             
-            for (const pair of a.pairs) {
-                console.log(pair)
-            }
-            console.log(a, b.id, c.id)
-        })
+            var camera =  this.Scene.cameras.main
+            camera.startFollow(player.GetComponent(PhysicBodyComponent).DefaultBody!.position, false, 0.1, 0.1)
+            
+
+            camera.setZoom(1.5)
+            */
+        } else {
+            this.SetupBaseWorld()
+        }
+        
+
+        this.Server.Events.emit("world_start", this)
+
+        return
+
+        console.log("[World] Creating sprites")
+
+        
+
+        
+
+        //scene.matter.world.setGravity(0, 0.3)
+
+     
+        
+        
+
+      
         
     }
 
-    public CreateCrate(x: number, y: number): EntityCrate {
-        var crate = this.EntityFactory.CreateEntity("EntityCrate") as EntityCrate
-        crate.GetComponent(Position).Set(x, y)
-        return crate
-    }
-
-    public CreateBot(x: number, y: number): EntityPlayer {
-        var bot = this.EntityFactory.CreateEntity("EntityPlayer") as EntityPlayer
-        bot.GetComponent(WorldText).FromData({text: "BOT"})
-        bot.GetComponent(PhysicBody).FromData({spriteName: "player2"})
-        bot.GetComponent(Position).Set(x, y)
-        
-        bot.AddComponent(new TestAI())
-        return bot
-    }
-
-    public Step(delta: number): void {
-        this.Scene.matter.world.step(delta)
-    }
-
-    public PreUpdate(delta: number): void {
-
-    }
-
-    public Update(delta: number): void {
-        super.Update(delta)
-
-        this.EntityFactory.Update(delta)
-    }
+    //public get Scene(): WorldScene { return this._scene! }
 }
+
+

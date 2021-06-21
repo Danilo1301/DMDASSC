@@ -1,39 +1,42 @@
+import { EntityManager } from "@phaserGame/entityManager/entityManager";
 import { Game } from "@phaserGame/game";
-import { World } from "@phaserGame/world";
 import { Entity } from "@phaserGame/utils";
+import { World } from "@phaserGame/world";
 
-export class Server extends Entity {
+
+export class Server {
     public Game: Game
-    public Worlds = new Phaser.Structs.Map<string, World>([])
 
-    public Id: string
+    public IsOnlineServer: boolean = false
 
-    constructor(id: string, game: Game) {
-        super()
+    private _id: string
+    private _worlds = new Phaser.Structs.Map<string, World>([])
+    public get Worlds(): World[] { return this._worlds.values() }
 
-        this.Id = id
+    public Events = new Phaser.Events.EventEmitter();
+
+    constructor(game: Game, id: string) {
         this.Game = game
+        this._id = id 
+
+        console.log(this.Id, this.Game.IsServer)
     }
 
-    public Awake() {
-        super.Awake()
+    public get Id(): string { return this._id }
 
-        this.Game.Scene.events.on('update', (time, delta) => super.Update(delta) )
+    public Start(): void {
+        console.log(`[Server] Start`)
 
-        this.CreateWorld('world')
+        var world = this.CreateWorld('world')
+        world.Init()
     }
 
     public CreateWorld(id: string): World {
-        var world = new World(this, id)
-        this.Worlds.set(id, world)
+        console.log(`[Server] Creating world '${id}'`)
+
+        var world = new World(id, this)
+        this._worlds.set(id, world)
         return world
-    }
-
-    public CreateServerWorld() {
-        this.CreateWorld('other_world')
-
-        this.Worlds.values()[0].CreateTest()
-        this.Worlds.values()[1].CreateTest()
     }
 }
 

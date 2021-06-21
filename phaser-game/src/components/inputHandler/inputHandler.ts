@@ -1,76 +1,36 @@
-import { Component, WorldEntity } from "@phaserGame/utils";
-import { PhysicBody } from "../physicBody";
+import { Input } from "@phaserGame/input";
+import { WorldEntity } from "@phaserGame/utils";
+import { Component } from "@phaserGame/utils/component";
+import { MovementComponent, PhysicBodyComponent } from "@phaserGame/components";
 
-
-export class InputHandler extends Component {
-    public Entity: WorldEntity | undefined
-    
-    private _keys: number[] = []
-    private _listeners: Phaser.Input.Keyboard.KeyboardPlugin[] = []
+export class InputHandlerComponent extends Component {
+    public Entity!: WorldEntity
 
     public ControlledByPlayer: boolean = false
-    
-    constructor() {
-        super()
-    }
 
     public Awake(): void {
-        this.Entity!.World.Scene.input.keyboard.addListener('keydown', this.OnKeyDown, this)
-
-        this.Entity!.World.Scene.input.keyboard.addListener('keyup', this.OnKeyUp, this)
-
+        super.Awake()
     }
 
-    private OnKeyDown(event) {
-        if(!this.ControlledByPlayer) return
-        this.SetKeyDown(event.keyCode)
+    public Start(): void {
+        super.Start()
     }
 
-    private OnKeyUp(event) {
-        if(!this.ControlledByPlayer) return
-            this.SetKeyDown(event.keyCode, false)
-    }
-    
     public Update(delta: number): void {
-        var physicBody = this.Entity?.GetComponent(PhysicBody)
+        super.Update(delta)
 
-        if(!physicBody) return
+        if(!this.ControlledByPlayer) return
 
-        var sprite = physicBody.Sprite
+        var entity = this.Entity
+        var movementComponent = entity.GetComponent(MovementComponent)
 
-        if(sprite) {
-            var force = {
-                x: 0,
-                y: 0
-            }
+        if(!movementComponent) return
 
-            var speed = 0.0008
-            var maxSpeed = 4;
-
-            if(sprite.body.velocity.x > -maxSpeed && this._keys.includes(65)) force.x = -speed
-            if(sprite.body.velocity.x < maxSpeed && this._keys.includes(68)) force.x = speed
-
-            if(sprite.body.velocity.y > -maxSpeed && this._keys.includes(87)) force.y = -speed
-            if(sprite.body.velocity.y < maxSpeed && this._keys.includes(83)) force.y = speed
-
-            sprite.applyForce(new Phaser.Math.Vector2(force.x * delta, force.y * delta))
-        }
+        movementComponent.Horizontal = Input.Horizontal
+        movementComponent.Vertical = Input.Vertical
     }
 
-    public SetKeyDown(keyCode: number, down: boolean = true) {
-        if(down) {
-            if(!this._keys.includes(keyCode)) this._keys.push(keyCode)
-        } else {
-            if(this._keys.includes(keyCode)) this._keys.splice(this._keys.indexOf(keyCode), 1)
-        }
-    }
-
-    public Destroy(): void {
-        for (const listener of this._listeners) {
-            listener.removeListener('keydown', this.OnKeyDown)
-            listener.removeListener('keyup', this.OnKeyUp)
-        }
-
-        this._listeners = []
+    public Destroy() {
+        super.Destroy()
     }
 }

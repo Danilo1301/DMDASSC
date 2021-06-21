@@ -1,5 +1,3 @@
-import { Position } from "@phaserGame/components"
-import { NetworkEntity } from "@phaserGame/components/networkEntity"
 import { WorldEntity } from "@phaserGame/utils"
 
 export class Packet {
@@ -14,18 +12,8 @@ export class Packet {
 
 export interface PacketData {}
 
-export class PacketDataEntity implements PacketData {
-    public Id: string
-    public Type: string
-    public ComponentsData: { [key: string]: any; } = {}
-
-    constructor(entity: WorldEntity) {
-        this.Id = entity.Id
-        this.Type = entity.constructor.name
-        
-        var networkEntity = entity.GetComponent(NetworkEntity)
-        if(networkEntity) {
-            this.ComponentsData = networkEntity.GetComponentsData()
-        }
-    }
+export interface PacketDataEntity {
+    Id: string
+    Type: string
+    Components: object
 }

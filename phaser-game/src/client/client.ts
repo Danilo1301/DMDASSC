@@ -1,47 +1,46 @@
-import { Position, WorldText } from '@phaserGame/components';
-import { NetworkEntity } from '@phaserGame/components/networkEntity';
+import { PositionComponent } from '@phaserGame/components';
 import { GameServer } from '@phaserGame/game';
-import { Packet, PacketData, PacketDataEntity, PacketManager } from '@phaserGame/packets';
+import { Packet, PacketData } from '@phaserGame/packets';
 import { WorldEntity } from '@phaserGame/utils';
 import { World } from '@phaserGame/world';
 import { Socket } from 'socket.io';
+import { EntityWatcher } from './entityWatcher';
+
+
 
 export class Client {
     public Socket: Socket
     public Game: GameServer
 
-    public PacketManager: PacketManager
+    public EntityWatcher: EntityWatcher
 
     public Entity?: WorldEntity
 
     public World?: World
-    private _entities = new Phaser.Structs.Map<string, WorldEntity>([])
+
+    private _packets: Packet[] = []
+
+    
 
     constructor(game: GameServer, socket: Socket) {
         this.Game = game
         this.Socket = socket
+        this.EntityWatcher = new EntityWatcher()
 
-        this.PacketManager = new PacketManager()
-        this.PacketManager.AutoSend = false
 
-        this.PacketManager.fnSendPackets = function (packets: Packet[], callback: (packets: Packet[]) => void) {
-            socket.emit('packets', packets, callback)
-        }
+        this.Socket.on("packets", (packets: Packet[], callback) => {
+            for (const packet of packets) this.OnReceivePacket(packet.Key, packet.Data)
 
-        game.events.on("step", (time, delta) => this.Update(delta))
+            callback(this._packets)
 
-        this.Socket.on("packets", (packets: Packet[], callback: (packets: Packet[]) => void) => {
-            for (const packet of packets) {
-                this.OnReceivePacket(packet.Key, packet.Data)
-            }
-
-            this.PacketManager.fnOnReceivePackets(packets, callback)
+            this._packets = []
         })
 
-        this.Socket.on("disconnect", () => {
-            if(this.Entity) 
-                this.Entity.World.EntityFactory.DestroyEntity(this.Entity)
-        })
+        setInterval(() => {
+            this.Update()
+        }, 20)
+
+        console.log(`[Client] ID ${this.Id} connected`)
     }
 
     public get Id(): string { return this.Socket.id }
@@ -51,98 +50,63 @@ export class Client {
     public Send(key: string, data: PacketData): void {
         var packet = new Packet(key, data)
 
-        this.PacketManager.AddPacket(packet)
+        this._packets.push(packet)
     }
 
-    public ChangeWorld(world: World): void {
-        for (const entity of this._entities.values()) {
-            this.SendStreamOutEntity(entity)
-        }
 
-        this.World = world
-    }
+    public Update(): void {
+        if(this.World) {
+            for (const entity of this.World.EntityFactory.Entities) {
+                if(!this.EntityWatcher.HasEntity(entity)) {
+                    var info = this.EntityWatcher.AddEntity(entity)
 
-    public SendStreamOutEntity(entity: WorldEntity): void {
-        if(this._entities.has(entity.Id)) {
-            this._entities.delete(entity.Id)
-            this.Send("entity_streamed_out", {entityId: entity.Id})
-        }
-    }
+                    var entitydata = info.FormatEntityComponentsData(false)
 
-    public Update(delta: number): void {
-        this.PacketManager.Update()
-
-        if(!this.World) return
-
-        var worldEntities: WorldEntity[] = []
-        
-        for (const entity of this.World.EntityFactory.ActiveEntities) {
-            if(entity.HasComponent(NetworkEntity)) worldEntities.push(entity)
-        }
-
-        for (const entity of worldEntities) {
-            var myPos = {x: 0, y: 0}
-
-            if(this.Entity) {
-                var position = this.Entity.GetComponent(Position)
-                myPos.x = position.X
-                myPos.y = position.Y
-            }
-
-            var entityPositionComponent = entity.GetComponent(Position)
-            var entityPos = {x: entityPositionComponent.X, y: entityPositionComponent.Y}
-
-            var distance = Phaser.Math.Distance.BetweenPoints(myPos, entityPos)
-
-       
-            if(distance < 2000) {
-                if(!this._entities.has(entity.Id)) {
-                    this._entities.set(entity.Id, entity)
-    
-                    this.Send("entity_streamed_in", {entity: new PacketDataEntity(entity)})
-
-                    
+                    this.Send("entity_stream_in", entitydata.data)
                 }
-
-                this.Send("entity_data", {entity: new PacketDataEntity(entity)})
-            } else {
-                this.SendStreamOutEntity(entity)
             }
-            
+        }
+
+        this.EntityWatcher.Update()
+
+        for (const info of this.EntityWatcher.EntitiesInfo) {
+            var entity = info.Entity
+
+            var entitydata = info.FormatEntityComponentsData(true)
+      
+            if(entitydata.hasNewValues) {
+                this.Send("entity_data", entitydata.data)
+            }
+
+            info.NewComponentsData = {}
         }
     }
 
     public OnReceivePacket(key: string, data: PacketData): void {
-        if(key == "change_world") {
-            var server = this.Game.Servers.values()[0]
-            
-            if(this.World == server.Worlds.values()[1]) {
-                this.ChangeWorld(server.Worlds.values()[0])
-            } else {
-                this.ChangeWorld(server.Worlds.values()[1])
+        //console.log(`[Client] Received ${key}`, data)
+
+        if(key == "join_server") {
+            this.World = this.Game.Servers[0].Worlds[0]
+
+            this.Entity = this.World.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+
+            //this.EntityWatcher.World = this.World
+
+            this.Send("join_server_status", {joined: true, id: this.Entity.Id})
+        }
+
+        if(key == "client_data") {
+            var x = data['x']
+            var y = data['y']
+
+            var entity = this.Entity
+
+            if(entity) {
+                var position = entity.GetComponent(PositionComponent)
+
+                position.Set(x, y)
             }
         }
 
-        if(key == "join_server") {
-
-            var server = this.Game.Servers.values()[0]
-
-
-
-            this.World = server.Worlds.values()[0]
-            this.Entity = this.World.EntityFactory.CreateEntity("EntityPlayer")
-            this.Entity.GetComponent(WorldText).FromData({text: "Player " + this.Id})
-
-            this.Send("join_server_status", {
-                entityId: this.Entity.Id
-            })
-        }
-
-        if(key == "player_data") {
-            var cdata: any = data
-
-            if(this.Entity) 
-                this.Entity.GetComponent(NetworkEntity).SetComponentsData(cdata)
-        }
     }
 }

@@ -1,149 +1,121 @@
-import { GameClient } from "@phaserGame/game";
-import { Component, WorldEntity } from "@phaserGame/utils";
-import { NetworkEntity } from "../networkEntity";
-import { Position } from "../position";
+import { WorldEntity } from "@phaserGame/utils";
+import { Component } from "@phaserGame/utils/component";
 
-export interface PhysicBodyData {
-    spriteName?: string
-    velocityX?: number
-    velocityY?: number
-    angle?: number
+class BodyPart {
+    public Key: string
+    public Type: BodyType
+    public X: number
+    public Y: number
+
+    public Width: number = 0
+    public Height: number = 0
+
+    public Radius: number = 0
+
+    public Body?: MatterJS.BodyType
+
+    constructor(key: string, x: number, y: number, type: BodyType) {
+        this.Key = key
+        this.X = x
+        this.Y = y
+        this.Type = type
+    }
 }
 
-export class PhysicBody extends Component {
-    public Entity: WorldEntity | undefined
-    public Sprite?: Phaser.Physics.Matter.Sprite
+enum BodyType {
+    RECTANGLE,
+    CIRCLE
+}
 
-    private _targetVelocityX: number = 0
-    private _targetVelocityY: number = 0
-    private _targetAngle: number = 0
+export class PhysicBodyComponent extends Component {
+    public Entity!: WorldEntity
 
-    private _spriteName: string = ""
+    private _bodyParts = new Phaser.Structs.Map<string, BodyPart>([])
+    private _body?: MatterJS.BodyType
 
-    constructor(data?: PhysicBodyData) {
-        super()
-
-        if(data) this.FromData(data)
-    }
+    public Options: MatterJS.IChamferableBodyDefinition = {}
 
     public Awake(): void {
-        var matter = this.Entity!.World.Scene.matter
+        super.Awake()
+    }
 
-        var position = this.Entity?.GetComponent(Position)!
+    public Start(): void {
+        super.Start()
 
-        var pos = {
-            x: position.X,
-            y: position.Y
-        }
+        var scene = this.Entity.World.Scene
+        var matter = scene.matter
+        
+
+        if(!this._body) {
       
-        this.Sprite = matter.add.sprite(0, 0, this._spriteName)
+            var options: MatterJS.IChamferableBodyDefinition = Object.assign({}, this.Options)
+            
 
-        var sprite = this.Sprite!.setInteractive()
+            var parts: MatterJS.BodyType[] = []
 
-        var physicBody = this
+            for (const bodyPart of this._bodyParts.values()) {
 
-        sprite.on('pointerdown', function (pointer) {
-            sprite.setTint(0x000000)
+                if(bodyPart.Type == BodyType.RECTANGLE) bodyPart.Body = matter.bodies.rectangle(bodyPart.X, bodyPart.Y, bodyPart.Width, bodyPart.Height, options)
+                if(bodyPart.Type == BodyType.CIRCLE) bodyPart.Body = matter.bodies.circle(bodyPart.X, bodyPart.Y, bodyPart.Radius, options)
 
-            if(physicBody._spriteName == 'ball') {
-                var game = physicBody.Entity?.World.Server.Game as GameClient
-                game.Network.Send("change_world", {})
+                parts.push(bodyPart.Body!)
             }
-        });
 
-        sprite.on('pointerup', function (pointer) {
-            sprite.setTint(0xFFFFFF)
-        });
+            options.parts = parts
+            
 
-        var opt: MatterJS.IChamferableBodyDefinition = {mass: 10, frictionAir: 0.1, restitution: 0.2}
-        
-        if(this._spriteName == 'ball') {
-            opt.restitution = 1
-            opt.frictionAir = 0.01
-            opt.mass = 2
+            var body = matter.body.create(options)
+
+
+            matter.world.add(body)
+
+            this._body = body
         }
-
         
-        //var body1 = matter.bodies.circle(0, 0, 16, opt);
-        var body2 = matter.bodies.rectangle(0, 0, 32, 32, opt);
-        
-        opt.parts = [body2]
-
-        var cbody = matter.body.create(opt)
-        
-
-        sprite.setExistingBody(cbody)
-
-        this.Entity?.World.Scene.events.on('update', (time, delta) => {
-            this.Update(delta)
-        })
-
-        sprite.setPosition(pos.x, pos.y)
-       
     }
-    
+
+    public GetBodyPart(key: string) {
+        return this._bodyParts.get(key)
+    }
+
+    public get DefaultBody() {
+        return this._body
+    }
+
     public Update(delta: number): void {
-        if(this.CanSync() && this.Sprite) {
-            var currentVelocity = this.Sprite.body.velocity
-            var currentAngle = this.Sprite.angle
-
-            var newVelocity = {
-                x: Phaser.Math.Interpolation.Linear([currentVelocity.x, this._targetVelocityX], 1),
-                y: Phaser.Math.Interpolation.Linear([currentVelocity.y, this._targetVelocityY], 1)
-            }
-
-            var newAngle = Phaser.Math.Interpolation.Linear([currentAngle, this._targetAngle], 0.5)
-
-            if(Math.abs(Math.abs(currentAngle) - Math.abs(this._targetAngle)) > 10) newAngle = this._targetAngle
-
-            this.Sprite.setAngle(newAngle)
-            this.Sprite.setVelocity(newVelocity.x, newVelocity.y)
-        }
+        super.Update(delta)
+    }
+   
+    public Destroy() {
+        super.Destroy()
     }
 
-    public Destroy(): void {
-        
-        this.Sprite!.destroy()
+    public AddRectangle(key: string, x: number, y: number, width: number, height: number): BodyPart {
+        var bodyPart = new BodyPart(key, x, y, BodyType.RECTANGLE)
 
-        this.Sprite = undefined
-    }
-    
-    public CanSync(): boolean {
-        var networkEntity = this.Entity?.GetComponent(NetworkEntity)
-        if(!networkEntity) return false
-        return networkEntity.SyncEnabled
+        bodyPart.Width = width
+        bodyPart.Height = height
+
+        this._bodyParts.set(key, bodyPart)
+
+        return bodyPart
     }
 
-    public FromData(data: PhysicBodyData) {
-        if(data.spriteName) this._spriteName = data.spriteName
-        
-        if(this.CanSync()) {
-            this._targetVelocityX = data.velocityX || 0
-            this._targetVelocityY = data.velocityY || 0
-            this._targetAngle = data.angle || 0
-        } else {
-            if(data.velocityX) this.Sprite?.setVelocityX(data.velocityX)
-            if(data.velocityY) this.Sprite?.setVelocityY(data.velocityY)
-            if(data.angle) this.Sprite?.setAngle(data.angle)
-        }
+    public AddCircle(key: string, x: number, y: number, radius: number): BodyPart {
+        var bodyPart = new BodyPart(key, x, y, BodyType.CIRCLE)
 
-        
+        bodyPart.Radius = radius
+  
+        this._bodyParts.set(key, bodyPart)
 
-        //console.log(data)
+        return bodyPart
     }
 
-    public ToData(): PhysicBodyData | undefined {
-        if(!this.Sprite) return undefined
+    public SetPosition(x: number, y: number) {
+        var body = this.DefaultBody!
+        var scene = this.Entity.World.Scene
+        var matter = scene.matter
 
-        var body = this.Sprite.body as MatterJS.BodyType
-
-        var data: PhysicBodyData = {
-            spriteName: this._spriteName,
-            velocityX: body.velocity.x,
-            velocityY: body.velocity.y,
-            angle: this.Sprite.angle
-        }
-
-        return data
+        matter.body.setPosition(body, {x: x, y: y})
     }
 }
