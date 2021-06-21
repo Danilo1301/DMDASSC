@@ -1,4 +1,5 @@
 import { Entity } from "../entity"
+import { WorldEntity } from "../worldEntity"
 
 interface IWatchComponentDataOptions {
     minDifference?: number
@@ -22,6 +23,23 @@ export class Component {
         this.HasAwaken = false
         this.HasStarted = false
     }
+
+    public CallComponentFunction(key: string, id?: string) {
+        var entity = this.Entity as WorldEntity
+
+        var data = {
+            key: key,
+            entityId: entity.Id,
+            component: this.constructor.name,
+            id: id
+        }
+
+        entity.World.Server.Events.emit('call_component_function', data)
+    }
+
+    public OnReceiveComponentFunction(key: string, id?: string) {
+    }
+
 
     public PreStep(delta: number): void {}
     public Step(delta: number): void {}

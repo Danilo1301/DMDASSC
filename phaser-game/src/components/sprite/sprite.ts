@@ -28,6 +28,8 @@ export class SpriteComponent extends Component {
     private _sprites = new Phaser.Structs.Map<string, Sprite>([])
 
     private _container?: Phaser.GameObjects.Container
+
+    public Events = new Phaser.Events.EventEmitter();
     
     public Awake(): void {
         super.Awake()
@@ -138,10 +140,13 @@ export class SpriteComponent extends Component {
                 sprite.Sprite = scene.add.sprite(sprite.X, sprite.Y, sprite.TextureName)
 
                 //
+                var self = this
                 var s = sprite.Sprite
                 s.setInteractive()
                 s.on('pointerdown', function (pointer) {
                     s.setTint(0x000000)
+
+                    self.Events.emit("pointerdown", pointer)
                 });
         
                 s.on('pointerup', function (pointer) {

@@ -3,7 +3,7 @@ import { Server } from "@phaserGame/server";
 import { EntityManager } from "@phaserGame/entityManager";
 import { GameClient } from "@phaserGame/game";
 import { EntityFactory } from "@phaserGame/entityFactory";
-import { PhysicBodyComponent, PositionComponent, InputHandlerComponent, RandomMovementComponent } from "@phaserGame/components";
+import { PhysicBodyComponent, PositionComponent, InputHandlerComponent, RandomMovementComponent, InventoryComponent } from "@phaserGame/components";
 
 
 export class World extends Entity {
@@ -66,7 +66,10 @@ export class World extends Entity {
     }
 
     public SetupBaseWorld() {
-    
+        var chest = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
+        chest.GetComponent(InventoryComponent).SetSlotItem(1, "GOOD)+ITEMID")
+
+
         for (let i = 0; i < 2; i++) {
             var bot = this.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
             bot.AddComponent(new RandomMovementComponent())
@@ -89,6 +92,7 @@ export class World extends Entity {
             }
         }
 
+        
         var floorLeft = scene.matter.add.rectangle(0, 230, 500, 50, {isStatic: true})
         scene.matter.body.setAngle(floorLeft, 0.2)
 
@@ -117,21 +121,7 @@ export class World extends Entity {
 
         this.Server.Events.emit("world_start", this)
 
-        return
-
-        console.log("[World] Creating sprites")
-
-        
-
-        
-
-        //scene.matter.world.setGravity(0, 0.3)
-
-     
-        
-        
-
-      
+    
         
     }
 

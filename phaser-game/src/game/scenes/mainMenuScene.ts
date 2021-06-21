@@ -19,6 +19,8 @@ export class MainMenuScene extends Phaser.Scene {
         this.load.image('ball', 'ball.png')
         this.load.image('bullet_tracer1', 'bullet_tracer1.png')
         this.load.image('block1', 'block1.png')
+        this.load.image('block2', 'block2.png')
+        this.load.image('chest1', 'chest1.png')
         this.load.image('player1', 'player1.png')
         this.load.image('block64', 'block64.png')
     }
@@ -26,20 +28,28 @@ export class MainMenuScene extends Phaser.Scene {
     create() {
         console.log(`[MainMenuScene] Create`)
 
-        var sprite = this.add.sprite(200, 200, "ball").setInteractive()
+        var spriteSingleplayer = this.add.sprite(200, 200, "block1").setInteractive()
+        var spriteMultiplayer = this.add.sprite(200, 250, "block2").setInteractive()
 
-        this.Game.OnClickPlay()
-        
+        spriteSingleplayer.on("pointerdown", () => {
+            console.log(`[MainMenuScene] Singleplayer`)
 
-        sprite.on("pointerdown", () => {
-            console.log(`[MainMenuScene] Play`)
+            this.Game.StartSinglePlayer()
 
-            this.Game.OnClickPlay()
+            spriteSingleplayer.destroy()
+            spriteMultiplayer.destroy()
         })
 
-        sprite.destroy()
+        spriteMultiplayer.on("pointerdown", () => {
+            console.log(`[MainMenuScene] Multiplayer`)
 
+            this.Game.StartMultiplayer()
 
+            spriteSingleplayer.destroy()
+            spriteMultiplayer.destroy()
+        })
+
+    
         this,this.text = this.add.text(30,70, '><')
 
         var t = this.add.text(30,30, '')

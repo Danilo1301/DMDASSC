@@ -3,6 +3,7 @@ import { Input } from "@phaserGame/input"
 import { Server } from "@phaserGame/server"
 import { MainMenuScene } from "@phaserGame/game/scenes/mainMenuScene"
 import { Network } from "@phaserGame/network"
+import { InputHandlerComponent, PhysicBodyComponent, PositionComponent } from "@phaserGame/components"
 
 export class GameClient extends Game {
     public PhaserGame!: Phaser.Game
@@ -48,19 +49,29 @@ export class GameClient extends Game {
             else
             {
 
-                scene.scale.startFullscreen();
+                //scene.scale.startFullscreen();
             }
 
         }, this);
     }
 
-    public OnClickPlay() {
-        this.StartMultiplayer()
-    }
 
     public StartSinglePlayer() {
         this.CreateServer('server')
         this.Server.Start()
+
+        var world = this.Server.Worlds[0]
+
+        var player = world.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+        player.GetComponent(InputHandlerComponent).ControlledByPlayer = true
+        console.log(player)
+
+        
+        var camera =  this.Scene.cameras.main
+        camera.startFollow(player.GetComponent(PhysicBodyComponent).DefaultBody!.position, false, 0.1, 0.1)
+
+        camera.setZoom(1.5)
+ 
     }
 
     public StartMultiplayer() {

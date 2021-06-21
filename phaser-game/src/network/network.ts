@@ -68,6 +68,19 @@ export class Network {
             this.EntityId = data['id']
         }
 
+        if(key == "call_component_function") {
+    
+            var world = this.Entity!.World
+
+            var entity = world.EntityFactory.GetEntity(data['entityId'])
+
+            for (const component of entity.Components) {
+                if(component.constructor.name == data['component']) {
+                    component.OnReceiveComponentFunction(data['key'])
+                }
+            }
+        }
+
         this.Events.emit("received_packet:" + key, data)
 
 

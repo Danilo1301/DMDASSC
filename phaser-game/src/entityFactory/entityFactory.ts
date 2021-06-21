@@ -7,6 +7,7 @@ import { Component, WorldEntity } from "@phaserGame/utils"
 import { World } from "@phaserGame/world"
 import { Network } from "@phaserGame/network"
 import { PacketDataEntity } from "@phaserGame/packets"
+import { EntityChest } from "@phaserGame/entities/chest"
 
 interface ICreateEntityOptions {
     id?: string
@@ -116,6 +117,7 @@ export class EntityFactory {
         this.RegisterEntity('EntityPlayer', EntityPlayer)
         this.RegisterEntity('EntityProjectile', EntityProjectile)
         this.RegisterEntity('EntityBlock', EntityBlock)
+        this.RegisterEntity('EntityChest', EntityChest)
 
         this.RegisterComponent('PositionComponent', PositionComponent)
     }

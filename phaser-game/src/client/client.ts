@@ -86,7 +86,11 @@ export class Client {
         //console.log(`[Client] Received ${key}`, data)
 
         if(key == "join_server") {
-            this.World = this.Game.Servers[0].Worlds[0]
+            var server = this.Game.Servers[0]
+
+            this.World = server.Worlds[0]
+
+            server._clients.set(this.Id, this)
 
             this.Entity = this.World.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
 
@@ -108,5 +112,24 @@ export class Client {
             }
         }
 
+        if(key == "call_component_function") {
+            this.OnReceivePacket_call_component_function(data)
+            
+        }
+
+    }
+
+    public OnReceivePacket_call_component_function(data) {
+        console.log('call_component_function', data)
+
+        var world = this.World!
+
+        var entity = world.EntityFactory.GetEntity(data['entityId'])
+
+        for (const component of entity.Components) {
+            if(component.constructor.name == data['component']) {
+                component.OnReceiveComponentFunction(data['key'], this.Id)
+            }
+        }
     }
 }
