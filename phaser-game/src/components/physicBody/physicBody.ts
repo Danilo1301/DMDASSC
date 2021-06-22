@@ -86,8 +86,23 @@ export class PhysicBodyComponent extends Component {
         super.Update(delta)
     }
    
-    public Destroy() {
+    public Destroy()
+    {
         super.Destroy()
+
+        var scene = this.Entity.World.Scene
+        var matter = scene.matter
+
+        //if(part.Body) matter.world.remove(part.Body, true)
+
+        for (const part of this._bodyParts.values())
+        {
+            part.Body = undefined
+        }
+
+        if(this._body) matter.world.remove(this._body, true)
+
+        this._body = undefined
     }
 
     public AddRectangle(key: string, x: number, y: number, width: number, height: number): BodyPart {

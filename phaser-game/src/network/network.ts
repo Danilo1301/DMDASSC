@@ -1,25 +1,30 @@
 import { PositionComponent } from "@phaserGame/components";
-import { Packet, PacketData } from "@phaserGame/packets";
+import { Packet, PacketData, PacketDataComponentFunction } from "@phaserGame/packets";
 import { WorldEntity } from "@phaserGame/utils";
 import { io, Socket } from "socket.io-client";
 
 export class Network {
     public static Events = new Phaser.Events.EventEmitter();
 
-    static EntityId: string = ""
-    static Entity?: WorldEntity
+    public static EntityId: string = ""
+
+    public static Entity?: WorldEntity
 
     public static Socket: Socket
+
     public static Settings = {
         TestDelay: 0,
         ServerAddress: ''
     }
 
     private static _packets: Packet[] = []
+
     private static _packetsSent: number = 0
+
     private static _lastSentPackets: number = 0
 
-    public static Update() {
+    public static Update()
+    {
         var limit = 5
 
         if(this._packetsSent > limit) return
@@ -30,12 +35,14 @@ export class Network {
 
         var autoSend = true
 
-        if(now - this._lastSentPackets > sendInterval && this._packets.length > 0 || autoSend) {
+        if(now - this._lastSentPackets > sendInterval && this._packets.length > 0 || autoSend)
+        {
             this._lastSentPackets = now
 
             var s: string = this._packets.map((p: Packet) => p.Key).join(',')
             
-            if(Network.Entity) {
+            if(Network.Entity)
+            {
                 var position = Network.Entity.GetComponent(PositionComponent)
 
                 this.Send('client_data', {
@@ -44,39 +51,44 @@ export class Network {
                 })
             }
 
-            this.Socket.emit('packets', this._packets, (packets: Packet[]) => {
-                //console.log("callback")
-
+            this.Socket.emit('packets', this._packets, (packets: Packet[]) =>
+            {
                 this._packetsSent = 0
 
                 for (const packet of packets) this.OnReceivePacket(packet.Key, packet.Data)
-
             })
 
             //console.log(`[Network] Sending ${this._packets.length} packets (${s}) ${this._packetsSent+1}/${limit}`)
             
             this._packets = []
-            this._packetsSent++
-            
+            this._packetsSent++  
         }
     }
 
-    public static OnReceivePacket(key: string, data: PacketData): void {
+    public static OnReceivePacket(key: string, data: PacketData): void
+    {
         //console.log(`[Network] Received ${key}`, data)
 
-        if(key == "join_server_status") {
+        if(key == "join_server_status")
+        {
             this.EntityId = data['id']
         }
 
-        if(key == "call_component_function") {
-    
+        if(key == "call_component_function")
+        {
+            var packetData = data as PacketDataComponentFunction
+
+            var cfData = packetData.Data
+
             var world = this.Entity!.World
 
-            var entity = world.EntityFactory.GetEntity(data['entityId'])
+            var entity = world.EntityFactory.GetEntity(cfData.EntityId)
 
-            for (const component of entity.Components) {
-                if(component.constructor.name == data['component']) {
-                    component.OnReceiveComponentFunction(data['key'])
+            for (const component of entity.Components)
+            {
+                if(component.constructor.name == cfData.ComponentName)
+                {
+                    component.OnReceiveFunction(cfData.Key, cfData.Data)
                 }
             }
         }
@@ -86,7 +98,8 @@ export class Network {
 
     }
 
-    public static Setup() {
+    public static Setup()
+    {
         window['Network'] = Network
 
         this.Settings.ServerAddress = `${location.protocol}//${location.host}/api/phaserGame`
@@ -99,25 +112,24 @@ export class Network {
             reconnection: false
         })
 
-
         socket.on("connect", () => {
             console.log(`[Network] Connected`)
             this.Events.emit("connect")
         })
     }
 
-    public static Connect(): void {
+    public static Connect(): void
+    {
         console.log(`[Network] Connecting to '${this.Settings.ServerAddress}'...`)
         this.Socket.connect()
     }
 
-    public static Send(key: string, data: PacketData) {
+    public static Send(key: string, data: PacketData)
+    {
         var packet = new Packet(key, data)
 
         this._packets.push(packet)
     }
 
-    private static GetTime() {
-        return new Date().getTime()
-    }
+    private static GetTime() { return new Date().getTime() }
 }

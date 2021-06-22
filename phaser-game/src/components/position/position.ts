@@ -16,11 +16,13 @@ export class PositionComponent extends Component {
     private _x: number = 0
     private _y: number = 0
 
-    constructor() {
+    constructor(data?: PositionComponentData) {
         super()
 
         this.WatchDataValue('x', {minDifference: 0.1})
         this.WatchDataValue('y', {minDifference: 0.1})
+
+        if(data) this.FromData(data)
     }
 
     public Step(delta) {
@@ -39,7 +41,7 @@ export class PositionComponent extends Component {
 
             this.Set(newPos.x, newPos.y)
 
-            if(distance > 80) {
+            if(distance > 30) {
                 this.Set(this._targetx, this._targety)
             }
         }

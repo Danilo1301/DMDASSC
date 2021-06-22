@@ -116,8 +116,15 @@ export class SpriteComponent extends Component {
         this._container.setPosition(position.X, position.Y)
     }
 
-    public Destroy() {
+    public Destroy()
+    {
         super.Destroy()
+
+        for (const sprite of this._sprites.values()) {
+            sprite.Sprite?.destroy()
+
+            sprite.Sprite = undefined
+        }
     }
 
     public Add(textureName: string, key: string, x: number = 0, y: number = 0): Sprite {
@@ -138,13 +145,14 @@ export class SpriteComponent extends Component {
                 //console.log(`Creating sprite ${sprite.Key}`)
 
                 sprite.Sprite = scene.add.sprite(sprite.X, sprite.Y, sprite.TextureName)
+                sprite.Sprite.setDepth(0)
 
                 //
                 var self = this
                 var s = sprite.Sprite
                 s.setInteractive()
                 s.on('pointerdown', function (pointer) {
-                    s.setTint(0x000000)
+                    s.setTint(0x6B6B6B)
 
                     self.Events.emit("pointerdown", pointer)
                 });

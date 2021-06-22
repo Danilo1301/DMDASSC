@@ -87,8 +87,8 @@ function initGame()
   div.style.filter = 'invert(1)';
 
   var img = document.createElement('img');
-  img.src = ''
-  img.style.width = '80px';
+  img.src = 'https://dmdassc.glitch.me/static/phaser/assets/play.png'
+  img.style.width = '120px';
   img.style.cursor = 'pointer';
   img.onclick = function()
   {

@@ -5,6 +5,14 @@ interface IWatchComponentDataOptions {
     minDifference?: number
 }
 
+export interface ComponentFunctionData {
+    Key: string
+    Data?: any
+    EntityId: string
+    ComponentName: string
+
+}
+
 export class Component {
     public Entity!: Entity
 
@@ -24,21 +32,20 @@ export class Component {
         this.HasStarted = false
     }
 
-    public CallComponentFunction(key: string, id?: string) {
+    public CallFunction(key: string, data: any) {
         var entity = this.Entity as WorldEntity
 
-        var data = {
-            key: key,
-            entityId: entity.Id,
-            component: this.constructor.name,
-            id: id
+        var cfData: ComponentFunctionData = {
+            Key: key,
+            Data: data,
+            EntityId: entity.Id,
+            ComponentName: this.constructor.name,
         }
 
-        entity.World.Server.Events.emit('call_component_function', data)
+        entity.World.Server.Events.emit('call_component_function', cfData)
     }
 
-    public OnReceiveComponentFunction(key: string, id?: string) {
-    }
+    public OnReceiveFunction(key: string, data: any) {}
 
 
     public PreStep(delta: number): void {}

@@ -3,7 +3,8 @@ import { Server } from "@phaserGame/server";
 import { EntityManager } from "@phaserGame/entityManager";
 import { GameClient } from "@phaserGame/game";
 import { EntityFactory } from "@phaserGame/entityFactory";
-import { PhysicBodyComponent, PositionComponent, InputHandlerComponent, RandomMovementComponent, InventoryComponent } from "@phaserGame/components";
+import { WorldTextComponent, PositionComponent , RandomMovementComponent, InventoryComponent } from "@phaserGame/components";
+
 
 
 export class World extends Entity {
@@ -67,7 +68,19 @@ export class World extends Entity {
 
     public SetupBaseWorld() {
         var chest = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
-        chest.GetComponent(InventoryComponent).SetSlotItem(1, "GOOD)+ITEMID")
+        chest.GetComponent(InventoryComponent).SetSlotItem(1, "ITEM_ID_GAY")
+
+        var n = 0;
+
+        setInterval(() => {
+            n++
+
+            chest.GetComponent(WorldTextComponent).FromData({text: `Chest\nUptime: ${n} seconds`})
+        }, 1000)
+
+        chest.AddComponent(new WorldTextComponent({text: "Chest"}))
+
+        
 
 
         for (let i = 0; i < 2; i++) {

@@ -1,20 +1,21 @@
-import { Input } from "@phaserGame/input";
 import { WorldEntity } from "@phaserGame/utils";
 import { Component } from "@phaserGame/utils/component";
-import { MovementComponent, PhysicBodyComponent } from "@phaserGame/components";
 import { PositionComponent } from "../position";
 
-class Slot {
+class Slot
+{
     public Index: number = -1
     public ItemId?: string
 }
 
-export class InventoryComponent extends Component {
+export class InventoryComponent extends Component
+{
     public Entity!: WorldEntity
 
     public _slots: Slot[] = []
 
-    public Awake(): void {
+    public Awake(): void
+    {
         super.Awake()
 
         this.AddSlot()
@@ -22,9 +23,12 @@ export class InventoryComponent extends Component {
         this.AddSlot()
 
         console.log(this._slots)
+
+        this.ShowSlots()
     }
 
-    public AddSlot() {
+    public AddSlot()
+    {
         var slot = new Slot()
 
         this._slots.push(slot)
@@ -34,21 +38,38 @@ export class InventoryComponent extends Component {
         return slot
     }
 
-    public SetSlotItem(index: number, itemId: string) {
+    public SetSlotItem(index: number, itemId: string)
+    {
         this._slots[index].ItemId = itemId
 
         console.log(this._slots)
     }
 
-    public Start(): void {
-        super.Start()
+    public OnReceiveFunction(key: string, data: object)
+    {
+        console.log("INVENTORY", key, data)
+
+        if(key == 'SET_SLOTS') {
+            this._slots = data['slots']
+
+            this.ShowSlots()
+        }
     }
 
-    public Update(delta: number): void {
-        super.Update(delta)
-    }
+    public ShowSlots() {
+        var str = ""
 
-    public Destroy() {
-        super.Destroy()
+        for (const slot of this._slots) {
+            str += `[${slot.Index}] ${slot.ItemId || "Empty"}\n`   
+        }
+
+        var position = this.Entity.GetComponent(PositionComponent)
+
+        var text = this.Entity.World.Scene.add.text(position.X, position.Y - 70, str)
+
+  
+        setTimeout(() => {
+            text.destroy()
+        }, 1000)
     }
 }

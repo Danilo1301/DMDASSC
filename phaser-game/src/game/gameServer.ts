@@ -3,21 +3,19 @@ import { Game } from "@phaserGame/game"
 import socketio from 'socket.io';
 import { Client } from "@phaserGame/client";
 
-export class GameServer extends Game {
-    constructor(io: socketio.Namespace) {
+export class GameServer extends Game
+{
+    constructor(io: socketio.Namespace)
+    {
         super()
 
         this.IsServer = true
 
-
-        console.log("created")
-
-        io.on("connection", (socket) => {
-            var client = new Client(this, socket)
-        })
+        io.on("connection", this.OnSocketConnection.bind(this))
     }
 
-    public Start(): void {
+    public Start(): void
+    {
         super.Start()
 
         console.log(`[Game] Starting Server...`)
@@ -25,12 +23,18 @@ export class GameServer extends Game {
         this.OnReady()
     }
 
-    public OnReady() {
+    public OnReady()
+    {
         super.OnReady()
 
         var server = this.CreateServer('server1')
         server.Start()
+    }
 
+    public OnSocketConnection(socket: socketio.Socket)
+    {
+        var client = new Client(this, socket)
 
+        client.OnConnect()
     }
 }

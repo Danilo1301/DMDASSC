@@ -1,73 +1,129 @@
 import { Client } from "@phaserGame/client";
-import { EntityManager } from "@phaserGame/entityManager/entityManager";
+import { WorldTextComponent } from "@phaserGame/components";
 import { Game } from "@phaserGame/game";
 import { Network } from "@phaserGame/network";
-import { Entity } from "@phaserGame/utils";
+import { PacketDataComponentFunction } from "@phaserGame/packets";
+import { ComponentFunctionData } from "@phaserGame/utils";
 import { World } from "@phaserGame/world";
 
 
-export class Server {
+export class Server
+{
     public Game: Game
 
     public IsOnlineServer: boolean = false
 
-    private _id: string
-    private _worlds = new Phaser.Structs.Map<string, World>([])
-    public get Worlds(): World[] { return this._worlds.values() }
-
     public Events = new Phaser.Events.EventEmitter();
 
+    private _id: string
+
+    private _worlds = new Phaser.Structs.Map<string, World>([])
+
+    //x
     public _clients = new Phaser.Structs.Map<string, Client>([])
 
-    constructor(game: Game, id: string) {
+    public get Worlds(): World[] { return this._worlds.values() }
+
+    constructor(game: Game, id: string)
+    {
         this.Game = game
+
         this._id = id 
 
         console.log(this.Id, this.Game.IsServer)
 
-        this.Events.on("call_component_function", (data) => {
-            console.log("call_component_function", data)
+        this.Events.on("call_component_function", (cfData: ComponentFunctionData) =>
+        {
+            console.log("call_component_function", cfData)
 
-            if(data.id) {
+            const data = cfData.Data
 
-                this._clients.get(data.id).Send("call_component_function", data)
+            const clientId: string | undefined = data.id
 
-                console.log("RETURN TO CLIENT", data)
+            const isLocalClient = Network.Entity != undefined
+
+            var packet: PacketDataComponentFunction = {
+                Data: cfData
+            }
+
+
+            if(clientId)
+            {
+                data.id = undefined
+
+                this._clients.get(clientId).Send("call_component_function", packet)
                 return
             }
 
-            if(Network.Entity) {
-                Network.Send("call_component_function", data)
-            } else {
+            if(isLocalClient)
+            {
+                Network.Send("call_component_function", packet)
+            }
+            else
+            {
                 var world = this.Worlds[0]
 
-                var entity = world.EntityFactory.GetEntity(data['entityId'])
+                var entity = world.EntityFactory.GetEntity(cfData.EntityId)
 
-                for (const component of entity.Components) {
-                    if(component.constructor.name == data['component']) {
-                        component.OnReceiveComponentFunction(data['key'])
+                for (const component of entity.Components)
+                {
+                    if(component.constructor.name == cfData.ComponentName)
+                    {
+                        component.OnReceiveFunction(cfData.Key, data)
                     }
                 }
-
             }
         })
     }
 
     public get Id(): string { return this._id }
 
-    public Start(): void {
+    public Start(): void
+    {
         console.log(`[Server] Start`)
 
         var world = this.CreateWorld('world')
+
         world.Init()
     }
 
-    public CreateWorld(id: string): World {
+    public CreateWorld(id: string): World
+    {
         console.log(`[Server] Creating world '${id}'`)
 
         var world = new World(id, this)
+
         this._worlds.set(id, world)
+        
         return world
+    }
+
+    public HandleClientConnection(client: Client)
+    {
+        //if can
+        var world = this.Worlds[0]
+        
+        var entity = world.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+        entity.AddComponent(new WorldTextComponent({text: client.Id}))
+
+        this._clients.set(client.Id, client)
+
+        client.Server = this
+        client.WorldIndex = 0
+        client.Entity = entity
+        client.Send("join_server_status", {joined: true, id: entity.Id})
+
+        this.OnClientJoin(client)
+    }
+
+    public OnClientJoin(client: Client)
+    {
+        
+    }
+
+    public OnClientLeave(client: Client)
+    {
+        
     }
 }
 

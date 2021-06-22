@@ -1,6 +1,6 @@
 import { EntityPlayer } from "@phaserGame/entities"
 import { EntityBlock } from "@phaserGame/entities/block"
-import { InputHandlerComponent, PhysicBodyComponent, PositionComponent } from "@phaserGame/components"
+import { InputHandlerComponent, PhysicBodyComponent, PositionComponent, WorldTextComponent } from "@phaserGame/components"
 import { EntityProjectile } from "@phaserGame/entities/projectile"
 import { EntityManager } from "@phaserGame/entityManager/entityManager"
 import { Component, WorldEntity } from "@phaserGame/utils"
@@ -24,6 +24,17 @@ export class EntityFactory {
         this.EntityManager = entityManager
         this.World = world
         
+        Network.Events.on('received_packet:entity_stream_out', (entityId: string) => {
+            if(this.HasEntity(entityId))
+            {
+                var entity = this.GetEntity(entityId)
+
+                this.RemoveEntity(entity)
+            }
+
+
+        })
+
         Network.Events.on('received_packet:entity_stream_in', (data: PacketDataEntity) => {
             console.log('entity_stream_in')
 
@@ -44,6 +55,30 @@ export class EntityFactory {
 
                     entity.IsNetworkEntity = false
                     entity.GetComponent(InputHandlerComponent).ControlledByPlayer = true
+                }
+
+                var componentsInEntity: string[] = []
+
+                for (const component of entity.Components)
+                {
+                    componentsInEntity.push(component.constructor.name)
+                }
+
+                for (const componentName in data.Components) {
+                    if(!componentsInEntity.includes(componentName)) {
+
+                        var constr = EntityFactory.GetComponentByName(componentName)
+                        var component = new constr()
+                        component.FromData(data.Components[componentName])
+
+                        entity.AddComponent(component)
+                        
+
+
+                        console.log("ADD ", componentName)
+
+                        console.log(component)
+                    }
                 }
             }
 
@@ -119,7 +154,8 @@ export class EntityFactory {
         this.RegisterEntity('EntityBlock', EntityBlock)
         this.RegisterEntity('EntityChest', EntityChest)
 
-        this.RegisterComponent('PositionComponent', PositionComponent)
+        //this.RegisterComponent('PositionComponent', PositionComponent)
+        this.RegisterComponent('WorldTextComponent', WorldTextComponent)
     }
 
     public static GetComponentByName(componentName: string) { return this._registeredComponents.get(componentName) }

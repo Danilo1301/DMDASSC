@@ -1,4 +1,4 @@
-import { WorldEntity } from "@phaserGame/utils"
+import { ComponentFunctionData, WorldEntity } from "@phaserGame/utils"
 
 export class Packet {
     public Key: string
@@ -12,8 +12,12 @@ export class Packet {
 
 export interface PacketData {}
 
-export interface PacketDataEntity {
+export interface PacketDataEntity extends PacketData {
     Id: string
     Type: string
     Components: object
+}
+
+export interface PacketDataComponentFunction extends PacketData {
+    Data: ComponentFunctionData
 }
