@@ -78,7 +78,7 @@ function initMouseGame()
 function initGame()
 {
   var div = document.createElement("div");
-  div.id = 'chat-container'
+  div.id = 'game-container'
   div.style.position = 'fixed';
   div.style.bottom = '0';
   div.style.left = '0';
@@ -94,10 +94,10 @@ function initGame()
   {
     var iframe = document.createElement('iframe');
     iframe.src = 'https://dmdassc.glitch.me/game';
-    iframe.style.width = '600px';
-    iframe.style.height = '450px';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
 
-    div.style.height = '30%';
+    div.style.height = '100%';
 
     img.remove();
     div.appendChild(iframe);

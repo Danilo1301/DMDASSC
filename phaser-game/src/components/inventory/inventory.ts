@@ -1,3 +1,4 @@
+import { Item } from "@phaserGame/inventoryGui/item";
 import { WorldEntity } from "@phaserGame/utils";
 import { Component } from "@phaserGame/utils/component";
 import { PositionComponent } from "../position";
@@ -5,7 +6,7 @@ import { PositionComponent } from "../position";
 class Slot
 {
     public Index: number = -1
-    public ItemId?: string
+    public Item?: Item
 }
 
 export class InventoryComponent extends Component
@@ -13,6 +14,10 @@ export class InventoryComponent extends Component
     public Entity!: WorldEntity
 
     public _slots: Slot[] = []
+
+    public Events = new Phaser.Events.EventEmitter();
+
+    public _clientsUsingInventory: string[] = []
 
     public Awake(): void
     {
@@ -38,11 +43,42 @@ export class InventoryComponent extends Component
         return slot
     }
 
-    public SetSlotItem(index: number, itemId: string)
+    public SetSlotItem(index: number, item: Item)
     {
-        this._slots[index].ItemId = itemId
+        this._slots[index].Item = item
 
         console.log(this._slots)
+    }
+
+    public MoveSlot(indexFrom: number, indexTo: number)
+    {
+        this.CallFunction("REQUEST_MOVE_ITEM", {}) 
+
+        //this.PerformMoveAction
+
+    }
+
+    public BroadcastItemsToAllClients()
+    {
+        for (const clientId of this._clientsUsingInventory) {
+            this.CallFunction("SET_SLOTS", {id: clientId, slots: this._slots})
+        }
+    }
+
+    public PerformMoveAction(indexFrom: number, indexTo: number)
+    {
+        var isItemInFirst = this._slots[0].Item != undefined
+
+        if(isItemInFirst)
+        {
+            this._slots[1].Item = this._slots[0].Item
+            this._slots[0].Item = undefined
+        } else {
+            this._slots[0].Item = this._slots[1].Item
+            this._slots[1].Item = undefined
+        }
+        
+        this.Events.emit("slots_updated")
     }
 
     public OnReceiveFunction(key: string, data: object)
@@ -52,7 +88,21 @@ export class InventoryComponent extends Component
         if(key == 'SET_SLOTS') {
             this._slots = data['slots']
 
+            this.Events.emit("slots_updated")
+
             this.ShowSlots()
+        }
+
+        if(key == 'REQUEST_MOVE_ITEM')
+        {
+            
+
+            console.log("he wants to move")
+
+            this.PerformMoveAction(1, 0)
+
+            var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
+            intentoryComponent.BroadcastItemsToAllClients()
         }
     }
 
@@ -60,7 +110,7 @@ export class InventoryComponent extends Component
         var str = ""
 
         for (const slot of this._slots) {
-            str += `[${slot.Index}] ${slot.ItemId || "Empty"}\n`   
+            str += `[${slot.Index}] ${slot.Item?.Id || "Empty"}\n`   
         }
 
         var position = this.Entity.GetComponent(PositionComponent)
@@ -71,5 +121,7 @@ export class InventoryComponent extends Component
         setTimeout(() => {
             text.destroy()
         }, 1000)
+
+        
     }
 }

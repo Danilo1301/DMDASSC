@@ -4,6 +4,7 @@ import { EntityManager } from "@phaserGame/entityManager";
 import { GameClient } from "@phaserGame/game";
 import { EntityFactory } from "@phaserGame/entityFactory";
 import { WorldTextComponent, PositionComponent , RandomMovementComponent, InventoryComponent } from "@phaserGame/components";
+import { ItemManager } from "@phaserGame/inventoryGui/item";
 
 
 
@@ -68,7 +69,13 @@ export class World extends Entity {
 
     public SetupBaseWorld() {
         var chest = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
-        chest.GetComponent(InventoryComponent).SetSlotItem(1, "ITEM_ID_GAY")
+
+        var item = ItemManager.AddItem("weapon_pistol")
+        item.Id = "ITEM_PISTOL_842639861"
+        item.Name = "COOL PISTOL BRO"
+
+        chest.GetComponent(InventoryComponent).SetSlotItem(1, item)
+ 
 
         var n = 0;
 

@@ -41,10 +41,17 @@ export class Entity {
                 break
             }
         }
+
+        console.log(toRemove, index)
       
-        if (toRemove && index) {
+        if (toRemove != undefined && index != undefined) {
             //toRemove.Entity = undefined
+
+            console.log("OK REMOVED")
+
             this._components.splice(index, 1)
+
+            toRemove.Destroy()
         }
     }
 

@@ -25,6 +25,8 @@ export class MainMenuScene extends Phaser.Scene {
         this.load.image('block64', 'block64.png')
         this.load.image('multiplayer', 'multiplayer.png')
         this.load.image('singleplayer', 'singleplayer.png')
+        
+        this.load.image('items/pistol', 'items/pistol.png')
     }
 
     create() {

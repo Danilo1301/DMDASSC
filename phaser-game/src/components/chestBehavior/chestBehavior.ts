@@ -1,3 +1,5 @@
+import { InventoryGui } from "@phaserGame/inventoryGui/inventoryGui";
+import { ItemManager } from "@phaserGame/inventoryGui/item";
 import { WorldEntity } from "@phaserGame/utils";
 import { Component } from "@phaserGame/utils/component";
 import { InventoryComponent } from "../inventory";
@@ -19,31 +21,56 @@ export class ChestBehaviorComponent extends Component
         })
     }
 
-    public OnReceiveFunction(key: string, data: object)
+    
+
+    public OnReceiveFunction(key: string, data: any)
     {
         console.log(key)
 
         if(key == 'REQUEST_OPEN_CHEST')
         {
+            console.log("YES YOU CAN OPEN")
+
             if(data['id'])
             {
                 var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
 
+
+                if(!intentoryComponent._clientsUsingInventory.includes(data.id))
+                {
+                    console.log(`Client ${data.id} is now listening for ccrate`)
+                    intentoryComponent._clientsUsingInventory.push(data.id)
+                }
                 
-
-                intentoryComponent.CallFunction("SET_SLOTS", {id: data['id'], slots: intentoryComponent._slots})
-
-                console.log("POPULATE")
+                
+                intentoryComponent.BroadcastItemsToAllClients()
             }
 
-            console.log("YES YOU CAN OPEN")
 
             this.CallFunction("OPEN_CHEST", {id: data['id']})
+
+   
         }
 
         if(key == 'OPEN_CHEST')
         {
             console.log("NOW ILL OPEN THIS MDKC SHIEET")
+
+            var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
+
+            var inventoryWindow = InventoryGui.CreateInventoryWindow(intentoryComponent)
+
+            /*
+            for (const slotData of intentoryComponent._slots) {
+                if(slotData.Item)
+                {
+                    var slot = inventoryWindow.GetSlot(slotData.Index)
+                    slot.SetItem(slotData.Item)
+                }
+            }
+            */
+
+           
 
             //alert("Lets pretend you opened the chest \\o/")
         }

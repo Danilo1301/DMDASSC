@@ -30,53 +30,53 @@ export class Server
 
         this._id = id 
 
-        console.log(this.Id, this.Game.IsServer)
-
-        this.Events.on("call_component_function", (cfData: ComponentFunctionData) =>
-        {
-            console.log("call_component_function", cfData)
-
-            const data = cfData.Data
-
-            const clientId: string | undefined = data.id
-
-            const isLocalClient = Network.Entity != undefined
-
-            var packet: PacketDataComponentFunction = {
-                Data: cfData
-            }
-
-
-            if(clientId)
-            {
-                data.id = undefined
-
-                this._clients.get(clientId).Send("call_component_function", packet)
-                return
-            }
-
-            if(isLocalClient)
-            {
-                Network.Send("call_component_function", packet)
-            }
-            else
-            {
-                var world = this.Worlds[0]
-
-                var entity = world.EntityFactory.GetEntity(cfData.EntityId)
-
-                for (const component of entity.Components)
-                {
-                    if(component.constructor.name == cfData.ComponentName)
-                    {
-                        component.OnReceiveFunction(cfData.Key, data)
-                    }
-                }
-            }
-        })
+        this.Events.on("call_component_function", this.ProcessEventCallComponentFunction, this)
     }
 
     public get Id(): string { return this._id }
+
+    public ProcessEventCallComponentFunction(cfData: ComponentFunctionData)
+    {
+        console.log("call_component_function", cfData)
+
+        const data = cfData.Data
+
+        const clientId: string | undefined = data.id
+
+        const isLocalClient = Network.Entity != undefined
+
+        var packet: PacketDataComponentFunction = {
+            Data: cfData
+        }
+
+        if(clientId)
+        {
+            data.id = undefined
+
+            this._clients.get(clientId).Send("call_component_function", packet)
+
+            return
+        }
+
+        if(isLocalClient)
+        {
+            Network.Send("call_component_function", packet)
+        }
+        else
+        {
+            var world = this.Worlds[0]
+
+            var entity = world.EntityFactory.GetEntity(cfData.EntityId)
+
+            for (const component of entity.Components)
+            {
+                if(component.constructor.name == cfData.ComponentName)
+                {
+                    component.OnReceiveFunction(cfData.Key, data)
+                }
+            }
+        }
+    }
 
     public Start(): void
     {
@@ -123,7 +123,9 @@ export class Server
 
     public OnClientLeave(client: Client)
     {
+        var world = this.Worlds[0]
         
+        if(client.Entity) world.EntityFactory.RemoveEntity(client.Entity)
     }
 }
 

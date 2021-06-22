@@ -5,6 +5,7 @@ import { Server } from '@phaserGame/server';
 import { ComponentFunctionData, WorldEntity } from '@phaserGame/utils';
 import { World } from '@phaserGame/world';
 import { Socket } from 'socket.io';
+import ClientPacketProcess from './clientPacketProcess';
 import { EntityWatcher } from './entityWatcher';
 
 
@@ -23,6 +24,8 @@ export class Client
 
     public WorldIndex: number = 0
 
+    public ClientPacketProcess: ClientPacketProcess
+
     private _packets: Packet[] = []
 
     constructor(game: GameServer, socket: Socket)
@@ -30,6 +33,7 @@ export class Client
         this.Game = game
         this.Socket = socket
         this.EntityWatcher = new EntityWatcher()
+        this.ClientPacketProcess = new ClientPacketProcess(this)
 
         this.SetupListeners()
     }
@@ -61,7 +65,9 @@ export class Client
 
     public OnDisconnect()
     {
-
+        if(this.Server) {
+            this.Server.OnClientLeave(this)
+        }
     }
 
     public Send(key: string, data: PacketData): void
@@ -76,9 +82,10 @@ export class Client
         return this.Server?.Worlds[this.WorldIndex]
     }
 
-
     public Update(): void
     {
+        if(!this.IsConnected) return
+
         var world = this.GetCurrentServerWorld()
 
         if(world)
@@ -132,51 +139,12 @@ export class Client
         //console.log(`[Client] Received ${key}`, data)
 
         if(key == "join_server")
-        {
-            var server = this.Game.Servers[0]
-
-            server.HandleClientConnection(this)
-        }
+            this.ClientPacketProcess.OnJoinServer(data)
 
         if(key == "client_data")
-        {
-            var x = data['x']
-            var y = data['y']
+            this.ClientPacketProcess.OnClientData(data)
 
-            var entity = this.Entity
-
-            if(entity) {
-                var position = entity.GetComponent(PositionComponent)
-
-                position.Set(x, y)
-            }
-        }
-
-        if(key == "call_component_function") this.OnReceivePacket_call_component_function(data as PacketDataComponentFunction)
+        if(key == "call_component_function")
+            this.ClientPacketProcess.OnCallComponentFunction(data as PacketDataComponentFunction)
     }
-
-    public OnReceivePacket_call_component_function(packetData: PacketDataComponentFunction)
-    {
-        console.log("packetData", packetData)
-
-        const cfData = packetData.Data
-
-        console.log('call_component_function', cfData)
-
-        var world = this.GetCurrentServerWorld()!
-
-        var entity = world.EntityFactory.GetEntity(cfData.EntityId)
-
-        cfData.Data.id = this.Id
-
-        for (const component of entity.Components)
-        {
-            if(component.constructor.name == cfData.ComponentName)
-            {
-                component.OnReceiveFunction(cfData.Key, cfData.Data)
-            }
-        }
-    }
-
- 
 }

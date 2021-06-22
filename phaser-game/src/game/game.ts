@@ -4,6 +4,7 @@ import { Entity } from "@phaserGame/utils";
 
 import { config } from "@phaserGame/game/config"
 import { EntityFactory } from "@phaserGame/entityFactory";
+import { ItemManager } from "@phaserGame/inventoryGui/item";
 
 export abstract class Game extends Entity {
     public IsServer: boolean = false
@@ -28,6 +29,7 @@ export abstract class Game extends Entity {
         console.log(`[Game] Ready`)
 
         EntityFactory.Setup()
+        ItemManager.Setup()
     }
 
     public CreatePhaserInstance(headless: boolean = false) {
