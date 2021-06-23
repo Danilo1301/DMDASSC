@@ -28,6 +28,7 @@ export class SlotItemDisplayComponent extends Component
 
         this._sprite = this.Slot._scene.add.sprite(this.Slot._position.x, this.Slot._position.y, this._item.Texture)
         this._text = this.Slot._scene.add.text(this.Slot._position.x, this.Slot._position.y, this._item.Name)
+        this._text.setDepth(2)
     }
 
     public Destroy(): void

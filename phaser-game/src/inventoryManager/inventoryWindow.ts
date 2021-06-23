@@ -60,8 +60,6 @@ class InventoryWindowTitle
                 var deltaMouse = {x: currentMousePos.x - this._startMousePos.x, y: currentMousePos.y - this._startMousePos.y}
 
                 this._scene.cameras.main.setPosition(this._startPos.x + deltaMouse.x, this._startPos.y + deltaMouse.y)
-
-                console.log(deltaMouse)
             }
         })
     }
@@ -95,14 +93,16 @@ export class InventoryWindow
 
         this._scene.cameras.main.setSize(300, 300)
 
+        this._scene.cameras.main.setPosition(Math.random()*600, Math.random()*50)
+
         
 
         
         
         //
-        this.CreateSlot(150 + -55, 55)
-        this.CreateSlot(150 + 0, 55)
-        this.CreateSlot(150 + 55, 55)
+        this.CreateSlot(150 + -110, 60)
+        this.CreateSlot(150 + 0, 60)
+        this.CreateSlot(150 + 110, 60)
         //
 
         this._title = new InventoryWindowTitle(scene, this)
