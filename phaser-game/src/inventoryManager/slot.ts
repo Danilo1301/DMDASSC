@@ -1,4 +1,5 @@
 import { Component, Entity } from "@phaserGame/utils";
+import { InventoryManager, SlotMoveManager } from "./inventoryManager";
 import { InventoryWindow } from "./inventoryWindow";
 import { Item } from "./item";
 import { SlotItemDisplayComponent } from "./slotDisplayComponent";
@@ -16,6 +17,8 @@ export class Slot extends Entity
 
     public _index: number = 0
 
+    private _sprite?: Phaser.GameObjects.Rectangle
+
     constructor(scene: Phaser.Scene, inventoryWindow: InventoryWindow, x: number, y: number)
     {
         super()
@@ -32,22 +35,22 @@ export class Slot extends Entity
     {
         super.Awake()
 
-        var sprite = this._scene.add.rectangle(this._position.x, this._position.y, 50, 50, 0x686868)
-
-        
-
-
-
-        sprite.setInteractive()
+        this._sprite = this._scene.add.rectangle(this._position.x, this._position.y, 50, 50, 0x686868)
+        this._sprite.setInteractive()
 
         var slot = this
 
-        sprite.on("pointerdown", () => {
+        this._sprite.on("pointerdown", () => {
             console.log("DOWN")
 
             if(slot.HasComponent(SlotItemDisplayComponent))
             {
                 var c = slot.GetComponent(SlotItemDisplayComponent)
+
+                SlotMoveManager.StartMoveSlot(slot)
+
+
+                return
 
                 console.log(c._item)
 
@@ -64,8 +67,13 @@ export class Slot extends Entity
             }
         })
 
-        sprite.on("pointerup", () => {
+        this._sprite.on("pointerup", () => {
             console.log("UP")
+
+            if(SlotMoveManager.IsMovingSlot())
+            {
+                SlotMoveManager.DropItemInSlot(slot)
+            }
         })
     }
 
@@ -85,5 +93,12 @@ export class Slot extends Entity
 
         if(item)
             this.AddComponent(new SlotItemDisplayComponent(item))
+    }
+
+    public Destroy(): void
+    {
+        super.Destroy()
+
+        this._sprite?.destroy()
     }
 }

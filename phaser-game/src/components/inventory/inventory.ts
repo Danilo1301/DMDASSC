@@ -68,26 +68,30 @@ export class InventoryComponent extends Component
         }
     }
 
-    public PerformMoveAction(indexFrom: number, indexTo: number)
+    public PerformMoveAction(from: any, to: any)
     {
-        console.log(indexFrom, indexTo)
+        console.log(from, to)
 
+        var fromInventory = this.Entity.World.EntityFactory.GetEntity(from.id).GetComponent(InventoryComponent)
+        var toInventory = this.Entity.World.EntityFactory.GetEntity(to.id).GetComponent(InventoryComponent)
 
-        var itemOnSlotFrom = this._slots[indexFrom].Item
-        var itemOnSlotTo = this._slots[indexTo].Item
+        console.log(fromInventory, toInventory)
+
+        var slotFrom = fromInventory._slots[from.index]
+        var slotTo = toInventory._slots[to.index]
+
+        var itemOnSlotFrom = slotFrom.Item
+        var itemOnSlotTo = slotTo.Item
+ 
         
         if(itemOnSlotFrom)
         {
-
-
-            
-
-            this._slots[indexTo].Item = itemOnSlotFrom
-            this._slots[indexFrom].Item = undefined
+            slotTo.Item = itemOnSlotFrom
+            slotFrom.Item = undefined
 
             if(itemOnSlotTo)
             {
-                this._slots[indexFrom].Item = itemOnSlotTo
+                slotFrom.Item = itemOnSlotTo
             }
 
             
@@ -95,7 +99,19 @@ export class InventoryComponent extends Component
 
         
 
-        this.Events.emit("slots_updated")
+        fromInventory.Events.emit("slots_updated")
+        toInventory.Events.emit("slots_updated")
+
+        fromInventory.BroadcastItemsToAllClients()
+        toInventory.BroadcastItemsToAllClients()
+    }
+
+    public RequestMoveItem(fromId, fromIndex, toId, toIndex)
+    {
+        this.CallFunction("REQUEST_MOVE_ITEM", {
+            from: {id: fromId, index: fromIndex},
+            to: {id: toId, index: toIndex}
+        })
     }
 
     public OnReceiveFunction(key: string, data: any)
@@ -113,13 +129,9 @@ export class InventoryComponent extends Component
         if(key == 'REQUEST_MOVE_ITEM')
         {
             
-
             console.log("he wants to move")
 
             this.PerformMoveAction(data.from, data.to)
-
-            var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
-            intentoryComponent.BroadcastItemsToAllClients()
         }
     }
 

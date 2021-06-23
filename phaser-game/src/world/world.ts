@@ -69,16 +69,24 @@ export class World extends Entity {
         var chest = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
 
         var item1 = ItemManager.AddItem("weapon_pistol")
-        item1.Id = "ITEM_PISTOL_842639861"
+        item1.Id = "ITEM_PISTOL_1stchest"
         item1.Name = "Pistol renamed"
 
         var item2 = ItemManager.AddItem("medkit")
-        item2.Id = "ITEM_MEDKIT_842639861"
+        item2.Id = "ITEM_MEDKIT_1stchest"
         item2.Name = "Medkit renamed"
 
         chest.GetComponent(InventoryComponent).SetSlotItem(0, item1)
         chest.GetComponent(InventoryComponent).SetSlotItem(2, item2)
- 
+        chest.GetComponent(PositionComponent).Set(100, 0)
+
+        var chest2 = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
+
+        var item3 = ItemManager.AddItem("weapon_pistol")
+        item3.Id = "ITEM_PISTOL_otherchest"
+        item3.Name = "COOL"
+
+        chest2.GetComponent(InventoryComponent).SetSlotItem(0, item3)
 
         var n = 0;
 

@@ -1,5 +1,77 @@
 import { InventoryComponent } from "@phaserGame/components"
+import { GameObjects } from "phaser"
+import { InventoryManager } from "./inventoryManager"
 import { Slot } from "./slot"
+
+class InventoryWindowTitle
+{
+    private _scene: Phaser.Scene
+
+    private _title: GameObjects.Rectangle
+    private _close: GameObjects.Rectangle
+
+    private _moving: boolean = false
+    
+    private _startPos = {x: 0, y: 0}
+    private _startMousePos = {x: 0, y: 0}
+
+    private _inventoryWindow: InventoryWindow
+
+    constructor(scene: Phaser.Scene, inventoryWindow: InventoryWindow)
+    {
+        this._scene = scene
+        this._inventoryWindow = inventoryWindow
+
+        this._scene.input.on("pointerup", () => {
+            this._moving = false
+        })
+
+        this._title = this._scene.add.rectangle(150, 15, 300, 30, 0x000000)
+        this._close = this._scene.add.rectangle(300 - 15, 15, 30, 30, 0xff0000)
+
+        this._title.setInteractive()
+        this._close.setInteractive()
+
+
+        this._close.on("pointerdown", () => {
+            InventoryManager.CloseInventoryWindow(this._inventoryWindow.Id)
+        })
+
+        this._title.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+            if(!this._moving)
+            {
+                this._moving = true
+
+                this._startMousePos.x = pointer.x
+                this._startMousePos.y = pointer.y
+
+                this._startPos.x = this._scene.cameras.main.x
+                this._startPos.y = this._scene.cameras.main.y
+            }
+        })
+
+    
+        this._scene.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+      
+            if(this._moving)
+            {
+                var currentMousePos = {x: pointer.x, y: pointer.y}
+
+                var deltaMouse = {x: currentMousePos.x - this._startMousePos.x, y: currentMousePos.y - this._startMousePos.y}
+
+                this._scene.cameras.main.setPosition(this._startPos.x + deltaMouse.x, this._startPos.y + deltaMouse.y)
+
+                console.log(deltaMouse)
+            }
+        })
+    }
+
+    public Destroy()
+    {
+        this._title.destroy()
+        this._close.destroy()
+    }
+}
 
 export class InventoryWindow
 {
@@ -11,6 +83,10 @@ export class InventoryWindow
 
     private _id: string
 
+    private _title: InventoryWindowTitle
+
+    public get Id() { return this._id }
+
     constructor(id: string, scene: Phaser.Scene, inventoryComponent: InventoryComponent)
     {
         this._id = id
@@ -20,12 +96,16 @@ export class InventoryWindow
         this._scene.cameras.main.setSize(300, 300)
 
         
+
+        
+        
         //
         this.CreateSlot(150 + -55, 55)
         this.CreateSlot(150 + 0, 55)
         this.CreateSlot(150 + 55, 55)
         //
 
+        this._title = new InventoryWindowTitle(scene, this)
         
 
         this.UpdateVisuals()
@@ -47,6 +127,25 @@ export class InventoryWindow
             {
                 slot.SetItem(slotData.Item)
             }
+        }
+    }
+
+    public Close()
+    {
+        console.log("close")
+
+        this.DestroyVisuals()
+
+        this._title.Destroy()
+
+        this._inventoryComponent.Events.removeListener("slots_updated", undefined, this)
+        
+    }
+
+    public DestroyVisuals()
+    {
+        for (const slot of this._slots) {
+            slot.Destroy()
         }
     }
 
