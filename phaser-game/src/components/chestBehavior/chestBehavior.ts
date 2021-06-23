@@ -1,5 +1,4 @@
-import { InventoryGui } from "@phaserGame/inventoryGui/inventoryGui";
-import { ItemManager } from "@phaserGame/inventoryGui/item";
+import { InventoryManager } from "@phaserGame/inventoryManager/inventoryManager";
 import { WorldEntity } from "@phaserGame/utils";
 import { Component } from "@phaserGame/utils/component";
 import { InventoryComponent } from "../inventory";
@@ -58,21 +57,7 @@ export class ChestBehaviorComponent extends Component
 
             var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
 
-            var inventoryWindow = InventoryGui.CreateInventoryWindow(intentoryComponent)
-
-            /*
-            for (const slotData of intentoryComponent._slots) {
-                if(slotData.Item)
-                {
-                    var slot = inventoryWindow.GetSlot(slotData.Index)
-                    slot.SetItem(slotData.Item)
-                }
-            }
-            */
-
-           
-
-            //alert("Lets pretend you opened the chest \\o/")
+            var inventoryWindow = InventoryManager.CreateInventoryWindow(this.Entity.Id, intentoryComponent)
         }
     }
 }

@@ -1,4 +1,4 @@
-import { Item } from "@phaserGame/inventoryGui/item";
+import { Item } from "@phaserGame/inventoryManager/item";
 import { WorldEntity } from "@phaserGame/utils";
 import { Component } from "@phaserGame/utils/component";
 import { PositionComponent } from "../position";
@@ -52,7 +52,10 @@ export class InventoryComponent extends Component
 
     public MoveSlot(indexFrom: number, indexTo: number)
     {
-        this.CallFunction("REQUEST_MOVE_ITEM", {}) 
+        this.CallFunction("REQUEST_MOVE_ITEM", {
+            from: indexFrom,
+            to: indexTo
+        }) 
 
         //this.PerformMoveAction
 
@@ -67,21 +70,35 @@ export class InventoryComponent extends Component
 
     public PerformMoveAction(indexFrom: number, indexTo: number)
     {
-        var isItemInFirst = this._slots[0].Item != undefined
+        console.log(indexFrom, indexTo)
 
-        if(isItemInFirst)
-        {
-            this._slots[1].Item = this._slots[0].Item
-            this._slots[0].Item = undefined
-        } else {
-            this._slots[0].Item = this._slots[1].Item
-            this._slots[1].Item = undefined
-        }
+
+        var itemOnSlotFrom = this._slots[indexFrom].Item
+        var itemOnSlotTo = this._slots[indexTo].Item
         
+        if(itemOnSlotFrom)
+        {
+
+
+            
+
+            this._slots[indexTo].Item = itemOnSlotFrom
+            this._slots[indexFrom].Item = undefined
+
+            if(itemOnSlotTo)
+            {
+                this._slots[indexFrom].Item = itemOnSlotTo
+            }
+
+            
+        }
+
+        
+
         this.Events.emit("slots_updated")
     }
 
-    public OnReceiveFunction(key: string, data: object)
+    public OnReceiveFunction(key: string, data: any)
     {
         console.log("INVENTORY", key, data)
 
@@ -99,7 +116,7 @@ export class InventoryComponent extends Component
 
             console.log("he wants to move")
 
-            this.PerformMoveAction(1, 0)
+            this.PerformMoveAction(data.from, data.to)
 
             var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
             intentoryComponent.BroadcastItemsToAllClients()

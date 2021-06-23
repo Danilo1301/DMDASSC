@@ -97,7 +97,8 @@ function initGame()
     iframe.style.width = '100%';
     iframe.style.height = '100%';
 
-    div.style.height = '100%';
+    div.style.width = '100%';
+    div.style.height = window.outerHeight;
 
     img.remove();
     div.appendChild(iframe);

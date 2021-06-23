@@ -4,9 +4,7 @@ import { EntityManager } from "@phaserGame/entityManager";
 import { GameClient } from "@phaserGame/game";
 import { EntityFactory } from "@phaserGame/entityFactory";
 import { WorldTextComponent, PositionComponent , RandomMovementComponent, InventoryComponent } from "@phaserGame/components";
-import { ItemManager } from "@phaserGame/inventoryGui/item";
-
-
+import { ItemManager } from "@phaserGame/inventoryManager/itemManager";
 
 export class World extends Entity {
     public Server: Server
@@ -70,11 +68,16 @@ export class World extends Entity {
     public SetupBaseWorld() {
         var chest = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
 
-        var item = ItemManager.AddItem("weapon_pistol")
-        item.Id = "ITEM_PISTOL_842639861"
-        item.Name = "COOL PISTOL BRO"
+        var item1 = ItemManager.AddItem("weapon_pistol")
+        item1.Id = "ITEM_PISTOL_842639861"
+        item1.Name = "Pistol renamed"
 
-        chest.GetComponent(InventoryComponent).SetSlotItem(1, item)
+        var item2 = ItemManager.AddItem("medkit")
+        item2.Id = "ITEM_MEDKIT_842639861"
+        item2.Name = "Medkit renamed"
+
+        chest.GetComponent(InventoryComponent).SetSlotItem(0, item1)
+        chest.GetComponent(InventoryComponent).SetSlotItem(2, item2)
  
 
         var n = 0;

@@ -4,7 +4,7 @@ import { Server } from "@phaserGame/server"
 import { MainMenuScene } from "@phaserGame/game/scenes/mainMenuScene"
 import { Network } from "@phaserGame/network"
 import { InputHandlerComponent, PhysicBodyComponent, PositionComponent } from "@phaserGame/components"
-import { InventoryGui } from "@phaserGame/inventoryGui/inventoryGui"
+import { InventoryManager } from "@phaserGame/inventoryManager/inventoryManager"
 
 export class GameClient extends Game {
     public PhaserGame!: Phaser.Game
@@ -33,7 +33,7 @@ export class GameClient extends Game {
         Network.Setup()
         Input.Setup(this.Scene.input)
 
-        InventoryGui.Setup(this)
+        InventoryManager.Setup(this)
 
         this.Scene.events.on("update", Network.Update, Network)
 

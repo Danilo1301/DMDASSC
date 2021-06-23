@@ -4,7 +4,7 @@ import { Entity } from "@phaserGame/utils";
 
 import { config } from "@phaserGame/game/config"
 import { EntityFactory } from "@phaserGame/entityFactory";
-import { ItemManager } from "@phaserGame/inventoryGui/item";
+import { ItemManager } from "@phaserGame/inventoryManager/itemManager";
 
 export abstract class Game extends Entity {
     public IsServer: boolean = false

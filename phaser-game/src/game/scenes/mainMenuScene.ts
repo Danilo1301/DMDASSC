@@ -27,6 +27,7 @@ export class MainMenuScene extends Phaser.Scene {
         this.load.image('singleplayer', 'singleplayer.png')
         
         this.load.image('items/pistol', 'items/pistol.png')
+        this.load.image('items/medkit', 'items/medkit.png')
     }
 
     create() {
