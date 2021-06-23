@@ -55,9 +55,10 @@ export class InventoryManager {
         this.Game = game
     }
 
-    public static CreateInventoryWindow(id: string, inventoryComponent: InventoryComponent)
+    public static CreateInventoryWindow(inventoryComponent: InventoryComponent)
     {
-        var inventoryId = "InventoryWindow" + id
+        var entityId = inventoryComponent.Entity.Id
+        var inventoryId = "InventoryWindow" + entityId
 
         if(this._inventoryWindows.has(inventoryId))
         {
@@ -67,7 +68,13 @@ export class InventoryManager {
 
         console.log(`[InventoryManager] Create Window '${inventoryId}'`)
 
+        console.log(this.Game.PhaserGame.scene)
+
+        console.log(inventoryId)
+
         var scene = this.Game.PhaserGame.scene.add(inventoryId, {}, true)
+
+        console.log(scene)
 
         var inventoryWindow = new InventoryWindow(inventoryId, scene, inventoryComponent)
 
@@ -76,12 +83,20 @@ export class InventoryManager {
         return inventoryWindow
     }
 
-    public static CloseInventoryWindow(id: string)
+    public static CloseInventoryWindow(inventoryComponent: InventoryComponent)
     {
-        this._inventoryWindows.get(id).Close()
+        var entityId = inventoryComponent.Entity.Id
+        var inventoryId = "InventoryWindow" + entityId
 
-        this._inventoryWindows.delete(id)
+ 
+        var inventoryWindow = this._inventoryWindows.get(inventoryId)
 
-        this.Game.PhaserGame.scene.remove(id)
+        if(!inventoryWindow) return
+
+        inventoryWindow.Close()
+
+        this._inventoryWindows.delete(inventoryId)
+
+        this.Game.PhaserGame.scene.remove(inventoryId)
     }
 }

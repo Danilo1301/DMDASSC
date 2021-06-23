@@ -1,3 +1,4 @@
+import { InventoryManager } from "@phaserGame/inventoryManager/inventoryManager";
 import { Item } from "@phaserGame/inventoryManager/item";
 import { WorldEntity } from "@phaserGame/utils";
 import { Component } from "@phaserGame/utils/component";
@@ -19,6 +20,13 @@ export class InventoryComponent extends Component
 
     public _clientsUsingInventory: string[] = []
 
+    public OpenInventory()
+    {
+        var inventoryWindow = InventoryManager.CreateInventoryWindow(this)
+        
+        return inventoryWindow
+    }
+
     public Awake(): void
     {
         super.Awake()
@@ -28,6 +36,11 @@ export class InventoryComponent extends Component
         this.AddSlot()
 
         console.log(this._slots)
+    }
+
+    public Start(): void
+    {
+        super.Start()
 
         this.ShowSlots()
     }
@@ -48,6 +61,9 @@ export class InventoryComponent extends Component
         this._slots[index].Item = item
 
         console.log(this._slots)
+
+        this.Events.emit("slots_updated")
+        this.BroadcastItemsToAllClients()
     }
 
     public MoveSlot(indexFrom: number, indexTo: number)
@@ -152,5 +168,12 @@ export class InventoryComponent extends Component
         }, 1000)
 
         
+    }
+
+    public Destroy()
+    {
+        super.Destroy()
+
+        InventoryManager.CloseInventoryWindow(this)
     }
 }

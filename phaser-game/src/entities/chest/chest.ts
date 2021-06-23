@@ -14,7 +14,7 @@ export class EntityChest extends WorldEntity {
 
         var physicBodyComponent = this.GetComponent(PhysicBodyComponent)
         physicBodyComponent.Options = {
-            isSensor: true
+
         }
         var body_part = physicBodyComponent.AddRectangle('body', 0, 0, 32, 32)
         

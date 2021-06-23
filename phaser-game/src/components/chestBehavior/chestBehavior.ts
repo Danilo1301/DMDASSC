@@ -56,8 +56,9 @@ export class ChestBehaviorComponent extends Component
             console.log("NOW ILL OPEN THIS MDKC SHIEET")
 
             var intentoryComponent = this.Entity.GetComponent(InventoryComponent)
-
-            var inventoryWindow = InventoryManager.CreateInventoryWindow(this.Entity.Id, intentoryComponent)
+            var inventoryWindow = intentoryComponent.OpenInventory()
+            inventoryWindow?.CreateMovableTitle()
+            
         }
     }
 }

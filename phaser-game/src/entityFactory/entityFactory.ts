@@ -1,6 +1,6 @@
 import { EntityPlayer } from "@phaserGame/entities"
 import { EntityBlock } from "@phaserGame/entities/block"
-import { InputHandlerComponent, PhysicBodyComponent, WorldTextComponent } from "@phaserGame/components"
+import { InputHandlerComponent, InventoryComponent, PhysicBodyComponent, WorldTextComponent } from "@phaserGame/components"
 import { EntityProjectile } from "@phaserGame/entities/projectile"
 import { EntityManager } from "@phaserGame/entityManager/entityManager"
 import { Component, WorldEntity } from "@phaserGame/utils"
@@ -8,6 +8,7 @@ import { World } from "@phaserGame/world"
 import { Network } from "@phaserGame/network"
 import { PacketDataEntity } from "@phaserGame/packets"
 import { EntityChest } from "@phaserGame/entities/chest"
+import { UserManager } from "@phaserGame/game"
 
 interface ICreateEntityOptions
 {
@@ -89,14 +90,14 @@ export class EntityFactory
 
             if(entity.Id == Network.EntityId)
             {
+    
+                UserManager.SetupUser(entity)
+
                 Network.Entity = entity
 
-                var camera =  this.World.Scene.cameras.main
-                camera.startFollow(entity.GetComponent(PhysicBodyComponent).DefaultBody!.position, false, 0.1, 0.1)
-                camera.setZoom(1.5)
-
                 entity.IsNetworkEntity = false
-                entity.GetComponent(InputHandlerComponent).ControlledByPlayer = true
+   
+    
             }
 
             var componentsInEntity: string[] = []

@@ -1,6 +1,7 @@
 import { WorldEntity } from "@phaserGame/utils/worldEntity";
-import { MovementComponent, PhysicBodyComponent, PositionComponent, SpriteComponent } from "@phaserGame/components";
+import { InventoryComponent, MovementComponent, PhysicBodyComponent, PositionComponent, SpriteComponent } from "@phaserGame/components";
 import { InputHandlerComponent } from "@phaserGame/components/inputHandler";
+import { Network } from "@phaserGame/network";
 
 export class EntityPlayer extends WorldEntity {
     constructor() {
@@ -13,6 +14,8 @@ export class EntityPlayer extends WorldEntity {
 
         this.AddComponent(new MovementComponent())
         this.AddComponent(new InputHandlerComponent())
+
+        this.AddComponent(new InventoryComponent())
 
         var physicBodyComponent = this.GetComponent(PhysicBodyComponent)
         physicBodyComponent.Options = {

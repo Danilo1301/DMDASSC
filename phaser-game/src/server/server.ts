@@ -1,5 +1,5 @@
 import { Client } from "@phaserGame/client";
-import { WorldTextComponent } from "@phaserGame/components";
+import { InventoryComponent, WorldTextComponent } from "@phaserGame/components";
 import { Game } from "@phaserGame/game";
 import { Network } from "@phaserGame/network";
 import { PacketDataComponentFunction } from "@phaserGame/packets";
@@ -103,8 +103,9 @@ export class Server
         //if can
         var world = this.Worlds[0]
         
-        var entity = world.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+        var entity = world.CreatePlayer()
         entity.AddComponent(new WorldTextComponent({text: client.Id}))
+        entity.GetComponent(InventoryComponent)._clientsUsingInventory.push(client.Id)
 
         this._clients.set(client.Id, client)
 

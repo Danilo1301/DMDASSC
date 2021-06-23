@@ -1,10 +1,32 @@
 import "phaser";
 import { Server } from "@phaserGame/server";
-import { Entity } from "@phaserGame/utils";
+import { Entity, WorldEntity } from "@phaserGame/utils";
 
 import { config } from "@phaserGame/game/config"
 import { EntityFactory } from "@phaserGame/entityFactory";
 import { ItemManager } from "@phaserGame/inventoryManager/itemManager";
+import { InputHandlerComponent, InventoryComponent, PhysicBodyComponent } from "@phaserGame/components";
+
+export class UserManager
+{
+    static SetupUser(player: WorldEntity)
+    {
+        this._entity = player
+
+        player.GetComponent(InputHandlerComponent).ControlledByPlayer = true
+ 
+        var camera =  player.World.Scene.cameras.main
+
+        camera.startFollow(player.GetComponent(PhysicBodyComponent).DefaultBody!.position, false, 0.1, 0.1)
+        camera.setZoom(1.5)
+
+
+        var inventoryWindow = player.GetComponent(InventoryComponent).OpenInventory()
+        inventoryWindow?.SetPosition(300, 480)
+    }
+
+    private static _entity?: Entity
+}
 
 export abstract class Game extends Entity {
     public IsServer: boolean = false

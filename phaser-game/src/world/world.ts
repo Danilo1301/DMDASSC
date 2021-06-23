@@ -16,6 +16,8 @@ export class World extends Entity {
 
     public EntityFactory: EntityFactory
 
+    public Events = new Phaser.Events.EventEmitter();
+
     constructor(id: string, server: Server) {
         super()
 
@@ -65,7 +67,15 @@ export class World extends Entity {
         scene.events.on("postupdate", (time, delta) => this.EntityManager.PostUpdate(delta))
     }
 
-    public SetupBaseWorld() {
+    public CreatePlayer()
+    {
+        var player = this.EntityFactory.CreateEntity("EntityPlayer", {autoActivate: true})
+
+        return player
+    }
+
+    public CreateChestWithSomeItems()
+    {
         var chest = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
 
         var item1 = ItemManager.AddItem("weapon_pistol")
@@ -80,24 +90,51 @@ export class World extends Entity {
         chest.GetComponent(InventoryComponent).SetSlotItem(2, item2)
         chest.GetComponent(PositionComponent).Set(100, 0)
 
-        var chest2 = this.EntityFactory.CreateEntity("EntityChest", {autoActivate: true})
+        chest.AddComponent(new WorldTextComponent({text: "Chest"}))
 
-        var item3 = ItemManager.AddItem("weapon_pistol")
-        item3.Id = "ITEM_PISTOL_otherchest"
-        item3.Name = "COOL"
-
-        chest2.GetComponent(InventoryComponent).SetSlotItem(0, item3)
-
-        var n = 0;
-
+        var n = 0
         setInterval(() => {
             n++
 
             chest.GetComponent(WorldTextComponent).FromData({text: `Chest\nUptime: ${n} seconds`})
+
+
         }, 1000)
 
-        chest.AddComponent(new WorldTextComponent({text: "Chest"}))
+        setInterval(() => {
+   
+            var inv = chest.GetComponent(InventoryComponent)._slots[0]
 
+            if(!inv.Item)
+            {
+                var i = ItemManager.AddItem("weapon_pistol")
+                i.Id = "ITEM_PISTOLNEW"
+                i.Name = "NEW GUN"
+
+                chest.GetComponent(InventoryComponent).SetSlotItem(0, i)
+            }
+
+            
+        }, 5000)
+
+        setInterval(() => {
+  
+            var position = chest.GetComponent(PositionComponent)
+
+            if(Phaser.Math.Distance.BetweenPoints({x: position.X, y: position.Y}, {x: 0, y: 0}) > 200)
+            {
+                position.Set(0, 0)
+            }
+        }, 10)
+    }
+    
+    public SetupBaseWorld() {
+        
+
+        this.CreateChestWithSomeItems()
+        this.CreateChestWithSomeItems()
+
+        
         
 
 
@@ -149,7 +186,7 @@ export class World extends Entity {
             this.SetupBaseWorld()
         }
         
-
+        this.Events.emit("world_start")
         this.Server.Events.emit("world_start", this)
 
     

@@ -34,7 +34,7 @@ class InventoryWindowTitle
 
 
         this._close.on("pointerdown", () => {
-            InventoryManager.CloseInventoryWindow(this._inventoryWindow.Id)
+            InventoryManager.CloseInventoryWindow(this._inventoryWindow._inventoryComponent)
         })
 
         this._title.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
@@ -81,7 +81,7 @@ export class InventoryWindow
 
     private _id: string
 
-    private _title: InventoryWindowTitle
+    private _title?: InventoryWindowTitle
 
     public get Id() { return this._id }
 
@@ -93,7 +93,7 @@ export class InventoryWindow
 
         this._scene.cameras.main.setSize(300, 300)
 
-        this._scene.cameras.main.setPosition(Math.random()*600, Math.random()*50)
+        this.SetPosition(Math.random()*600, Math.random()*50 + 50)
 
         
 
@@ -105,7 +105,7 @@ export class InventoryWindow
         this.CreateSlot(150 + 110, 60)
         //
 
-        this._title = new InventoryWindowTitle(scene, this)
+        
         
 
         this.UpdateVisuals()
@@ -115,8 +115,20 @@ export class InventoryWindow
         setInterval(this.Update.bind(this), 1)
     }
 
+    public CreateMovableTitle()
+    {
+        this._title = new InventoryWindowTitle(this._scene, this)
+    }
+
+    public SetPosition(x: number, y: number)
+    {
+        this._scene.cameras.main.setPosition(x, y)
+    }
+
     public UpdateVisuals()
     {
+        console.log(`Inventory ${this.Id} UpdateVisuals`)
+
         for (const slotData of this._inventoryComponent._slots) {
 
             var slot = this.GetSlot(slotData.Index)
@@ -136,7 +148,7 @@ export class InventoryWindow
 
         this.DestroyVisuals()
 
-        this._title.Destroy()
+        this._title?.Destroy()
 
         this._inventoryComponent.Events.removeListener("slots_updated", undefined, this)
         
