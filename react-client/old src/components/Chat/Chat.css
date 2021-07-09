@@ -1,0 +1,24 @@
+#chat #root {
+    height: 100vh;
+}
+
+body#chat {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    background-color: #2D2D3A;
+    color: #CECECE;
+}
+
+#chat input {
+    border: none;
+}
+
+#chat button {
+    border: none;
+    background-color: rgb(128, 128, 128);
+}
+
+#chat .overfl {
+    overflow-x: hidden!important;
+}

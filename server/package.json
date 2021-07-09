@@ -1,0 +1,39 @@
+{
+  "name": "dmdassc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/server.ts",
+  "scripts": {
+    "start": "node -r tsconfig-paths/register -r ts-node/register src/server.ts",
+    "dev": "nodemon -e ts,js --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "phaser_game:start": "node -r tsconfig-paths/register -r ts-node/register phaser-game/src/main.ts",
+    "phaser_game:dev": "webpack --config phaser-game/webpack.config.js --watch",
+    "phaser_game:build": "webpack --config phaser-game/webpack.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@enable3d/phaser-extension": "^0.22.0",
+    "@geckos.io/phaser-on-nodejs": "1.2.4",
+    "@types/express": "^4.17.12",
+    "enable3d": "^0.22.0",
+    "express": "^4.17.1",
+    "phaser": "^3.24.1",
+    "phaser3-rex-plugins": "^1.1.53",
+    "safe-eval": "^0.4.1",
+    "socket.io": "^4.1.2",
+    "socket.io-client": "^4.1.2",
+    "ts-loader": "^9.2.3",
+    "ts-node": "^10.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.3.2",
+    "uuid": "^8.3.2",
+    "vm": "^0.1.0",
+    "vm-browserify": "^1.1.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.2"
+  },
+  "engines": {
+    "node": "14.x"
+  }
+}

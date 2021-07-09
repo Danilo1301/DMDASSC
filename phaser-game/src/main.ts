@@ -1,10 +1,10 @@
 import "phaser";
-import { Game, GameClient } from "@phaserGame/game"
+import GameClient from "@phaserGame/game/GameClient"
 
 function main(): void {
     document.body.style.margin = "0px"
     var game = window["game"] = new GameClient()
-    game.Start()
+    game.start()
 }
 
 window.onload = main.bind(this)
