@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './phaser-game/src/main.ts',
+  entry: './src/main.ts',
   module: {
     rules: [
       {
@@ -19,7 +19,7 @@ module.exports = {
   },
   output: {
     filename: 'game.js',
-    path: path.resolve(__dirname, '..', 'static', 'phaser')
+    path: path.resolve(__dirname, '..', 'server', 'static', 'phaser')
   },
   devtool: 'source-map',
   mode: 'development'

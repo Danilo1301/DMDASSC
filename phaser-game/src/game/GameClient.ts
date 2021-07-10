@@ -24,6 +24,8 @@ export default class GameClient extends Game
 
             this.startLoadScene()
         })
+
+        console.log("test2")
     }
 
     public getNetwork()

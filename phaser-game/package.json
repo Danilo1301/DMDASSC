@@ -1,9 +1,7 @@
 {
-  "dependencies": {
-    "phaser": "^3.55.2",
-    "socket.io": "^4.1.2",
-    "socket.io-client": "^4.1.2",
-    "uuid": "^8.3.2",
-    "webpack": "^5.44.0"
+  "scripts": {
+    "start": "node -r tsconfig-paths/register -r ts-node/register src/main.ts",
+    "dev": "webpack --config webpack.config.js --watch",
+    "build": "webpack --config webpack.config.js"
   }
 }
