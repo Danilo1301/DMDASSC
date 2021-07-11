@@ -12,6 +12,8 @@ const app: express.Application = express();
 const server: http.Server = http.createServer(app);
 const io: socketio.Server = new socketio.Server();
 
+try { require("../env").load(); } catch (error) {}
+
 
 //socket
 io.attach(server, {
@@ -28,21 +30,21 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use('/static', express.static(path.join(__dirname, "..", "static")));
 
-app.get("/api", (req, res) => {
-    res.json({ message: "Hello from server! " + new Date().getTime() });
-});
+app.get("/api", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
-app.get("/game", (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "static", "phaser", "index.html"))
-});
+app.get("/game", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "phaser", "index.html")) );
 
-app.get("/notapi", (req, res) => {
-    res.json({ message: "Hello from server! " + new Date().getTime() });
-});
+app.get("/notapi", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
 app.get("*", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "client", "index.html")));
 
 server.listen(port, () => console.log(`Express web server started: http://localhost:${port}`));
+
+
+//discord bot
+import { DiscordBot } from './bot'
+
+const discordBot = new DiscordBot();
 
 /*
 import mouseGame from './mouseGame'
@@ -57,7 +59,7 @@ const chat = new Chat(io.of('/api/chat'));
 
 
 
-
+/*
 console.log("Starting geckos...")
 
 import '@geckos.io/phaser-on-nodejs'
@@ -71,5 +73,5 @@ import PacketSender from '@phaserGame/network/PacketSender'
 
 var game = new GameServer(io.of("/api/phaserGame"))
 game.start()
-
+*/
 
