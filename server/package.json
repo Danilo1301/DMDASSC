@@ -1,7 +1,6 @@
 {
   "name": "server",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "dev": "nodemon -e ts,js --ignore static/ --ignore public/ --exec ts-node -r tsconfig-paths/register src/index.ts"
+    "start": "nodemon -e ts,js --ignore static/ --ignore public/ --exec ts-node -r tsconfig-paths/register src/index.ts"
   }
 }
