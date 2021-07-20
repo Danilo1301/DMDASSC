@@ -17,7 +17,7 @@ const NavbarItem = function(text, href, active)
 
 const Navbar = function(props)
 {
-  const items = [["Projetos", "url"], ["Game", "url"]]
+  const items = [["Projetos", "projetos"], ["Game", "game"]]
 
   return (
     <>

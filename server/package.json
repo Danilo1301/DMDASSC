@@ -1,6 +1,7 @@
 {
+  "name": "server",
   "scripts": {
-    "start": "node -r tsconfig-paths/register -r ts-node/register src/server.ts",
-    "dev": "nodemon -e ts,js --exec ts-node -r tsconfig-paths/register src/server.ts"
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon -e ts,js --ignore static/ --ignore public/ --exec ts-node -r tsconfig-paths/register src/index.ts"
   }
 }
