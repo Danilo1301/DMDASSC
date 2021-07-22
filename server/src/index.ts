@@ -33,6 +33,7 @@ app.use('/static', express.static(path.join(__dirname, "..", "static")));
 app.get("/api", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
 app.get("/game", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "phaser", "index.html")) );
+app.get("/cafemania", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "cafemania", "index.html")) );
 
 app.get("/notapi", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
