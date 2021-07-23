@@ -11,7 +11,6 @@ export default class World
     {
         this._game = game
 
-
         for(let y = 0; y < 4; y++)
         {
             for(let x = 0; x < 4; x++)
@@ -20,11 +19,21 @@ export default class World
             }
         }
 
-        const wall = this.getGame().tileItemFactory.createTileItem('wall0')
+        
 
-        const tile = this.getTile(0, 0)
-        tile.addTileItem(wall)
+        this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
+        this.getTile(0, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
+        this.getTile(0, 1).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0') )
+
+        window['tile'] = this.getTile(1, 0)
+
+        
+
+        //this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0')  )
+        //this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0')  )
+        //this.getTile(2, 2).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0')  )
     }
+
 
     public getTile(x: number, y: number)
     {

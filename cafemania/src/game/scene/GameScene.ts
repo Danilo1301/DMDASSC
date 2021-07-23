@@ -33,11 +33,40 @@ class MoveScene {
     }
 }
 
+enum Layer {
+    GROUND,
+    OBJECTS,
+    COLLISION
+}
+
 export default class GameScene extends BaseScene
 {
     private _moveScene?: MoveScene;
 
-    private _collisionLayer?: Phaser.GameObjects.Layer
+    private _layers = new Map<Layer, Phaser.GameObjects.Layer>()
+
+    constructor()
+    {
+        super('GameScene')
+
+        GameScene._instance = this
+    }
+
+    private setupLayers()
+    {
+        const ground = this.add.layer()
+        ground.setDepth(0)
+
+        const objects = this.add.layer()
+        objects.setDepth(5)
+
+        const collision = this.add.layer()
+        collision.setDepth(10)
+
+        this._layers.set(Layer.GROUND, ground)
+        this._layers.set(Layer.OBJECTS, objects)
+        this._layers.set(Layer.COLLISION, collision)
+    }
 
     public preload(): void
     {
@@ -49,22 +78,53 @@ export default class GameScene extends BaseScene
         this.load.image('tile4', 'tile4.png')
         this.load.image('block4', 'block4.png')
         this.load.image('tubatu', 'tubatu.png')
+        this.load.image('chair0', 'chair0.png')
+    }
+
+    public getLayer(layer: Layer)
+    {
+        return this._layers[layer]
     }
 
     public create(): void
     {
+        this.setupLayers()
+
         this.cameras.main.setBackgroundColor(0x21007F)
 
         this._moveScene = new MoveScene(this);
 
-        this._collisionLayer = this.add.layer();
-        this._collisionLayer.setDepth(0)
+        
+        const tile1 = this.add.image(0, -150, 'tile1')
+        const tile2 = this.add.image(120, -150, 'tile1')
+
+ 
+
+        /*
+
+        EACH CONTAINER OF TILEITEMRENDER NEEDS TO HAVE: A SPRITE AND ITS COLLISION!
+
+        */
+    
+
+        setInterval(() => {
+            tile1.setPosition(tile1.x, tile1.y + 0.05)
+            tile2.setPosition(tile2.x, tile2.y + 0.05)
+
+            
+            tile1.setDepth(tile1.y)
+            tile2.setDepth(tile2.y)
+        }, 1)
+
+        
         
         const game = this.getGame()
 
         game.events.emit("ready");
         
     
+        return
+
         const tileItemRender2 = game.tileItemFactory.createTileItemRender('chao0')
 
         const tileItemRender = game.tileItemFactory.createTileItemRender('fogao0')
@@ -82,8 +142,8 @@ export default class GameScene extends BaseScene
     
                 t.setLayer(n%2)
     
-                t.setIsTransparent(n == 0)
-                t.setDirection(n == 3 ? -1 : 1)
+                //t.setIsTransparent(n == 0)
+                //t.setDirection(n == 3 ? -1 : 1)
             }, 200)
         }
 
@@ -108,8 +168,8 @@ export default class GameScene extends BaseScene
             tile.render()
 
             
-
-            if(this._collisionLayer)
+            
+            //if(this._collisionLayer)
             {
                 /*
                 let collision = tile.getCollisionBox()
@@ -124,5 +184,13 @@ export default class GameScene extends BaseScene
                 */
             }
         }
+    }
+
+
+    private static _instance: GameScene
+
+    public static getScene()
+    {
+        return this._instance
     }
 }

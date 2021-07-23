@@ -89,8 +89,8 @@ export default class Tile
         const scene = this.getScene()
 
         this._sprite = scene.add.sprite(0, 0, 'tile1')
-        this._sprite.setAlpha(1)
-        this._sprite.setDepth(-1)
+        this._sprite.setAlpha(0.1)
+        this._sprite.setDepth(-100000)
     }
 
     public serialize()

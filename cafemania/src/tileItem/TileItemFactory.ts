@@ -45,6 +45,15 @@ export class TileItemFactory
             1
         ))
 
+        const chair = this.addTileItemInfo('chair0', new TileItemInfo(
+            'Cadeira',
+            'chair0',
+            new Phaser.Math.Vector2(1, 1),
+            2,
+            4
+        ))
+        chair.extraLayers = 2
+
         console.log(this._tileItemInfoList)
     }
 

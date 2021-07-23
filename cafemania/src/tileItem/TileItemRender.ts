@@ -5,25 +5,34 @@ import TileTextureFactory from "./TileTextureFactory"
 
 export default class TileItemRender
 {
-    private _container: Phaser.GameObjects.Container
+    public depth: number = 0
 
     private _sprites: {[coord: string]: Phaser.GameObjects.Sprite} = {}
+    private _containers: {[coord: string]: Phaser.GameObjects.Container} = {}
 
     private _currentSprite: number = 0
     private _currentLayer: number = 0
 
+    private _tileItemInfo: TileItemInfo
+
+    private _flipSprites: boolean = false
+    private _transparent: boolean = false
+
+    private _position: Phaser.Math.Vector2
+
     constructor(scene: Phaser.Scene, tileItemInfo: TileItemInfo)
     {
+        this._position = new Phaser.Math.Vector2(0, 0)
+
+        this._tileItemInfo = tileItemInfo
+
         const textureName = tileItemInfo.texture
         const size = tileItemInfo.size
         const sprites = tileItemInfo.sprites
         const layers = tileItemInfo.layers
 
-        this._container = scene.add.container()
-
         const textureKeys = TileTextureFactory.generateTextures(textureName, size, sprites, layers);
 
-        const testDirection = 1
         const gridBounds = Tile.getGridBounds(size.x, size.y)
 
         for (let y = 0; y < size.y; y++)
@@ -37,18 +46,16 @@ export default class TileItemRender
 
                 const pos = Tile.getPosition(x, y)
 
+                const container = this._containers[key] = scene.add.container()
+                
                 const sprite = this._sprites[key] = scene.add.sprite(0, 0, textureKey, '0_0')
                 sprite.setOrigin(0.5, 1)
-                sprite.setAlpha(1)
-
                 sprite.setPosition(
-                    testDirection * pos.x,
-                    gridBounds.height + gridBounds.bottom + 1
-                );
+                    0,
+                    -pos.y + (gridBounds.bottom + gridBounds.height)
+                )
 
-                console.log(x, y, textureKeys[`${x}_${y}`])
-
-                this._container.add(sprite)
+                container.add(sprite)
             }
         }
 
@@ -69,24 +76,55 @@ export default class TileItemRender
 
     public updateSprites()
     {
-        for (const k in this._sprites)
+        for (let y = 0; y < this._tileItemInfo.size.y; y++)
         {
-            this._sprites[k].setFrame(`${this._currentSprite}_${this._currentLayer}`)
+            for (let x = 0; x < this._tileItemInfo.size.x; x++)
+            {
+                const key = `${x}_${y}`
+
+                const pos = Tile.getPosition(x, y)
+
+                const container = this._containers[key]
+
+                if(container)
+                {
+                    container.setPosition(
+                        this._position.x + ((this._flipSprites ? -1 : 1) * pos.x),
+                        this._position.y + (pos.y)
+                    )
+                    container.setScale(this._flipSprites ? -1 : 1, 1)
+                    container.setDepth(container.y - this.depth)
+                }
+
+                const sprite = this._sprites[key]
+
+                if(sprite)
+                {
+                    sprite.setFrame(`${this._currentLayer}_${this._currentSprite}`)
+                    sprite.setAlpha(this._transparent ? 0.3 : 1)
+                }
+            }
         }
     }
 
     public setPosition(x: number, y: number)
     {
-        this._container.setPosition(x, y)
+        this._position.set(x, y)
+
+        this.updateSprites()
     }
     
-    public setDirection(dir: number)
+    public setFlipSprites(value: boolean)
     {
-        this._container.setScale(dir, 1)
+        this._flipSprites = value
+
+        this.updateSprites()
     }
 
-    public setIsTransparent(transparent: boolean)
+    public setTransparent(value: boolean)
     {
-        this._container.setAlpha(transparent ? 0.3 : 1)
+        this._transparent = value
+
+        this.updateSprites()
     }
 }

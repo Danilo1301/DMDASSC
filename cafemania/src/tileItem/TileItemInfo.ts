@@ -14,6 +14,7 @@ export default class TileItemInfo
     public size: Phaser.Math.Vector2
     public sprites: number
     public layers: number
+    public extraLayers: number
     public collision: TileItemInfoCollision = {
         isWall: false,
         height: 0,
@@ -28,5 +29,6 @@ export default class TileItemInfo
         this.size = size;
         this.sprites = sprites;
         this.layers = layers;
+        this.extraLayers = 1;
     }
 }

@@ -7,7 +7,7 @@ export default class Three
     public static scene: THREE.Scene
     public static renderer: THREE.WebGLRenderer
     
-
+    public static object?: THREE.Group
 
     public static init()
     {
@@ -27,7 +27,19 @@ export default class Three
 
         document.body.appendChild( this.renderer.domElement );
 
-        this.loadGLTF('')
+        this.loadGLTF('/static/cafemania/assets/player.glb')
+
+        this.animate()
+    }
+
+    private static animate()
+    {
+        requestAnimationFrame( this.animate.bind(this) );
+        
+        //mesh.rotation.x += 0.005;
+        if(this.object) this.object.rotation.y += 0.01;
+    
+        this.renderer.render( this.scene, this.camera );
     }
 
     public static loadGLTF(path: string)
@@ -43,10 +55,10 @@ export default class Three
         const scene = this.scene;
 
         var loader = new GLTFLoader();
-        loader.load('/static/cafemania/assets/player.glb', function(gltf) {
-            //playerObj = gltf.scene;
-    
-            scene.add(gltf.scene);
+        loader.load(path, function(gltf) {
+            const obj = Three.object = gltf.scene
+
+            scene.add(obj);
         }, onProgress, onError);
     }
 }
