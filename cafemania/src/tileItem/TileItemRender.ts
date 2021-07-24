@@ -3,12 +3,21 @@ import { text } from "express"
 import TileItemInfo from "./TileItemInfo"
 import TileTextureFactory from "./TileTextureFactory"
 
+interface TileItemRenderSprite
+{
+    spriteLayer: number
+    x: number
+    y: number
+    container: Phaser.GameObjects.Container
+    sprite: Phaser.GameObjects.Sprite
+}
+
 export default class TileItemRender
 {
     public depth: number = 0
 
-    private _sprites: {[coord: string]: Phaser.GameObjects.Sprite} = {}
-    private _containers: {[coord: string]: Phaser.GameObjects.Container} = {}
+    //private _sprites: {[coord: string]: Phaser.GameObjects.Sprite} = {}
+    //private _containers: {[coord: string]: Phaser.GameObjects.Container} = {}
 
     private _currentSprite: number = 0
     private _currentLayer: number = 0
@@ -20,6 +29,8 @@ export default class TileItemRender
 
     private _position: Phaser.Math.Vector2
 
+    private _sprites: {[extraLayer: string]: {[coord: string]: TileItemRenderSprite}} = {}
+
     constructor(scene: Phaser.Scene, tileItemInfo: TileItemInfo)
     {
         this._position = new Phaser.Math.Vector2(0, 0)
@@ -30,38 +41,51 @@ export default class TileItemRender
         const size = tileItemInfo.size
         const sprites = tileItemInfo.sprites
         const layers = tileItemInfo.layers
+        const extraLayers = tileItemInfo.extraLayers
 
-        const textureKeys = TileTextureFactory.generateTextures(textureName, size, sprites, layers);
+        const textureKeys = TileTextureFactory.generateTextures(textureName, size, sprites, layers * extraLayers);
 
         const gridBounds = Tile.getGridBounds(size.x, size.y)
 
-        for (let y = 0; y < size.y; y++)
+        for (let spriteLayer = 0; spriteLayer < tileItemInfo.extraLayers; spriteLayer++)
         {
-            for (let x = 0; x < size.x; x++)
+            if(!this._sprites[spriteLayer]) this._sprites[spriteLayer] = {}
+
+            for (let y = 0; y < size.y; y++)
             {
-                const key = `${x}_${y}`
-                const textureKey = textureKeys[key]
+                for (let x = 0; x < size.x; x++)
+                {
+                    const key = `${x}_${y}`
+                    const textureKey = textureKeys[key]
 
-                if(!textureKey) continue
+                    if(!textureKey) continue
 
-                const pos = Tile.getPosition(x, y)
+                    const pos = Tile.getPosition(x, y)
 
-                const container = this._containers[key] = scene.add.container()
-                
-                const sprite = this._sprites[key] = scene.add.sprite(0, 0, textureKey, '0_0')
-                sprite.setOrigin(0.5, 1)
-                sprite.setPosition(
-                    0,
-                    -pos.y + (gridBounds.bottom + gridBounds.height)
-                )
+                    const tileItemRenderSprite: TileItemRenderSprite =  this._sprites[spriteLayer][key] = {
+                        x: x,
+                        y: y,
+                        spriteLayer: spriteLayer,
+                        container: scene.add.container(),
+                        sprite: scene.add.sprite(0, 0, textureKey, '0_0')
+                    }
 
-                container.add(sprite)
+                    
+                    console.log(tileItemInfo.texture, x, y, spriteLayer)
+
+                    tileItemRenderSprite.sprite.setOrigin(0.5, 1)
+                    tileItemRenderSprite.sprite.setPosition(
+                        0,
+                        -pos.y + (gridBounds.bottom + gridBounds.height) + 1
+                    )
+
+                    tileItemRenderSprite.container.add(tileItemRenderSprite.sprite)
+                }
             }
         }
 
-        
-
         console.log(this._sprites)
+
     }
 
     public setSprite(sprite: number) {
@@ -76,34 +100,33 @@ export default class TileItemRender
 
     public updateSprites()
     {
-        for (let y = 0; y < this._tileItemInfo.size.y; y++)
-        {
-            for (let x = 0; x < this._tileItemInfo.size.x; x++)
-            {
-                const key = `${x}_${y}`
+        for (const spriteLayerKey in this._sprites) {
+            const spriteLayer = this._sprites[spriteLayerKey]
 
-                const pos = Tile.getPosition(x, y)
+            for (const coord in spriteLayer) {
+                const tileItemRenderSprite = spriteLayer[coord]
 
-                const container = this._containers[key]
+                const pos = Tile.getPosition(tileItemRenderSprite.x, tileItemRenderSprite.y)
 
-                if(container)
-                {
-                    container.setPosition(
-                        this._position.x + ((this._flipSprites ? -1 : 1) * pos.x),
-                        this._position.y + (pos.y)
-                    )
-                    container.setScale(this._flipSprites ? -1 : 1, 1)
-                    container.setDepth(container.y - this.depth)
+                const container = tileItemRenderSprite.container
+                container.setPosition(
+                    this._position.x + ((this._flipSprites ? -1 : 1) * pos.x),
+                    this._position.y + (pos.y)
+                )
+                container.setScale(this._flipSprites ? -1 : 1, 1)
+                container.setDepth(container.y - this.depth - (tileItemRenderSprite.spriteLayer * 5))
+    
+                const sprite = tileItemRenderSprite.sprite
+
+                const frame = {
+                    layer: this._currentLayer + (tileItemRenderSprite.spriteLayer * this._tileItemInfo.extraLayers),
+                    sprite: this._currentSprite
                 }
 
-                const sprite = this._sprites[key]
-
-                if(sprite)
-                {
-                    sprite.setFrame(`${this._currentLayer}_${this._currentSprite}`)
-                    sprite.setAlpha(this._transparent ? 0.3 : 1)
-                }
+                sprite.setFrame(`${frame.layer}_${frame.sprite}`)
+                sprite.setAlpha(this._transparent ? 0.3 : 1)
             }
+
         }
     }
 

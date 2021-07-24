@@ -50,7 +50,7 @@ export class TileItemFactory
             'chair0',
             new Phaser.Math.Vector2(1, 1),
             2,
-            4
+            2
         ))
         chair.extraLayers = 2
 

@@ -21,9 +21,9 @@ export default class World
 
         
 
-        this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
+        //this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
         this.getTile(0, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
-        this.getTile(0, 1).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0') )
+        this.getTile(1, 1).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0') )
 
         window['tile'] = this.getTile(1, 0)
 

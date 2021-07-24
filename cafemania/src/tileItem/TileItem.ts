@@ -22,13 +22,11 @@ export default class TileItem
 
     private _id: string
 
-    //private _tileItemRender?: TileItemRender
+    private _tileItemRender?: TileItemRender
 
     private _collisionBox?: Phaser.GameObjects.Polygon
 
     private _direction: TileItemDirection = TileItemDirection.FRONT
-
-    private _tileItemRenderList: TileItemRender[] = []
 
     constructor(tileItemInfo: TileItemInfo)
     {
@@ -38,17 +36,24 @@ export default class TileItem
 
     public render()
     {
-        const numTileRender = this._tileItemInfo.extraLayers
-
-
-        while(this._tileItemRenderList.length < numTileRender)
+        if(!this._tileItemRender)
         {
-            const tileItemRender = this.getGame().tileItemFactory.createTileItemRender(this._tileItemInfo.id)
-            this._tileItemRenderList.push(tileItemRender)
-            tileItemRender.setTransparent(false)
+            const tileItemRender = this._tileItemRender = this.getGame().tileItemFactory.createTileItemRender(this._tileItemInfo.id)
+        
+            var i = 0;
+            var t = 0
 
-            tileItemRender.setLayer(this._tileItemRenderList.length)
-            tileItemRender.depth = this._tileItemRenderList.length * 5
+            setInterval(() => {
+                i++; t++
+
+                if(i >= this._tileItemInfo.sprites) i = 0
+                if(t >= 9) t = 0
+
+                tileItemRender.setTransparent(t < 3) 
+                tileItemRender.setFlipSprites(t >= 6) 
+
+                tileItemRender.setSprite(i)
+            }, 250)
         }
 
         if(!this._collisionBox)
@@ -60,9 +65,7 @@ export default class TileItem
 
         const isFlipped = this._direction == TileItemDirection.FRONT_FLIPPED || this._direction == TileItemDirection.BACK_FLIPPED
 
-        for (const tileItemRender of this._tileItemRenderList) {
-            tileItemRender.setPosition(position.x, position.y)
-        }
+        this._tileItemRender.setPosition(position.x, position.y)
 
 
         this._collisionBox?.setPosition(

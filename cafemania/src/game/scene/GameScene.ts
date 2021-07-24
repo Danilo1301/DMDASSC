@@ -104,6 +104,8 @@ export default class GameScene extends BaseScene
 
         EACH CONTAINER OF TILEITEMRENDER NEEDS TO HAVE: A SPRITE AND ITS COLLISION!
 
+        SPRITES IN TILEITEMRENDER ARE 1 Y OFF
+
         */
     
 
