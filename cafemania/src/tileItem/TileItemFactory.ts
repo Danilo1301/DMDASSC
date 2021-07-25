@@ -37,6 +37,14 @@ export class TileItemFactory
             2
         ))
 
+        this.addTileItemInfo('2by3', new TileItemInfo(
+            '2by3',
+            '2by3',
+            new Phaser.Math.Vector2(2, 3),
+            1,
+            2
+        ))
+
         this.addTileItemInfo('chao0', new TileItemInfo(
             'Chao 2x1',
             'tile4',
@@ -53,6 +61,23 @@ export class TileItemFactory
             2
         ))
         chair.extraLayers = 2
+
+        this.addTileItemInfo('1by1', new TileItemInfo(
+            '1by1',
+            '1by1',
+            new Phaser.Math.Vector2(1, 1),
+            1,
+            2
+        ))
+
+        this.addTileItemInfo('3by3', new TileItemInfo(
+            '3by3',
+            '3by3',
+            new Phaser.Math.Vector2(3, 3),
+            1,
+            2
+        ))
+ 
 
         console.log(this._tileItemInfoList)
     }

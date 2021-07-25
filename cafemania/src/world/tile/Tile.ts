@@ -18,7 +18,6 @@ export default class Tile
 
     private _sprite?: Phaser.GameObjects.Sprite
     private _debugText?: Phaser.GameObjects.Text
-    
 
     constructor(world: World, x: number, y: number)
     {
@@ -37,6 +36,16 @@ export default class Tile
     public get id(): string
     {
         return this._id
+    }
+
+    public get x(): number
+    {
+        return this._x
+    }
+
+    public get y(): number
+    {
+        return this._y
     }
 
     public getPosition()
