@@ -43,12 +43,14 @@ export default class World
             }
         }
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(0, 0))
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1, 1))
+        window['world'] = this
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(0, 3))
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1,1))
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(2,2))
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1, 6))
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1, 3))
+
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(2, 4))
         
  
         //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('1by1'), this.getTile(3, 3))
@@ -93,31 +95,26 @@ export default class World
         return this._tiles.has(`${x}:${y}`)
     }
 
-    public getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection)
+    public static getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection)
     {
-
-    }
-
-    public canTileItemBePlaced(tileItem: TileItem, tileX: number, tileY: number, direction: TileItemDirection)
-    {
-        const tileItemInfo = tileItem.getTileItemInfo()
+        const coords: Phaser.Math.Vector2[] = []
 
         const isFlipped = direction == TileItemDirection.FRONT_FLIPPED || direction == TileItemDirection.BACK_FLIPPED
 
         const size = {
-            x: isFlipped ? tileItemInfo.size.y : tileItemInfo.size.x,
-            y: isFlipped ? tileItemInfo.size.x : tileItemInfo.size.y
+            x: isFlipped ? sizeY : sizeX,
+            y: isFlipped ? sizeX : sizeY
         }
         
-        const off = TileItem.getOffsetByDirection(tileItemInfo.size.x, tileItemInfo.size.y, direction)
+        const off = TileItem.getOffsetByDirection(sizeX, sizeY, direction)
 
         for (let iy = 0; iy <= (size.y-1); iy++)
         {
             
             for (let ix = 0; ix <= (size.x-1); ix++)
             {
-                let testingX = tileX + ix + off.x
-                let testingY = tileY + iy + off.y
+                let testingX = ix + off.x
+                let testingY = iy + off.y
 
                 if(isFlipped)
                 {
@@ -125,9 +122,98 @@ export default class World
                     testingY -= (size.y-1)
                 }
 
-                if(!this.tileExists(testingX, testingY)) return false
+                coords.push(new Phaser.Math.Vector2(testingX, testingY))
             }
         }
+
+        return coords
+    }
+
+    public getOccupiedTilesMap()
+    {
+        const map: {[coord: string]: boolean} = {}
+
+        const tiles = this.getTiles()
+
+        const tileItems: TileItem[] = []
+
+        for (const tile of tiles) {
+
+            //console.log(tile.id)
+
+            map[tile.id] = false
+
+            console.log(`[EMPTY] ${tile.id}`)
+
+            tile.getTileItems().map(tileItem => tileItems.push(tileItem))
+
+        }
+
+        for (const tileItem of tileItems) {
+            const size = tileItem.getTileItemInfo().size
+            const occupiedCoords = World.getCoordsTileItemOccupes(size.x, size.y, tileItem.direction)
+            const tile = tileItem.getTile()
+
+            for (const oc of occupiedCoords) {
+                const key = `${tile.x + oc.x}:${tile.y + oc.y}`
+
+                console.log(`[CONTAINS] ${key}}`)
+
+                map[key] = true
+
+                console.log(map[key])
+            }
+        }
+
+        console.warn(map)
+
+        return map
+    }
+
+    public canTileItemBePlaced(tileItem: TileItem, tileX: number, tileY: number, direction: TileItemDirection)
+    {
+        const tileItemInfo = tileItem.getTileItemInfo()
+
+        const coords = World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, direction)
+
+        console.log(World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, tileItem.direction))
+
+        const ocuppiedTiles = this.getOccupiedTilesMap()
+
+        console.log(ocuppiedTiles)
+
+        const currentAtTiles = World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, tileItem.direction)
+
+        
+        if(tileItem.isInAnyTile())
+        {
+            const atTile = tileItem.getTile()
+            console.log(`============ TILE ${atTile.x}, ${atTile.y}`)
+       
+            for (const coord of currentAtTiles)
+            {
+                console.log(`${atTile.x + coord.x}:${atTile.y + coord.y} to false`)
+
+                ocuppiedTiles[`${atTile.x + coord.x}:${atTile.y + coord.y}`] = false
+            }
+            console.log("==")
+        }
+
+        
+        
+
+        //World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, tileItem.direction).map(coord => ocuppiedTiles[`${tileX + coord.x}:${tileY + coord.y}`] = false)
+
+        for (const coord of coords) {
+            if(!this.tileExists(tileX + coord.x, tileY + coord.y)) return false
+
+            console.log(`${tileX + coord.x}:${tileY + coord.y}`, ocuppiedTiles[`${tileX + coord.x}:${tileY + coord.y}`])
+
+
+
+            if(ocuppiedTiles[`${tileX + coord.x}:${tileY + coord.y}`]) return false
+        }
+
 
         return true
     }

@@ -35,6 +35,16 @@ export default class TileItem
         this._tileItemInfo = tileItemInfo
     }
 
+    public getTile()
+    {
+        return this._tile
+    }
+
+    public isInAnyTile()
+    {
+        return this._tile != undefined
+    }
+
     public getTileItemInfo()
     {
         return this._tileItemInfo
@@ -44,11 +54,6 @@ export default class TileItem
     
         this._direction = direction
 
-        const atTile = this._tile
-
-        const world = this._tile.getWorld()
-        console.log('canTileItemBePlaced', world.canTileItemBePlaced(this, atTile.x, atTile.y, direction))
-        
         return
 
         if(
@@ -106,23 +111,11 @@ export default class TileItem
                 if(this._currentAnim >= 2) this._currentAnim = 0
             })
 
-            let newDir = 0
-
+        
             const speedo = Math.random()*500 + 500
 
             setInterval(() => {
-                newDir++
-                if(newDir >= 4) newDir = 0
-
-                const canBePlaced = this._tile.getWorld().canTileItemBePlaced(this, this._tile.x, this._tile.y, newDir)
-
-                if(canBePlaced)
-                {
-                    this.setDirection(newDir)
-                    console.log(newDir)
-                } else {
-                    console.warn("Cant rotate")
-                }
+                //this.rotate()
             
                 
 
@@ -184,7 +177,7 @@ export default class TileItem
 
         this._collisionBox?.setDepth(100 + position.y)
 
-        this._collisionBox?.setAlpha(0)
+        this._collisionBox?.setAlpha(0.8)
 
         this._collisionBox?.setScale(isFlipped ? -1 : 1, 1)
     }
@@ -241,8 +234,12 @@ export default class TileItem
 
         const tileId = this._id;
 
+        const self = this
+
         collisionBox.on('pointerdown', function (pointer) {
             console.log(tileId);
+
+            self.rotate()
         });
 
         collisionBox.on('pointerover', function (pointer) {
@@ -252,6 +249,40 @@ export default class TileItem
         collisionBox.on('pointerout', function (pointer) {
             collisionBox.setFillStyle(color, alpha)
         });
+    }
+
+    public rotate()
+    {
+        let n = 0;
+        let canRotate = false;
+        let rotateTo = this.direction + 1
+
+        while(!canRotate || n < 4)
+        {
+            let newDir = (rotateTo + n)%4
+            n++
+
+            const canBePlaced = this._tile.getWorld().canTileItemBePlaced(this, this._tile.x, this._tile.y, newDir)
+
+            if(canBePlaced)
+            {
+                rotateTo = newDir
+                canRotate = true
+                break
+            }
+        }
+
+        if(canRotate)
+        {
+            console.warn("Direction changed")
+            this.setDirection(rotateTo)
+            
+        } else {
+            console.error("Cant rotate")
+        }
+        
+
+
     }
 
     /*

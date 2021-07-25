@@ -82,6 +82,11 @@ export default class Tile
 
         this._tileItems.push(tileItem)
     }
+    public getTileItems()
+    {
+  
+        return this._tileItems
+    }
 
     private getScene()
     {
