@@ -92,6 +92,23 @@ export class TileItemFactory
                 height: 0
             }
         })
+
+        this.addTileItemInfo({
+            id: 'floor2',
+            name: 'floor2',
+            texture: 'floor2',
+            type: TileItemType.FLOOR,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1,1),
+            sprites: 1,
+            layers: 1,
+            extraLayers: 1,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 0
+            }
+        })
     }
 
     public createTileItem(id: string): TileItem

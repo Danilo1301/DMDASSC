@@ -61,7 +61,7 @@ export default class Tile
 
         if(!this._debugText)
         {
-            this._debugText = scene.add.bitmapText(position.x, position.y, 'gem', `${this.id}`, 20).setOrigin(0.5);
+            this._debugText = scene.add.bitmapText(position.x, position.y, 'gem', `${this.id}`, 16).setOrigin(0.5);
         }
         
         for (const tileItem of this._tileItems)

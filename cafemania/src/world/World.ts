@@ -25,7 +25,7 @@ export default class World
 
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
-                this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
+                this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('floor2'), this.getTile(x, y))
             }
         }
 
