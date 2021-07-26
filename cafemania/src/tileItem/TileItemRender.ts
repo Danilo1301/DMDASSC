@@ -34,10 +34,14 @@ export default class TileItemRender
 
     private _sprites: {[extraLayer: string]: {[coord: string]: TileItemRenderSprite}} = {}
 
+    private _scene: GameScene
+
     public tileItem?: TileItem
 
     constructor(scene: GameScene, tileItemInfo: TileItemInfo)
     {
+        this._scene = scene
+
         this._position = new Phaser.Math.Vector2(0, 0)
 
         this._tileItemInfo = tileItemInfo
@@ -89,74 +93,9 @@ export default class TileItemRender
                     scene.objectsLayer!.add(tileItemRenderSprite.container)
 
 
-                    //collision
                     if(spriteLayer == 0)
                     {
-                        const color = 0xff0000
-                        const alpha = 0.2
-
-                        let points: Phaser.Math.Vector2[] = []
-                        
-                        const offsetX = [0, 0]
-                        const offsetY = [0, 0]
-
-                        if(y == 0) offsetX[0] = tileItemInfo.collision.x
-                        if(y == tileItemInfo.size.y-1) offsetX[1] = tileItemInfo.collision.x
-
-                        if(x == 0) offsetY[0] = tileItemInfo.collision.y
-                        if(x == tileItemInfo.size.x-1) offsetY[1] = tileItemInfo.collision.y
-
-                        if(tileItemInfo.collision.isWall)
-                        {
-                            offsetY[0] -= tileItemInfo.collision.height
-                            offsetY[1] += tileItemInfo.collision.height
-
-                            points = TileCollisionFactory.getWallCollisionPoints(false,
-                                offsetX,
-                                offsetY,
-                                tileItemInfo.collision.wallSize
-                            )
-                        } else {
-                            points = TileCollisionFactory.getBlockCollisionPoints(
-                                offsetX,
-                                offsetY,
-                                tileItemInfo.collision.height
-                            )
-                        }
-
-                    
-
-                        const collisionBox = scene.add.polygon(0, 0, points, color, alpha)
-                        collisionBox.setOrigin(0, 0)
-
-
-                        tileItemRenderSprite.container.add(collisionBox)
-
-                        collisionBox.setPosition(
-                            - Tile.SIZE.x/2, - Tile.SIZE.y/2
-                        )
-
-                        const self = this
-
-                        collisionBox.setInteractive(
-                            new Phaser.Geom.Polygon(points),
-                            Phaser.Geom.Polygon.Contains
-                        );
-
-                        collisionBox.on('pointerdown', function (pointer) {
-                            console.log(self._tileItemInfo.name);
-
-                            if(self.tileItem) self.tileItem.rotate()
-                        });
-
-                        collisionBox.on('pointerover', function (pointer) {
-                            collisionBox.setFillStyle(0x000000, 0.5)
-                        });
-
-                        collisionBox.on('pointerout', function (pointer) {
-                            collisionBox.setFillStyle(color, alpha)
-                        });
-
+                        this.createSpriteCollision(tileItemRenderSprite)
                     }
                 }
             }
@@ -164,6 +103,93 @@ export default class TileItemRender
 
         //console.log(this._sprites)
 
+    }
+
+    public setSceneLayer(layer: Phaser.GameObjects.Layer) {
+        for (const spriteLayerKey in this._sprites) {
+            const spriteLayer = this._sprites[spriteLayerKey]
+
+            for (const coord in spriteLayer) {
+                const tileItemRenderSprite = spriteLayer[coord]
+
+                layer.add( tileItemRenderSprite.container )
+            }
+        }
+    }
+
+    private createSpriteCollision(sprite: TileItemRenderSprite)
+    {
+        const tileItemInfo = this._tileItemInfo
+        const x = sprite.x
+        const y = sprite.y
+        const scene = this._scene
+
+        const color = 0xff0000
+        const alpha = 0
+
+        let points: Phaser.Math.Vector2[] = []
+        
+        const offsetX = [0, 0]
+        const offsetY = [0, 0]
+
+        if(y == 0) offsetX[0] = tileItemInfo.collision.x
+        if(y == tileItemInfo.size.y-1) offsetX[1] = tileItemInfo.collision.x
+
+        if(x == 0) offsetY[0] = tileItemInfo.collision.y
+        if(x == tileItemInfo.size.x-1) offsetY[1] = tileItemInfo.collision.y
+
+        if(tileItemInfo.collision.isWall)
+        {
+            offsetY[0] -= tileItemInfo.collision.height
+            offsetY[1] += tileItemInfo.collision.height
+
+            const atFront = tileItemInfo.collision.wallAtFront === true
+
+            points = TileCollisionFactory.getWallCollisionPoints(atFront,
+                offsetX,
+                offsetY,
+                tileItemInfo.collision.wallSize || 0
+            )
+        } else {
+            points = TileCollisionFactory.getBlockCollisionPoints(
+                offsetX,
+                offsetY,
+                tileItemInfo.collision.height
+            )
+        }
+
+    
+
+        const collisionBox = scene.add.polygon(0, 0, points, color, alpha)
+        collisionBox.setOrigin(0, 0)
+
+
+        sprite.container.add(collisionBox)
+
+        collisionBox.setPosition(
+            - Tile.SIZE.x/2, - Tile.SIZE.y/2
+        )
+
+        const self = this
+
+        collisionBox.setInteractive(
+            new Phaser.Geom.Polygon(points),
+            Phaser.Geom.Polygon.Contains
+        );
+
+        collisionBox.on('pointerdown', function (pointer) {
+            console.log(self._tileItemInfo.name);
+
+            if(self.tileItem) self.tileItem.rotate()
+        });
+
+        collisionBox.on('pointerover', function (pointer) {
+            collisionBox.setFillStyle(0xff0000, 0.3)
+        });
+
+        collisionBox.on('pointerout', function (pointer) {
+            collisionBox.setFillStyle(color, alpha)
+        });
     }
 
     public setSprite(sprite: number) {

@@ -1,7 +1,7 @@
 import Tile from "@cafemania/world/tile/Tile";
 import { generateUUID } from "three/src/math/MathUtils";
 import TileCollisionFactory from "./TileCollisionFactory";
-import TileItemInfo from "./TileItemInfo";
+import TileItemInfo, { TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
 export enum TileItemDirection
@@ -107,25 +107,26 @@ export default class TileItem
         
             tileItemRender.tileItem = this
 
+            if(this._tileItemInfo.type == TileItemType.FLOOR)
+            {
+                tileItemRender.setSceneLayer(this.getScene().groundLayer!)
+            } else {
+                tileItemRender.setSceneLayer(this.getScene().objectsLayer!)
+            }
+
+            
+
             setInterval(() => {
                 this._currentAnim++
 
                 if(this._currentAnim >= 2) this._currentAnim = 0
             })
 
-        
-            const speedo = Math.random()*500 + 500
-
-            setInterval(() => {
-                //this.rotate()
-
-            }, speedo)
+    
 
 
         }
-
         
-
         const position = this._tile.getPosition()
 
         const isFlipped = this._direction == TileItemDirection.FRONT_FLIPPED || this._direction == TileItemDirection.BACK_FLIPPED
@@ -150,24 +151,6 @@ export default class TileItem
         newRotationOffset.y = newPos.y
      
         this._tileItemRender.setPosition(position.x + newRotationOffset.x, position.y + newRotationOffset.y)
-
-        /*
-        if(!this._collisionBox)
-        {
-            this.createCollisionBox()
-        }
-
-        this._collisionBox?.setPosition(
-            position.x - (Tile.SIZE.x/2 * (isFlipped ? -1 : 1)),
-            position.y - Tile.SIZE.y/2
-        )
-
-        this._collisionBox?.setDepth(100 + position.y)
-
-        this._collisionBox?.setAlpha(0.8)
-
-        this._collisionBox?.setScale(isFlipped ? -1 : 1, 1)
-        */
     }
 
     public setTile(tile: Tile)

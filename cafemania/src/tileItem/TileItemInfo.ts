@@ -1,26 +1,38 @@
 export interface TileItemInfoCollision
 {
-    wallSize: number
-    isWall: boolean
+    wallSize?: number
+    isWall?: boolean
+    wallAtFront?: boolean
     height: number
     x: number
     y: number
 }
 
-export default class TileItemInfo
+export enum TileItemType
 {
-    public id: string = ""
-    public name: string = ""
-    public texture: string = ""
-    public size: Phaser.Math.Vector2 = new Phaser.Math.Vector2(1, 1)
-    public sprites: number = 1
-    public layers: number = 1
-    public extraLayers: number = 0
-    public collision: TileItemInfoCollision = {
-        wallSize: 0,
-        isWall: false,
-        height: 0,
-        x: 0,
-        y: 0
-    }
+    FLOOR,
+    WALL,
+    STOVE,
+    WALL_OBJECT,
+    CHAIR
+}
+
+export enum TileItemPlaceType
+{
+    WALL,
+    FLOOR
+}
+
+export default interface TileItemInfo
+{
+    id: string
+    name: string
+    texture: string
+    type: TileItemType
+    placeType: TileItemPlaceType
+    size: Phaser.Math.Vector2
+    sprites: number
+    layers: number
+    extraLayers: number
+    collision: TileItemInfoCollision 
 }

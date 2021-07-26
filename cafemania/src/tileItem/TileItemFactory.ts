@@ -1,7 +1,7 @@
 import { generateUUID } from "three/src/math/MathUtils";
 import Game from "../game/Game";
 import TileItem from "./TileItem";
-import TileItemInfo from "./TileItemInfo";
+import TileItemInfo, { TileItemPlaceType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
 export class TileItemFactory
@@ -21,35 +21,78 @@ export class TileItemFactory
         todo: Allow extraLayers to be 0 instead of 1
         */
 
-        const wall1 = this.addTileItemInfo('wall1', new TileItemInfo())
-        wall1.texture = "wall1"
-        wall1.size.set(1, 1)
-        wall1.sprites = 1
-        wall1.layers = 1
-        wall1.extraLayers = 1
-        wall1.collision.isWall = true
+        this.addTileItemInfo({
+            id: 'wall1',
+            name: 'wall1',
+            texture: 'wall1',
+            type: TileItemType.WALL,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1,1),
+            sprites: 1,
+            layers: 1,
+            extraLayers: 1,
+            collision: {
+                wallAtFront: true,
+                isWall: true,
+                wallSize: 32,
+                x: 0,
+                y: 0,
+                height: 0
+            }
+        })
 
-        const window1 = this.addTileItemInfo('window1', new TileItemInfo())
-        window1.texture = "window1"
-        window1.size.set(1, 2)
-        window1.sprites = 1
-        window1.layers = 1
-        window1.extraLayers = 1
-        window1.collision.isWall = true
-        window1.collision.x = 20
-        window1.collision.y = 70
-        window1.collision.height = 35
-        window1.collision.wallSize = 0
+        this.addTileItemInfo({
+            id: 'window1',
+            name: 'window1',
+            texture: 'window1',
+            type: TileItemType.WALL_OBJECT,
+            placeType: TileItemPlaceType.WALL,
+            size: new Phaser.Math.Vector2(1,2),
+            sprites: 1,
+            layers: 1,
+            extraLayers: 1,
+            collision: {
+                isWall: true,
+                wallSize: 0,
+                x: 20,
+                y: 70,
+                height: 35
+            }
+        })
 
-        const chair1 = this.addTileItemInfo('chair1', new TileItemInfo())
-        chair1.texture = "chair1"
-        chair1.size.set(1, 1)
-        chair1.sprites = 2
-        chair1.layers = 2
-        chair1.extraLayers = 2
-        chair1.collision.height = 110
-        chair1.collision.x = 15
-        chair1.collision.y = 15
+        this.addTileItemInfo({
+            id: 'chair1',
+            name: 'chair1',
+            texture: 'chair1',
+            type: TileItemType.CHAIR,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1,1),
+            sprites: 2,
+            layers: 2,
+            extraLayers: 2,
+            collision: {
+                x: 15,
+                y: 15,
+                height: 110
+            }
+        })
+
+        this.addTileItemInfo({
+            id: 'floor1',
+            name: 'floor1',
+            texture: 'floor1',
+            type: TileItemType.FLOOR,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1,1),
+            sprites: 2,
+            layers: 2,
+            extraLayers: 1,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 0
+            }
+        })
     }
 
     public createTileItem(id: string)
@@ -63,11 +106,9 @@ export class TileItemFactory
         return tileItem
     }
 
-    public addTileItemInfo(id: string, tileItemInfo: TileItemInfo)
+    public addTileItemInfo(tileItemInfo: TileItemInfo)
     {
-        tileItemInfo.id = id
-
-        this._tileItemInfoList[id] = tileItemInfo
+        this._tileItemInfoList[tileItemInfo.id] = tileItemInfo
 
         return tileItemInfo
     }

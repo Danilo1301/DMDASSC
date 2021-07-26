@@ -40,7 +40,7 @@ export default class TileCollisionFactory {
     {
         const x = Tile.SIZE.x
         const y = Tile.SIZE.y
-        const h = 240
+        const h = 252
 
         const points: Phaser.Math.Vector2[] = [
             new Phaser.Math.Vector2( x/2,   -h),

@@ -50,13 +50,21 @@ export default class GameScene extends BaseScene
     {
         this.load.bitmapFont('gem', '/static/cafemania/assets/fonts/gem.png', '/static/cafemania/assets/fonts/gem.xml');
 
+
         this.load.setPath('/static/cafemania/assets')
+        this.load.image('floor1', 'floor1.png')
+        this.load.image('wall1', 'wall1.png')
         this.load.image('tile1', 'tile1.png')
         this.load.image('window1', 'window1.png')
         this.load.image('chair1', 'chair1.png')
     }
     public create(): void
     {
+        this.groundLayer = this.add.layer()
+        this.groundLayer.setDepth(0)
+
+        this.objectsLayer = this.add.layer()
+        this.objectsLayer.setDepth(100)
         
         this.cameras.main.setBackgroundColor(0x21007F)
 
