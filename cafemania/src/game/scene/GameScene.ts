@@ -1,8 +1,8 @@
-import TileItemRender from "@cafemania/tileItem/TileItemRender";
-import Tile from "@cafemania/world/tile/Tile";
+import Tile from "@cafemania/tile/Tile";
 import BaseScene from "./BaseScene";
 
-class MoveScene {
+class MoveScene
+{
     constructor(scene: Phaser.Scene)
     {
         let pointerDown = false;
@@ -33,13 +33,12 @@ class MoveScene {
     }
 }
 
-
 export default class GameScene extends BaseScene
 {
     private _fpsText!: Phaser.GameObjects.Text
 
-    public groundLayer?: Phaser.GameObjects.Layer
-    public objectsLayer?: Phaser.GameObjects.Layer
+    public groundLayer!: Phaser.GameObjects.Layer
+    public objectsLayer!: Phaser.GameObjects.Layer
 
     constructor()
     {
@@ -50,7 +49,6 @@ export default class GameScene extends BaseScene
     {
         this.load.bitmapFont('gem', '/static/cafemania/assets/fonts/gem.png', '/static/cafemania/assets/fonts/gem.xml');
 
-
         this.load.setPath('/static/cafemania/assets')
         this.load.image('floor1', 'floor1.png')
         this.load.image('wall1', 'wall1.png')
@@ -58,6 +56,7 @@ export default class GameScene extends BaseScene
         this.load.image('window1', 'window1.png')
         this.load.image('chair1', 'chair1.png')
     }
+
     public create(): void
     {
         this.groundLayer = this.add.layer()
@@ -70,47 +69,20 @@ export default class GameScene extends BaseScene
 
         const moveScene = new MoveScene(this);
 
-        for(let y = 0; y < 0; y++)
-        {
-            for(let x = 0; x < 0; x++)
-            {
-                const pos = Tile.getPosition(x, y)
-
-                const tile = this.add.sprite(pos.x, pos.y, 'tile1')
-            }
-        }
-
-        /*
-        const tile1 = this.add.image(0, -150, 'tile1')
-        const tile2 = this.add.image(120, -150, 'tile1')
-        setInterval(() => {
-            tile1.setPosition(tile1.x, tile1.y + 0.05)
-            tile2.setPosition(tile2.x, tile2.y + 0.05)
-
-            
-            tile1.setDepth(tile1.y)
-            tile2.setDepth(tile2.y)
-        }, 1)
-        */
-
-
-        const game = this.getGame()
-
-        game.events.emit("ready");
-
         this._fpsText = this.add.text(0, -300, `0 FPS`, {fontSize: '30px'})
 
         setInterval(() => {
             this._fpsText.setText(`${this.game.loop.actualFps} FPS`)
         })
+
+        this.getGame().events.emit("ready");
     }
 
-    public update()
+    public update(): void
     {
         const game = this.getGame()
         const world = game.getWorlds()[0]
 
         world.render()
-        
     }
 }

@@ -1,6 +1,5 @@
 import GameScene from "@cafemania/game/scene/GameScene"
-import Tile from "@cafemania/world/tile/Tile"
-import { text } from "express"
+import Tile from "@cafemania/tile/Tile"
 import TileCollisionFactory from "./TileCollisionFactory"
 import TileItem from "./TileItem"
 import TileItemInfo from "./TileItemInfo"
@@ -19,8 +18,7 @@ export default class TileItemRender
 {
     public depth: number = 0
 
-    //private _sprites: {[coord: string]: Phaser.GameObjects.Sprite} = {}
-    //private _containers: {[coord: string]: Phaser.GameObjects.Container} = {}
+    private _tileItem?: TileItem
 
     private _currentSprite: number = 0
     private _currentLayer: number = 0
@@ -35,8 +33,6 @@ export default class TileItemRender
     private _sprites: {[extraLayer: string]: {[coord: string]: TileItemRenderSprite}} = {}
 
     private _scene: GameScene
-
-    public tileItem?: TileItem
 
     constructor(scene: GameScene, tileItemInfo: TileItemInfo)
     {
@@ -105,16 +101,43 @@ export default class TileItemRender
 
     }
 
-    public setSceneLayer(layer: Phaser.GameObjects.Layer) {
-        for (const spriteLayerKey in this._sprites) {
+    public setTileItem(tileItem: TileItem): void
+    {
+        this._tileItem = tileItem
+    }
+
+    public hasTileItem(): boolean
+    {
+        return this._tileItem != undefined
+    }
+
+    public getTileItem(): TileItem
+    {
+        return this._tileItem!
+    }
+
+    public setSceneLayer(layer: Phaser.GameObjects.Layer): void
+    {
+        this.getAllSprites().map(sprite => layer.add( sprite.container ))
+    }
+
+    private getAllSprites(): TileItemRenderSprite[]
+    {
+        const sprites: TileItemRenderSprite[] = []
+
+        for (const spriteLayerKey in this._sprites)
+        {
             const spriteLayer = this._sprites[spriteLayerKey]
 
-            for (const coord in spriteLayer) {
+            for (const coord in spriteLayer)
+            {
                 const tileItemRenderSprite = spriteLayer[coord]
 
-                layer.add( tileItemRenderSprite.container )
+                sprites.push(tileItemRenderSprite)
             }
         }
+
+        return sprites
     }
 
     private createSpriteCollision(sprite: TileItemRenderSprite)
@@ -158,11 +181,8 @@ export default class TileItemRender
             )
         }
 
-    
-
         const collisionBox = scene.add.polygon(0, 0, points, color, alpha)
         collisionBox.setOrigin(0, 0)
-
 
         sprite.container.add(collisionBox)
 
@@ -180,7 +200,7 @@ export default class TileItemRender
         collisionBox.on('pointerdown', function (pointer) {
             console.log(self._tileItemInfo.name);
 
-            if(self.tileItem) self.tileItem.rotate()
+            if(self._tileItem) self._tileItem.rotate()
         });
 
         collisionBox.on('pointerover', function (pointer) {

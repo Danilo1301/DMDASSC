@@ -13,12 +13,10 @@ export default class GameClient extends Game
         this.events.on("ready", this.onReady.bind(this))
     }
 
-    private onReady()
+    private onReady(): void
     {
         TileTextureFactory.init(this, this.getGameScene())
 
         const world = this.createWorld()
-
-        
     }
 }

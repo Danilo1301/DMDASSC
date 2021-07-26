@@ -4,7 +4,7 @@ export default class BaseScene extends Phaser.Scene
 {
     private _game?: GameClient
 
-    public getGame()
+    public getGame(): GameClient
     {
         return this._game!;
     }

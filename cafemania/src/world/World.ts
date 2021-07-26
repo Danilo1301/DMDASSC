@@ -1,7 +1,7 @@
 import Game from "@cafemania/game/Game";
 import TileItem, { TileItemDirection } from "@cafemania/tileItem/TileItem";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
-import Tile from "@cafemania/world/tile/Tile"
+import Tile from "@cafemania/tile/Tile"
 
 export default class World
 {
@@ -47,7 +47,7 @@ export default class World
         {
             const tileItem = this.getGame().tileItemFactory.createTileItem('wall1')
 
-            tileItem.setDirection(TileItemDirection.FRONT_FLIPPED)
+            tileItem.direction = TileItemDirection.FRONT_FLIPPED
 
             this.putTileItemInTile(tileItem, this.getTile(x, 0))
         }

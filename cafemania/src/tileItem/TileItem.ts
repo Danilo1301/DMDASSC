@@ -1,6 +1,5 @@
-import Tile from "@cafemania/world/tile/Tile";
+import Tile from "@cafemania/tile/Tile";
 import { generateUUID } from "three/src/math/MathUtils";
-import TileCollisionFactory from "./TileCollisionFactory";
 import TileItemInfo, { TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
@@ -23,8 +22,6 @@ export default class TileItem
 
     private _tileItemRender?: TileItemRender
 
-    private _collisionBox?: Phaser.GameObjects.Polygon
-
     private _direction: TileItemDirection = TileItemDirection.FRONT
 
     private _currentAnim: number = 0
@@ -35,115 +32,53 @@ export default class TileItem
         this._tileItemInfo = tileItemInfo
     }
 
-    public getTile()
+    public getTile(): Tile
     {
         return this._tile
     }
 
-    public isInAnyTile()
+    public isInAnyTile(): boolean
     {
         return this._tile != undefined
     }
 
-    public getTileItemInfo()
+    public getTileItemInfo(): TileItemInfo
     {
         return this._tileItemInfo
     }
 
-    public setDirection(direction: TileItemDirection) {
-    
-        this._direction = direction
+    public get direction(): TileItemDirection { return this._direction }
+    public set direction(value) { this._direction = value }
 
-        return
-
-        if(
-            (direction == TileItemDirection.BACK || direction == TileItemDirection.BACK_FLIPPED) && (this._direction == TileItemDirection.FRONT || this._direction == TileItemDirection.FRONT_FLIPPED) ||
-            (direction == TileItemDirection.FRONT || direction == TileItemDirection.FRONT_FLIPPED) && (this._direction == TileItemDirection.BACK || this._direction == TileItemDirection.BACK_FLIPPED)
-        ) 
-        {
-            const d = (direction == TileItemDirection.FRONT) ? 1 : -1
-            //const d = 1
-
-
-            const tileSize = this._tileItemInfo.size
-            const atTile = this._tile
-
-            
-
-
-            const world = this._tile.getWorld()
-            const newTileOrigin = world.getTile(atTile.x + (d * (tileSize.x-1) ), atTile.y + (d * (tileSize.y-1) ))
-
-            console.log("PUT IN ", newTileOrigin.x, newTileOrigin.y)
-
-            console.log(world.canTileItemBePlaced(this, newTileOrigin.x, newTileOrigin.y, direction))
-
-            /*
-            dont forget to remove from _tileItems[]
-            */
-            newTileOrigin.addTileItem(this)
-
-            //world.putTileItemInTile(this, newTileOrigin)
-
-            console.log("change origin")
-        }
-
-
-        //this._direction = direction
-
-       /// if(direction)
-    }
-
-    public get direction()
-    {
-        return this._direction
-    }
-
-    public render()
+    public render(): void
     {
         if(!this._tileItemRender)
         {
             const tileItemRender = this._tileItemRender = this.getGame().tileItemFactory.createTileItemRender(this._tileItemInfo.id)
-        
-            tileItemRender.tileItem = this
+            tileItemRender.setTileItem(this)
 
-            if(this._tileItemInfo.type == TileItemType.FLOOR)
-            {
-                tileItemRender.setSceneLayer(this.getScene().groundLayer!)
-            } else {
-                tileItemRender.setSceneLayer(this.getScene().objectsLayer!)
-            }
+            const scene = this.getScene()
+            const layer = this._tileItemInfo.type == TileItemType.FLOOR ? scene.groundLayer : scene.objectsLayer
 
-            
+            tileItemRender.setSceneLayer(layer)
 
             setInterval(() => {
                 this._currentAnim++
-
-                if(this._currentAnim >= 2) this._currentAnim = 0
-            })
-
-    
-
-
+                if(this._currentAnim >= this._tileItemInfo.sprites) this._currentAnim = 0
+            }, 1000)
         }
         
-        const position = this._tile.getPosition()
-
+        const position = this._tile.position
         const isFlipped = this._direction == TileItemDirection.FRONT_FLIPPED || this._direction == TileItemDirection.BACK_FLIPPED
         const isBack = this._direction == TileItemDirection.BACK || this._direction == TileItemDirection.BACK_FLIPPED
         
-
         this._tileItemRender.setFlipSprites(isFlipped)
-
-        //this._tileItemRender.setSprite(this._currentAnim)
+        this._tileItemRender.setSprite(this._currentAnim)
+        
         if(this._tileItemInfo.layers > 1)
             this._tileItemRender.setLayer(isBack ? 1 : 0)
 
-        const newRotationOffset = {
-            x: 0,
-            y: 0
-        }
-
+        const newRotationOffset = new Phaser.Math.Vector2(0, 0)
         const offsetPos = TileItem.getOffsetByDirection(this._tileItemInfo.size.x, this._tileItemInfo.size.y, this._direction)
         const newPos = Tile.getPosition(offsetPos.x, offsetPos.y)
 
@@ -153,7 +88,7 @@ export default class TileItem
         this._tileItemRender.setPosition(position.x + newRotationOffset.x, position.y + newRotationOffset.y)
     }
 
-    public setTile(tile: Tile)
+    public setTile(tile: Tile): void
     {
         this._tile = tile
     }
@@ -177,8 +112,7 @@ export default class TileItem
         }
     }
 
-  
-    public rotate()
+    public rotate(): void
     {
         let n = 0;
         let canRotate = false;
@@ -201,15 +135,11 @@ export default class TileItem
 
         if(canRotate)
         {
-            console.warn("Direction changed")
-            this.setDirection(rotateTo)
-            
+            console.log("Direction changed")
+            this.direction = rotateTo
         } else {
-            console.error("Cant rotate")
+            console.warn("Cant rotate")
         }
-        
-
-
     }
 
     /*

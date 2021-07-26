@@ -1,7 +1,8 @@
-import Tile from "@cafemania/world/tile/Tile"
+import Tile from "@cafemania/tile/Tile"
 
-export default class TileCollisionFactory {
-    public static getBlockCollisionPoints(offsetX: number[], offsetY: number[], height: number)
+export default class TileCollisionFactory
+{
+    public static getBlockCollisionPoints(offsetX: number[], offsetY: number[], height: number): Phaser.Math.Vector2[]
     {
         const x = Tile.SIZE.x
         const y = Tile.SIZE.y
@@ -36,7 +37,7 @@ export default class TileCollisionFactory {
         return points
     }
 
-    public static getWallCollisionPoints(atFrontTile: boolean, offsetX: number[], offsetY: number[], wallSize: number)
+    public static getWallCollisionPoints(atFrontTile: boolean, offsetX: number[], offsetY: number[], wallSize: number): Phaser.Math.Vector2[]
     {
         const x = Tile.SIZE.x
         const y = Tile.SIZE.y
@@ -65,7 +66,6 @@ export default class TileCollisionFactory {
             points[2].add(this.moveAlongXY(0, 100 - size))
         }
 
-        
         points[0].add(this.moveAlongXY(offsetX[0], 0))
         points[5].add(this.moveAlongXY(offsetX[0], 0))
         points[4].add(this.moveAlongXY(offsetX[0], 0))
@@ -73,8 +73,6 @@ export default class TileCollisionFactory {
         points[1].add(this.moveAlongXY(-offsetX[1], 0))
         points[2].add(this.moveAlongXY(-offsetX[1], 0))
         points[3].add(this.moveAlongXY(-offsetX[1], 0))
-        
-
      
         points[0].y += offsetY[0]
         points[1].y += offsetY[0]
@@ -87,17 +85,17 @@ export default class TileCollisionFactory {
         return points
     }
 
-    public static moveAlongXY(moveX: number, moveY: number)
+    public static moveAlongXY(moveX: number, moveY: number): Phaser.Math.Vector2
     {
         var baseTileSize = Tile.SIZE
-        var pos = new Phaser.Math.Vector2(0, 0);
+        var pos = new Phaser.Math.Vector2(0, 0)
 
-        pos.x += moveX * baseTileSize.x / 2 / 100;
-        pos.y += moveX * baseTileSize.y / 2 / 100;
+        pos.x += moveX * baseTileSize.x / 2 / 100
+        pos.y += moveX * baseTileSize.y / 2 / 100
 
-        pos.x += moveY * -baseTileSize.x / 2 / 100;
-        pos.y += moveY * baseTileSize.y / 2 / 100;
+        pos.x += moveY * -baseTileSize.x / 2 / 100
+        pos.y += moveY * baseTileSize.y / 2 / 100
 
-        return pos;
+        return pos
     }
 }

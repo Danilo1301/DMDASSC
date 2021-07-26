@@ -6,7 +6,6 @@ export default class Three
     public static camera: THREE.OrthographicCamera
     public static scene: THREE.Scene
     public static renderer: THREE.WebGLRenderer
-    
     public static object?: THREE.Group
 
     public static init()
@@ -36,7 +35,6 @@ export default class Three
     {
         requestAnimationFrame( this.animate.bind(this) );
         
-        //mesh.rotation.x += 0.005;
         if(this.object) this.object.rotation.y += 0.01;
     
         this.renderer.render( this.scene, this.camera );
@@ -44,13 +42,9 @@ export default class Three
 
     public static loadGLTF(path: string)
     {
-        const onProgress = () => {
-            console.log("onProgress")
-        }
+        const onProgress = () => console.log("onProgress")
     
-        const onError = () => {
-            console.log("onError")
-        }
+        const onError = () => console.log("onError")
     
         const scene = this.scene;
 

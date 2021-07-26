@@ -25,7 +25,7 @@ export default class Game
         await this.init()
     }
 
-    public async init(): Promise<void>
+    private async init(): Promise<void>
     {
         await SceneManager.createPhaserInstance()
     }
@@ -55,7 +55,8 @@ export default class Game
         return this._gameScene! as GameScene
     }
 
-    public setGameScene(scene: Phaser.Scene): void {
+    public setGameScene(scene: Phaser.Scene): void
+    {
         this._gameScene = scene
     }
 }

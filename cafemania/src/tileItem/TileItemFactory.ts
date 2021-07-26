@@ -1,4 +1,3 @@
-import { generateUUID } from "three/src/math/MathUtils";
 import Game from "../game/Game";
 import TileItem from "./TileItem";
 import TileItemInfo, { TileItemPlaceType, TileItemType } from "./TileItemInfo";
@@ -95,7 +94,7 @@ export class TileItemFactory
         })
     }
 
-    public createTileItem(id: string)
+    public createTileItem(id: string): TileItem
     {
         if(!this.hasTileItemInfo(id)) throw `Invalid TileItemInfo '${id}'`
 
@@ -106,7 +105,7 @@ export class TileItemFactory
         return tileItem
     }
 
-    public addTileItemInfo(tileItemInfo: TileItemInfo)
+    public addTileItemInfo(tileItemInfo: TileItemInfo): TileItemInfo
     {
         this._tileItemInfoList[tileItemInfo.id] = tileItemInfo
 
@@ -123,7 +122,7 @@ export class TileItemFactory
         return this._tileItemInfoList[id]
     }
 
-    public createTileItemRender(id: string)
+    public createTileItemRender(id: string): TileItemRender
     {
         if(!this.hasTileItemInfo(id)) throw `Invalid TileItemInfo '${id}'`
 

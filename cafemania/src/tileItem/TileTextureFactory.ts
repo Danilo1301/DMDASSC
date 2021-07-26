@@ -1,15 +1,12 @@
 import GameClient from "@cafemania/game/GameClient"
-import Tile from "@cafemania/world/tile/Tile"
+import Tile from "@cafemania/tile/Tile"
 
 export default class TileTextureFactory
 {
     private static _game: GameClient
     private static _scene: Phaser.Scene
-
     private static _canvas: Phaser.Textures.CanvasTexture
-
     private static _textureSheetCache: {[tileId: string]: {[coord: string]: string}} = {}
-
     private static sprites = 1
     private static layers = 1
     private static sizeX = 1
@@ -33,13 +30,10 @@ export default class TileTextureFactory
     {
         if(this._textureSheetCache[textureName] != undefined) return this.getTextures(textureName)
 
-        //this.textureName = textureName
         this.sizeX = size.x
         this.sizeY = size.y
         this.sprites = sprites
         this.layers = layers
-
-        //get texture
         this.texture = this._scene.textures.get(textureName)
 
         const image = this.getImage()
@@ -48,7 +42,6 @@ export default class TileTextureFactory
 
         this._textureSheetCache[textureName] = {};
 
-        //---
         const sizeX = this.sizeX
         const sizeY = this.sizeY
         const rectSize = this.getRectSize()
@@ -65,23 +58,19 @@ export default class TileTextureFactory
 
                 const pos = Tile.getPosition(x, y)
 
-                console.log('>', x, y)
+                //console.log('>', x, y)
                 
                 const coord = `${x}_${y}`
 
                 const storeToCacheName = `${textureName}_${coord}`
                 const textureCanvas = this._scene.textures.createCanvas(storeToCacheName, sprites * Tile.SIZE.x, layers * rectSize.y)
                 
-
                 this._textureSheetCache[textureName][coord] = storeToCacheName
 
-                console.log(`Created texture '${storeToCacheName} for tile '${textureName}' coord (${x}, ${y})'`)
+                //console.log(`Created texture '${storeToCacheName} for tile '${textureName}' coord (${x}, ${y})'`)
 
                 textureCanvas.context.fillStyle = "black"
                 textureCanvas.context.fillRect(0, 0, textureCanvas.width, textureCanvas.height)
-
-                //var img = this._scene.add.image(x * textureCanvas.width, y * textureCanvas.height, storeToCacheName)
-                //img.setOrigin(0)
 
                 for (let layer = 0; layer < this.layers; layer++)
                 {
@@ -109,18 +98,14 @@ export default class TileTextureFactory
 
                         textureCanvas.add(frameName, 0, sprite * rect.w, layer * rect.h, rect.w, rect.h)
 
-                        console.log('added frame', frameName)
+                        //console.log('added frame', frameName)
 
                         this._canvas.refresh()
 
                     }
                 }
-
-                //var img = this._scene.add.image(0, -500 + y * 200, storeToCacheName, `1_1`)
-                //img.setOrigin(0)
             }
         }
-
 
         return this.getTextures(textureName)
     }
@@ -128,8 +113,6 @@ export default class TileTextureFactory
     private static setupCanvas()
     {
         this._canvas = this._scene.textures.createCanvas('TileTextureFactory_Canvas', 100, 100)
-
-        //this._scene.add.image(0, 300, 'TileTextureFactory_Canvas')
     }
 
     private static setCanvasImage(image: HTMLImageElement)
@@ -138,10 +121,7 @@ export default class TileTextureFactory
         const ctx = canvas.context;
 
         ctx.clearRect(0, 0, image.width, image.height)
-        //ctx.fillStyle = "red"
-        //ctx.fillRect(0, 0, image.width, image.height)
         ctx.drawImage(image, 0, 0)
-
 
         canvas.refresh()
     }
