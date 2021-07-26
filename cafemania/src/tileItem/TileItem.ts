@@ -105,6 +105,8 @@ export default class TileItem
         {
             const tileItemRender = this._tileItemRender = this.getGame().tileItemFactory.createTileItemRender(this._tileItemInfo.id)
         
+            tileItemRender.tileItem = this
+
             setInterval(() => {
                 this._currentAnim++
 
@@ -116,33 +118,13 @@ export default class TileItem
 
             setInterval(() => {
                 //this.rotate()
-            
-                
 
             }, speedo)
 
-            /*
-            var i = 0;
-            var t = 0
 
-            setInterval(() => {
-                i++; t++
-
-                if(i >= this._tileItemInfo.sprites) i = 0
-                if(t >= 9) t = 0
-
-                tileItemRender.setTransparent(t < 3) 
-                tileItemRender.setFlipSprites(t >= 6) 
-
-                tileItemRender.setSprite(i)
-            }, 250)
-            */
         }
 
-        if(!this._collisionBox)
-        {
-            this.createCollisionBox()
-        }
+        
 
         const position = this._tile.getPosition()
 
@@ -169,6 +151,11 @@ export default class TileItem
      
         this._tileItemRender.setPosition(position.x + newRotationOffset.x, position.y + newRotationOffset.y)
 
+        /*
+        if(!this._collisionBox)
+        {
+            this.createCollisionBox()
+        }
 
         this._collisionBox?.setPosition(
             position.x - (Tile.SIZE.x/2 * (isFlipped ? -1 : 1)),
@@ -180,6 +167,7 @@ export default class TileItem
         this._collisionBox?.setAlpha(0.8)
 
         this._collisionBox?.setScale(isFlipped ? -1 : 1, 1)
+        */
     }
 
     public setTile(tile: Tile)
@@ -206,51 +194,7 @@ export default class TileItem
         }
     }
 
-    private createCollisionBox()
-    {
-
-        const scene = this.getScene()
-
-        const isWall = this._tileItemInfo.collision.isWall
-        const offsetX = isWall ? 35 : this._tileItemInfo.collision.x
-        const offsetY = this._tileItemInfo.collision.y
-        const height = isWall ? 250 : this._tileItemInfo.collision.height
-        const alpha = 1
-    
-
-        const color = 0xfff00 * Math.random();
-        const points = TileCollisionFactory.getBlockCollisionPoints(offsetX, offsetY, height);
-
-        if(isWall) points.map(point => point.add(TileCollisionFactory.moveAlongXY(32, 0)))
-     
-
-        const collisionBox = this._collisionBox = scene.add.polygon(0, 0, points, color, alpha)
-        collisionBox.setOrigin(0, 0)
-        
-        collisionBox.setInteractive(
-            new Phaser.Geom.Polygon(points),
-            Phaser.Geom.Polygon.Contains
-        );
-
-        const tileId = this._id;
-
-        const self = this
-
-        collisionBox.on('pointerdown', function (pointer) {
-            console.log(tileId);
-
-            self.rotate()
-        });
-
-        collisionBox.on('pointerover', function (pointer) {
-            collisionBox.setFillStyle(0x000000, 0.5)
-        });
-
-        collisionBox.on('pointerout', function (pointer) {
-            collisionBox.setFillStyle(color, alpha)
-        });
-    }
-
+  
     public rotate()
     {
         let n = 0;

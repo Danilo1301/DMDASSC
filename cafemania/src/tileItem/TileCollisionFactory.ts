@@ -1,7 +1,7 @@
 import Tile from "@cafemania/world/tile/Tile"
 
 export default class TileCollisionFactory {
-    public static getBlockCollisionPoints(offsetX: number, offsetY: number, height: number)
+    public static getBlockCollisionPoints(offsetX: number[], offsetY: number[], height: number)
     {
         const x = Tile.SIZE.x
         const y = Tile.SIZE.y
@@ -16,25 +16,73 @@ export default class TileCollisionFactory {
             new Phaser.Math.Vector2( 0,     y/2 - h)
         ]
 
-        if(offsetX != 0)
+        points[0].add(this.moveAlongXY(offsetX[0], 0))
+        points[4].add(this.moveAlongXY(offsetX[0], 0))
+        points[5].add(this.moveAlongXY(offsetX[0], 0))
+
+
+        points[1].add(this.moveAlongXY(-offsetX[1], 0))
+        points[2].add(this.moveAlongXY(-offsetX[1], 0))
+        points[3].add(this.moveAlongXY(-offsetX[1], 0))
+
+        points[0].add(this.moveAlongXY(0, offsetY[0]))
+        points[1].add(this.moveAlongXY(0, offsetY[0]))
+        points[2].add(this.moveAlongXY(0, offsetY[0]))
+
+        points[3].add(this.moveAlongXY(0, -offsetY[1]))
+        points[4].add(this.moveAlongXY(0, -offsetY[1]))
+        points[5].add(this.moveAlongXY(0, -offsetY[1]))
+
+        return points
+    }
+
+    public static getWallCollisionPoints(atFrontTile: boolean, offsetX: number[], offsetY: number[], wallSize: number)
+    {
+        const x = Tile.SIZE.x
+        const y = Tile.SIZE.y
+        const h = 240
+
+        const points: Phaser.Math.Vector2[] = [
+            new Phaser.Math.Vector2( x/2,   -h),
+            new Phaser.Math.Vector2( x,     y/2 - h ),
+            new Phaser.Math.Vector2( x,     y/2 ),
+            new Phaser.Math.Vector2( x/2,   y),
+            new Phaser.Math.Vector2( 0,     y/2),
+            new Phaser.Math.Vector2( 0,     y/2 - h)
+        ]
+
+        const frontOfTile = atFrontTile
+        const size = wallSize
+    
+        if(!frontOfTile)
         {
-            points[0].add(this.moveAlongXY(offsetX, 0))
-            points[1].add(this.moveAlongXY(-offsetX, 0))
-            points[2].add(this.moveAlongXY(-offsetX, 0))
-            points[3].add(this.moveAlongXY(-offsetX, 0))
-            points[4].add(this.moveAlongXY(offsetX, 0))
-            points[5].add(this.moveAlongXY(offsetX, 0))
+            points[3].add(this.moveAlongXY(0, -100 + size))
+            points[4].add(this.moveAlongXY(0, -100 + size))
+            points[5].add(this.moveAlongXY(0, -100 + size))
+        } else {
+            points[0].add(this.moveAlongXY(0, 100 - size))
+            points[1].add(this.moveAlongXY(0, 100 - size))
+            points[2].add(this.moveAlongXY(0, 100 - size))
         }
 
-        if(offsetY != 0)
-        {
-            points[0].add(this.moveAlongXY(0, offsetY))
-            points[1].add(this.moveAlongXY(0, offsetY))
-            points[2].add(this.moveAlongXY(0, offsetY))
-            points[3].add(this.moveAlongXY(0, -offsetY))
-            points[4].add(this.moveAlongXY(0, -offsetY))
-            points[5].add(this.moveAlongXY(0, -offsetY))
-        }
+        
+        points[0].add(this.moveAlongXY(offsetX[0], 0))
+        points[5].add(this.moveAlongXY(offsetX[0], 0))
+        points[4].add(this.moveAlongXY(offsetX[0], 0))
+
+        points[1].add(this.moveAlongXY(-offsetX[1], 0))
+        points[2].add(this.moveAlongXY(-offsetX[1], 0))
+        points[3].add(this.moveAlongXY(-offsetX[1], 0))
+        
+
+     
+        points[0].y += offsetY[0]
+        points[1].y += offsetY[0]
+        points[5].y += offsetY[0]
+
+        points[2].y -= offsetY[1]
+        points[3].y -= offsetY[1]
+        points[4].y -= offsetY[1]   
 
         return points
     }

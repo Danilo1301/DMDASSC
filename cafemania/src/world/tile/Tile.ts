@@ -17,7 +17,7 @@ export default class Tile
     private _position = new Phaser.Math.Vector2()
 
     private _sprite?: Phaser.GameObjects.Sprite
-    private _debugText?: Phaser.GameObjects.Text
+    private _debugText?: Phaser.GameObjects.BitmapText
 
     constructor(world: World, x: number, y: number)
     {
@@ -58,8 +58,19 @@ export default class Tile
         const scene = this.getScene()
         const position = this._position
 
-        if(!this._sprite) this.createSprite()
-        this._sprite?.setPosition(position.x, position.y)
+        if(!this._sprite) 
+        {
+            const scene = this.getScene()
+
+            this._sprite = scene.add.sprite(0, 0, 'tile1')
+            this._sprite.setAlpha(0.1)
+            this._sprite.setDepth(0)
+
+            scene.groundLayer?.add(this._sprite)
+            
+        }
+        
+        this._sprite.setPosition(position.x, position.y)
 
         /*
         if(!this._collisionBox) this.createCollision()
@@ -67,11 +78,16 @@ export default class Tile
         this._collisionBox?.setDepth(position.y)
         */
 
-        if(!this._debugText) this._debugText = scene.add.text(0, 0, this.id, {color: '#000000'})
-        this._debugText?.setPosition(position.x, position.y)
-        this._debugText?.setDepth(2)
+        if(!this._debugText)
+        {
+            this._debugText = scene.add.bitmapText(position.x, position.y, 'gem', `${this.id}`, 20).setOrigin(0.5);
+            //this._debugText.sette
+            //text.setDepth(2)
+        }
+        
 
-        for (const tileItem of this._tileItems) {
+        for (const tileItem of this._tileItems)
+        {
             tileItem.render()
         }
     }
@@ -96,15 +112,6 @@ export default class Tile
     public getWorld()
     {
         return this._world
-    }
-
-    private createSprite()
-    {
-        const scene = this.getScene()
-
-        this._sprite = scene.add.sprite(0, 0, 'tile1')
-        this._sprite.setAlpha(0.1)
-        this._sprite.setDepth(-100000)
     }
 
     public serialize()

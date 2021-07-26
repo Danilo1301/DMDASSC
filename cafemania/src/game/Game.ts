@@ -2,6 +2,7 @@ import World from "@cafemania/world/World"
 import "phaser"
 import SceneManager from "./SceneManager"
 import { TileItemFactory } from "../tileItem/TileItemFactory"
+import GameScene from "./scene/GameScene"
 
 export default class Game
 {
@@ -49,9 +50,9 @@ export default class Game
         return world
     }
 
-    public getGameScene(): Phaser.Scene
+    public getGameScene(): GameScene
     {
-        return this._gameScene!
+        return this._gameScene! as GameScene
     }
 
     public setGameScene(scene: Phaser.Scene): void {

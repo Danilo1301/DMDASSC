@@ -16,70 +16,40 @@ export class TileItemFactory
     }
 
     public init(): void
-    {
-        const wall0 = this.addTileItemInfo('wall0', new TileItemInfo(
-            'Wall',
-            'wall0',
-            new Phaser.Math.Vector2(1, 1),
-            1,
-            1
-        ))
+    {   
+        /*
+        todo: Allow extraLayers to be 0 instead of 1
+        */
 
-        wall0.collision.isWall = true
-    
+        const wall1 = this.addTileItemInfo('wall1', new TileItemInfo())
+        wall1.texture = "wall1"
+        wall1.size.set(1, 1)
+        wall1.sprites = 1
+        wall1.layers = 1
+        wall1.extraLayers = 1
+        wall1.collision.isWall = true
 
+        const window1 = this.addTileItemInfo('window1', new TileItemInfo())
+        window1.texture = "window1"
+        window1.size.set(1, 2)
+        window1.sprites = 1
+        window1.layers = 1
+        window1.extraLayers = 1
+        window1.collision.isWall = true
+        window1.collision.x = 20
+        window1.collision.y = 70
+        window1.collision.height = 35
+        window1.collision.wallSize = 0
 
-        this.addTileItemInfo('fogao0', new TileItemInfo(
-            'Fogao 2x1',
-            'block4',
-            new Phaser.Math.Vector2(1, 2),
-            2,
-            2
-        ))
-
-        this.addTileItemInfo('2by3', new TileItemInfo(
-            '2by3',
-            '2by3',
-            new Phaser.Math.Vector2(2, 3),
-            1,
-            2
-        ))
-
-        this.addTileItemInfo('chao0', new TileItemInfo(
-            'Chao 2x1',
-            'tile4',
-            new Phaser.Math.Vector2(2, 2),
-            1,
-            1
-        ))
-
-        const chair = this.addTileItemInfo('chair0', new TileItemInfo(
-            'Cadeira',
-            'chair0',
-            new Phaser.Math.Vector2(1, 1),
-            2,
-            2
-        ))
-        chair.extraLayers = 2
-
-        this.addTileItemInfo('1by1', new TileItemInfo(
-            '1by1',
-            '1by1',
-            new Phaser.Math.Vector2(1, 1),
-            1,
-            2
-        ))
-
-        this.addTileItemInfo('3by3', new TileItemInfo(
-            '3by3',
-            '3by3',
-            new Phaser.Math.Vector2(3, 3),
-            1,
-            2
-        ))
- 
-
-        console.log(this._tileItemInfoList)
+        const chair1 = this.addTileItemInfo('chair1', new TileItemInfo())
+        chair1.texture = "chair1"
+        chair1.size.set(1, 1)
+        chair1.sprites = 2
+        chair1.layers = 2
+        chair1.extraLayers = 2
+        chair1.collision.height = 110
+        chair1.collision.x = 15
+        chair1.collision.y = 15
     }
 
     public createTileItem(id: string)

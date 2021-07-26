@@ -1,5 +1,6 @@
 export interface TileItemInfoCollision
 {
+    wallSize: number
     isWall: boolean
     height: number
     x: number
@@ -9,26 +10,17 @@ export interface TileItemInfoCollision
 export default class TileItemInfo
 {
     public id: string = ""
-    public name: string
-    public texture: string
-    public size: Phaser.Math.Vector2
-    public sprites: number
-    public layers: number
-    public extraLayers: number
+    public name: string = ""
+    public texture: string = ""
+    public size: Phaser.Math.Vector2 = new Phaser.Math.Vector2(1, 1)
+    public sprites: number = 1
+    public layers: number = 1
+    public extraLayers: number = 0
     public collision: TileItemInfoCollision = {
+        wallSize: 0,
         isWall: false,
         height: 0,
         x: 0,
         y: 0
-    }
-
-    constructor(name: string, texture: string, size: Phaser.Math.Vector2, sprites: number, layers: number)
-    {
-        this.name = name;
-        this.texture = texture;
-        this.size = size;
-        this.sprites = sprites;
-        this.layers = layers;
-        this.extraLayers = 1;
     }
 }

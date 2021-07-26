@@ -8,7 +8,7 @@ function main(): void
     var game = window["game"] = new GameClient()
     game.start()
 
-    Three.init()
+    //Three.init()
 }
 
 window.onload = main.bind(this)

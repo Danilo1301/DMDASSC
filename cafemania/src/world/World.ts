@@ -35,6 +35,7 @@ export default class World
     {
         this._game = game
 
+        
         for(let y = 0; y < 15; y++)
         {
             for(let x = 0; x < 15; x++)
@@ -45,13 +46,21 @@ export default class World
 
         window['world'] = this
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1,1))
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(2,2))
+        for (let y = 2; y < 15; y += 1) {
+            for (let x = 2; x < 15; x += 1) {
+                //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('1by1'), this.getTile(x, y))
+            }
+            
+        }
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1, 3))
+        for (let x = 2; x < 15; x += 2) {
+            this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('chair1'), this.getTile(x, 1))
+        }
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(2, 4))
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(1, 1))
+
         
+
  
         //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('1by1'), this.getTile(3, 3))
         //his.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('2by3'), this.getTile(0, 0))
@@ -143,7 +152,7 @@ export default class World
 
             map[tile.id] = false
 
-            console.log(`[EMPTY] ${tile.id}`)
+            //console.log(`[EMPTY] ${tile.id}`)
 
             tile.getTileItems().map(tileItem => tileItems.push(tileItem))
 
@@ -157,15 +166,15 @@ export default class World
             for (const oc of occupiedCoords) {
                 const key = `${tile.x + oc.x}:${tile.y + oc.y}`
 
-                console.log(`[CONTAINS] ${key}}`)
+                //console.log(`[CONTAINS] ${key}}`)
 
                 map[key] = true
 
-                console.log(map[key])
+                //console.log(map[key])
             }
         }
 
-        console.warn(map)
+        //console.warn(map)
 
         return map
     }
@@ -221,6 +230,11 @@ export default class World
  
     public render(): void
     {
+        const scene = this.getGame().getGameScene()
+
+        if(!scene.groundLayer) scene.groundLayer = scene.add.layer()
+        if(!scene.objectsLayer) scene.objectsLayer = scene.add.layer()
+
         for (const tile of this.getTiles())
         {
             tile.render()

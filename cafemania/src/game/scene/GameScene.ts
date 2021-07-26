@@ -36,6 +36,11 @@ class MoveScene {
 
 export default class GameScene extends BaseScene
 {
+    private _fpsText!: Phaser.GameObjects.Text
+
+    public groundLayer?: Phaser.GameObjects.Layer
+    public objectsLayer?: Phaser.GameObjects.Layer
+
     constructor()
     {
         super('GameScene')
@@ -43,18 +48,12 @@ export default class GameScene extends BaseScene
 
     public preload(): void
     {
+        this.load.bitmapFont('gem', '/static/cafemania/assets/fonts/gem.png', '/static/cafemania/assets/fonts/gem.xml');
+
         this.load.setPath('/static/cafemania/assets')
-        this.load.image('wall0', 'wall0.png')
         this.load.image('tile1', 'tile1.png')
-        this.load.image('tile2', 'tile2.png')
-        this.load.image('tile3', 'tile3.png')
-        this.load.image('tile4', 'tile4.png')
-        this.load.image('block4', 'block4.png')
-        this.load.image('tubatu', 'tubatu.png')
-        this.load.image('chair0', 'chair0.png')
-        this.load.image('3by3', '3by3.png')
-        this.load.image('2by3', '2by3.png')
-        this.load.image('1by1', '1by1.png')
+        this.load.image('window1', 'window1.png')
+        this.load.image('chair1', 'chair1.png')
     }
     public create(): void
     {
@@ -63,6 +62,17 @@ export default class GameScene extends BaseScene
 
         const moveScene = new MoveScene(this);
 
+        for(let y = 0; y < 0; y++)
+        {
+            for(let x = 0; x < 0; x++)
+            {
+                const pos = Tile.getPosition(x, y)
+
+                const tile = this.add.sprite(pos.x, pos.y, 'tile1')
+            }
+        }
+
+        /*
         const tile1 = this.add.image(0, -150, 'tile1')
         const tile2 = this.add.image(120, -150, 'tile1')
         setInterval(() => {
@@ -73,11 +83,18 @@ export default class GameScene extends BaseScene
             tile1.setDepth(tile1.y)
             tile2.setDepth(tile2.y)
         }, 1)
+        */
 
 
         const game = this.getGame()
 
         game.events.emit("ready");
+
+        this._fpsText = this.add.text(0, -300, `0 FPS`, {fontSize: '30px'})
+
+        setInterval(() => {
+            this._fpsText.setText(`${this.game.loop.actualFps} FPS`)
+        })
     }
 
     public update()
