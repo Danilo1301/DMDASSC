@@ -43,7 +43,7 @@ export default class World
         {
             const tileItem = this.getGame().tileItemFactory.createTileItem('wall1')
 
-            tileItem.direction = TileItemDirection.FRONT_FLIPPED
+            tileItem.direction = TileItemDirection.BACK_FLIPPED
 
             this.putTileItemInTile(tileItem, this.getTile(x, 0))
         }

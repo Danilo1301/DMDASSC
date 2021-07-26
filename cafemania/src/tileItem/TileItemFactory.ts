@@ -1,6 +1,6 @@
 import Game from "../game/Game";
 import TileItem from "./TileItem";
-import TileItemInfo, { TileItemPlaceType, TileItemType } from "./TileItemInfo";
+import TileItemInfo, { TileItemPlaceType, TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
 export class TileItemFactory
@@ -24,6 +24,7 @@ export class TileItemFactory
             id: 'wall1',
             name: 'wall1',
             texture: 'wall1',
+            rotationType: TileItemRotationType.SIDE_ONLY,
             type: TileItemType.WALL,
             placeType: TileItemPlaceType.FLOOR,
             size: new Phaser.Math.Vector2(1,1),
@@ -44,6 +45,7 @@ export class TileItemFactory
             id: 'window1',
             name: 'window1',
             texture: 'window1',
+            rotationType: TileItemRotationType.SIDE_ONLY,
             type: TileItemType.WALL_OBJECT,
             placeType: TileItemPlaceType.WALL,
             size: new Phaser.Math.Vector2(1,2),
@@ -63,6 +65,7 @@ export class TileItemFactory
             id: 'chair1',
             name: 'chair1',
             texture: 'chair1',
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
             type: TileItemType.CHAIR,
             placeType: TileItemPlaceType.FLOOR,
             size: new Phaser.Math.Vector2(1,1),
@@ -80,6 +83,7 @@ export class TileItemFactory
             id: 'floor1',
             name: 'floor1',
             texture: 'floor1',
+            rotationType: TileItemRotationType.SIDE_ONLY,
             type: TileItemType.FLOOR,
             placeType: TileItemPlaceType.FLOOR,
             size: new Phaser.Math.Vector2(1,1),
@@ -98,6 +102,7 @@ export class TileItemFactory
             name: 'floor2',
             texture: 'floor2',
             type: TileItemType.FLOOR,
+            rotationType: TileItemRotationType.SIDE_ONLY,
             placeType: TileItemPlaceType.FLOOR,
             size: new Phaser.Math.Vector2(1,1),
             sprites: 1,

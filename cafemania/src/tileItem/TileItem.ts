@@ -1,6 +1,6 @@
 import Tile from "@cafemania/tile/Tile";
 import { generateUUID } from "three/src/math/MathUtils";
-import TileItemInfo, { TileItemType } from "./TileItemInfo";
+import TileItemInfo, { TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
 export enum TileItemDirection
@@ -118,11 +118,15 @@ export default class TileItem
         let canRotate = false;
         let rotateTo = this.direction + 1
 
+        console.log("Direction was " + this.direction)
+
         while(!canRotate || n < 4)
         {
-            let newDir = (rotateTo + n)%4
-            n++
+            if(this._tileItemInfo.rotationType == TileItemRotationType.SIDE_ONLY && rotateTo >= 2)
+                rotateTo += 2
 
+            let newDir: TileItemDirection = (rotateTo + n)%4
+  
             const canBePlaced = this._tile.getWorld().canTileItemBePlaced(this, this._tile.x, this._tile.y, newDir)
 
             if(canBePlaced)
@@ -131,12 +135,15 @@ export default class TileItem
                 canRotate = true
                 break
             }
+
+            n++
         }
 
         if(canRotate)
         {
-            console.log("Direction changed")
             this.direction = rotateTo
+
+            console.log("Direction changed to " + this.direction)
         } else {
             console.warn("Cant rotate")
         }
