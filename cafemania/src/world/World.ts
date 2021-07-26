@@ -5,7 +5,7 @@ import Tile from "@cafemania/tile/Tile"
 
 export default class World
 {
-    private _game: Game;
+    private _game: Game
 
     private _tiles = new Phaser.Structs.Map<string, Tile>([])
 
@@ -23,15 +23,10 @@ export default class World
             }
         }
 
-        window['world'] = this
-
-        
-
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
                 this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
             }
-            
         }
 
         for (let x = 2; x < 12; x += 2) {
@@ -43,6 +38,7 @@ export default class World
         }
 
         for (let y = 1; y < 15; y += 1) this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('wall1'), this.getTile(mapSize.x-1, y))
+        
         for (let x = 0; x < 14; x += 1) 
         {
             const tileItem = this.getGame().tileItemFactory.createTileItem('wall1')
@@ -52,56 +48,26 @@ export default class World
             this.putTileItemInTile(tileItem, this.getTile(x, 0))
         }
 
-        
-
         this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(3, 3))
-   
-        
-
- 
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('1by1'), this.getTile(3, 3))
-        //his.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('2by3'), this.getTile(0, 0))
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('chao0'), this.getTile(9, 2))
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('fogao0'), this.getTile(1, 6))
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('3by3'), this.getTile(9, 7))
-  
-
-        //tileItem.setDirection(TileItemDirection.BACK_FLIPPED)
-
-
-     
-        
-
-        //this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
-        //this.getTile(0, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('chair0') )
-        //this.getTile(1, 1).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0') )
-
-
-        
-
-        //this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0')  )
-        //this.getTile(1, 0).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0')  )
-        //this.getTile(2, 2).addTileItem( this.getGame().tileItemFactory.createTileItem('fogao0')  )
     }
 
-    public putTileItemInTile(tileItem: TileItem, tile: Tile)
+    public putTileItemInTile(tileItem: TileItem, tile: Tile): void
     {
         const canBePlaced = this.canTileItemBePlaced(tileItem, tile.x, tile.y, tileItem.direction)
 
-        if(canBePlaced) 
-        {
-            console.log(`[World] TileItem '${tileItem.getTileItemInfo().name}' was placed at tile (${tile.x}, ${tile.y})`)
+        if(!canBePlaced) return
+        
+        tile.addTileItem(tileItem)
 
-            tile.addTileItem(tileItem)
-        }
+        console.log(`[World] TileItem '${tileItem.getTileItemInfo().name}' was placed at tile (${tile.x}, ${tile.y})`)
     }
 
-    public tileExists(x: number, y: number)
+    public tileExists(x: number, y: number): boolean
     {
         return this._tiles.has(`${x}:${y}`)
     }
 
-    public static getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection)
+    public static getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection): Phaser.Math.Vector2[]
     {
         const coords: Phaser.Math.Vector2[] = []
 
@@ -116,7 +82,6 @@ export default class World
 
         for (let iy = 0; iy <= (size.y-1); iy++)
         {
-            
             for (let ix = 0; ix <= (size.x-1); ix++)
             {
                 let testingX = ix + off.x
@@ -135,7 +100,7 @@ export default class World
         return coords
     }
 
-    public getOccupiedTilesMap(compareTileItem?: TileItem)
+    public getOccupiedTilesMap(compareTileItem?: TileItem): {[coord: string]: boolean }
     {
         const map: {[coord: string]: boolean} = {}
 
@@ -143,28 +108,21 @@ export default class World
 
         const tileItems: TileItem[] = []
 
-        for (const tile of tiles) {
-
-            //console.log(tile.id)
-
+        for (const tile of tiles) 
+        {
             map[tile.id] = false
 
-            //console.log(`[EMPTY] ${tile.id}`)
-
             tile.getTileItems().map(tileItem => tileItems.push(tileItem))
-
         }
 
-
-        for (const tileItem of tileItems) {
+        for (const tileItem of tileItems)
+        {
             const size = tileItem.getTileItemInfo().size
             const occupiedCoords = World.getCoordsTileItemOccupes(size.x, size.y, tileItem.direction)
             const tile = tileItem.getTile()
 
             for (const oc of occupiedCoords) {
                 const key = `${tile.x + oc.x}:${tile.y + oc.y}`
-
-                //console.log(`[CONTAINS] ${key}}`)
 
                 let canBePlaced = true
 
@@ -175,62 +133,40 @@ export default class World
                     if(compareTileItem.getTileItemInfo().placeType == tileItem.getTileItemInfo().placeType && compareTileItem.getTileItemInfo().type != TileItemType.FLOOR && tileItem.getTileItemInfo().type != TileItemType.FLOOR) canBePlaced = false
                 }
 
-                
                 if(!canBePlaced) map[key] = true
-
-                //console.log(map[key])
             }
         }
-
-        //console.warn(map)
 
         return map
     }
 
-    public canTileItemBePlaced(tileItem: TileItem, tileX: number, tileY: number, direction: TileItemDirection)
+    public canTileItemBePlaced(tileItem: TileItem, tileX: number, tileY: number, direction: TileItemDirection): boolean
     {
         const tileItemInfo = tileItem.getTileItemInfo()
 
         const coords = World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, direction)
 
-        //console.log(World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, tileItem.direction))
-
         const ocuppiedTiles = this.getOccupiedTilesMap(tileItem)
-
-        //console.log(ocuppiedTiles)
 
         const currentAtTiles = World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, tileItem.direction)
 
-        
         if(tileItem.isInAnyTile())
         {
             const atTile = tileItem.getTile()
-          //  console.log(`============ TILE ${atTile.x}, ${atTile.y}`)
-       
+
             for (const coord of currentAtTiles)
             {
-                //console.log(`${atTile.x + coord.x}:${atTile.y + coord.y} to false`)
-
                 ocuppiedTiles[`${atTile.x + coord.x}:${atTile.y + coord.y}`] = false
             }
-            //console.log("==")
+
         }
 
-        
-        
-
-        //World.getCoordsTileItemOccupes(tileItemInfo.size.x, tileItemInfo.size.y, tileItem.direction).map(coord => ocuppiedTiles[`${tileX + coord.x}:${tileY + coord.y}`] = false)
-
-        for (const coord of coords) {
+        for (const coord of coords)
+        {
             if(!this.tileExists(tileX + coord.x, tileY + coord.y)) return false
-
-            //console.log(`${tileX + coord.x}:${tileY + coord.y}`, ocuppiedTiles[`${tileX + coord.x}:${tileY + coord.y}`])
-
-
 
             if(ocuppiedTiles[`${tileX + coord.x}:${tileY + coord.y}`]) return false
         }
-
 
         return true
     }
@@ -249,12 +185,12 @@ export default class World
         }
     }
 
-    public getTile(x: number, y: number)
+    public getTile(x: number, y: number): Tile
     {
         return this._tiles.get(`${x}:${y}`)
     }
 
-    public getGame()
+    public getGame(): Game
     {
         return this._game
     }
