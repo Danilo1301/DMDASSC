@@ -42,7 +42,7 @@ export default class GameClient extends Game
 
 
 
-        const texture = this.getGameScene().textures.createCanvas('aja', 800, 400)
+        const texture = this.getGameScene().textures.createCanvas('aja', Three.size.x*2, Three.size.y)
         
         //this.getGameScene().textures.addCanvas('ajaxs', Three.renderer.domElement)
         //const imageData = texture.context.createImageData(400, 400);
@@ -55,7 +55,7 @@ export default class GameClient extends Game
         Three.setDirection(ThreeDirection.FRONT)
         Three.animate()
 
-        texture.context.drawImage(Three.renderer.domElement, 400, 0)
+        texture.context.drawImage(Three.renderer.domElement, Three.size.x, 0)
 
         texture.refresh()
 

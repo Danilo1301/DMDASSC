@@ -12,7 +12,7 @@ export enum ThreeDirection
 
 export default class Three
 {
-
+    public static readonly size = {x: 150, y: 200}
     public static camera: THREE.OrthographicCamera
     public static scene: THREE.Scene
     public static renderer: THREE.WebGLRenderer
@@ -20,19 +20,20 @@ export default class Three
 
     public static async init()
     {
-        const frustumSize = 6;
-        const aspect = window.innerWidth / window.innerHeight;
+        const size = this.size
+        const frustumSize = 5;
+        const aspect = size.x / size.y //window.innerWidth / window.innerHeight;
         const camera = this.camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000 );
 
         camera.position.set( -200, 200, 200 );
 
         const scene = this.scene = new THREE.Scene();
-        //scene.background = new THREE.Color( 0xFF00FF );
+        //sbcene.ackground = new THREE.Color( 0xFF00FF );
         camera.lookAt( scene.position );
 
         const renderer = this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, preserveDrawingBuffer: true } );
         renderer.setPixelRatio( 1 );
-        renderer.setSize( 400, 400 );
+        renderer.setSize( size.x, size.y );
 
         const light = new THREE.AmbientLight( 0xffffff, 1 );
         scene.add( light );
@@ -57,6 +58,8 @@ export default class Three
         
         if(this.object) this.object.rotation.y += 0.01;
     
+        this.scene.background = new THREE.Color( Math.random()*1000 );
+
         this.renderer.render( this.scene, this.camera );
 
         
@@ -94,6 +97,8 @@ export default class Three
                 */
 
                 Three.object = object.scene
+
+                object.scene.position.y = 1
 
     
 
