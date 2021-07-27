@@ -40,26 +40,20 @@ export default class GameClient extends Game
         window['Three'] = Three
 
 
+        const frames = 5
 
+        const texture = this.getGameScene().textures.createCanvas('aja', Three.size.x*frames, Three.size.y)
 
-        const texture = this.getGameScene().textures.createCanvas('aja', Three.size.x*2, Three.size.y)
-        
-        //this.getGameScene().textures.addCanvas('ajaxs', Three.renderer.domElement)
-        //const imageData = texture.context.createImageData(400, 400);
-        //imageData.data.set(pixels)
-
-        //texture.context.putImageData(imageData, 0, 0)
-
-        texture.context.drawImage(Three.renderer.domElement, 0, 0)
-
-        Three.setDirection(ThreeDirection.FRONT)
-        Three.animate()
-
-        texture.context.drawImage(Three.renderer.domElement, Three.size.x, 0)
+        for (let i = 0; i < frames; i++) {
+            Three.setDirection(i)
+            Three.animate()
+            
+            texture.context.drawImage(Three.renderer.domElement, Three.size.x * i, 0)
+        }
 
         texture.refresh()
 
-        const img = this.getGameScene().add.image(0, 0, 'aja')
+        const img = this.getGameScene().add.image(0, 300, 'aja')
         img.setOrigin(0, 0)
         img.setDepth(100)
 

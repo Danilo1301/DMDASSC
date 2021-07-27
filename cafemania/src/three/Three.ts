@@ -47,7 +47,7 @@ export default class Three
 
     public static setDirection(direction: ThreeDirection)
     {
-        const angles = [45]
+        const angles = [-45, 0, 45*3, 45*2, 45]
         const object = this.object!
         object.rotation.y = Phaser.Math.DegToRad(angles[direction])
     }
@@ -56,7 +56,7 @@ export default class Three
     {
         //requestAnimationFrame( this.animate.bind(this) );
         
-        if(this.object) this.object.rotation.y += 0.01;
+        //if(this.object) this.object.rotation.y += 0.01;
     
         this.scene.background = new THREE.Color( Math.random()*1000 );
 
