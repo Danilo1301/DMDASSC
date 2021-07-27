@@ -26,6 +26,8 @@ export default class TileItem
 
     private _currentAnim: number = 0
 
+    public isHovering: boolean = false
+
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = generateUUID()
@@ -182,6 +184,17 @@ export default class TileItem
         return {
             x: 0,
             y: 0
+        }
+    }
+
+    public static directionToString(direction: TileItemDirection): string
+    {
+        switch(direction)
+        {
+            case TileItemDirection.FRONT: return `FRONT`
+            case TileItemDirection.FRONT_FLIPPED: return `FRONT_FLIPPED`
+            case TileItemDirection.BACK: return `BACK`
+            case TileItemDirection.BACK_FLIPPED: return `BACK_FLIPPED`
         }
     }
 }

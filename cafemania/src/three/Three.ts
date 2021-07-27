@@ -1,14 +1,24 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
+export enum ThreeDirection
+{
+    FRONT,
+    FRONT_ISO,
+    SIDE,
+    BACK_ISO,
+    BACK
+}
+
 export default class Three
 {
+
     public static camera: THREE.OrthographicCamera
     public static scene: THREE.Scene
     public static renderer: THREE.WebGLRenderer
     public static object?: THREE.Group
 
-    public static init()
+    public static async init()
     {
         const frustumSize = 6;
         const aspect = window.innerWidth / window.innerHeight;
@@ -17,42 +27,92 @@ export default class Three
         camera.position.set( -200, 200, 200 );
 
         const scene = this.scene = new THREE.Scene();
-        scene.background = new THREE.Color( 0xFF00FF );
+        //scene.background = new THREE.Color( 0xFF00FF );
         camera.lookAt( scene.position );
 
-        const renderer = this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+        const renderer = this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, preserveDrawingBuffer: true } );
         renderer.setPixelRatio( 1 );
         renderer.setSize( 400, 400 );
 
+        const light = new THREE.AmbientLight( 0xffffff, 1 );
+        scene.add( light );
+
         document.body.appendChild( this.renderer.domElement );
 
-        this.loadGLTF('/static/cafemania/assets/player.glb')
+        //this.loadGLTF('/static/cafemania/assets/player.glb')
 
-        this.animate()
+        //this.animate()
     }
 
-    private static animate()
+    public static setDirection(direction: ThreeDirection)
     {
-        requestAnimationFrame( this.animate.bind(this) );
+        const angles = [45]
+        const object = this.object!
+        object.rotation.y = Phaser.Math.DegToRad(angles[direction])
+    }
+
+    public static animate()
+    {
+        //requestAnimationFrame( this.animate.bind(this) );
         
         if(this.object) this.object.rotation.y += 0.01;
     
         this.renderer.render( this.scene, this.camera );
+
+        
     }
 
-    public static loadGLTF(path: string)
+    public static async loadModel(path: string)
     {
-        const onProgress = () => console.log("onProgress")
+        return new Promise<void>((resolve) => {
+            const onProgress = () => console.log("onProgress")
     
-        const onError = () => console.log("onError")
+            const onError = (error) => console.log("onError", error)
+        
+            const scene = this.scene;
+
+            var loader = new GLTFLoader();
+            loader.load(path, function(object) {
+                
+                /*
+                    mixer = new THREE.AnimationMixer( object );
+
+					const action = mixer.clipAction( object.animations[ 0 ] );
+					action.play();
+                */
+
+                    /*
+                object.traverse( function ( child ) {
+
+                    if ( child.isMesh )
+                    {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+
+                } );
+                */
+
+                Three.object = object.scene
+
     
-        const scene = this.scene;
 
-        var loader = new GLTFLoader();
-        loader.load(path, function(gltf) {
-            const obj = Three.object = gltf.scene
+				scene.add( object.scene );
 
-            scene.add(obj);
-        }, onProgress, onError);
+                resolve()
+            }, onProgress, onError);
+        })
+    }
+
+    public static getImageData()
+    {
+        const canvas = Three.renderer.domElement
+        const gl = Three.renderer.getContext()
+
+        const pixelBuffer = new Uint8Array(canvas.width * canvas.height * 4);   
+
+        console.log(gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixelBuffer))
+
+        return pixelBuffer
     }
 }

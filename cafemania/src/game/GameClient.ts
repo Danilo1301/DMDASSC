@@ -1,4 +1,5 @@
 import Game from "@cafemania/game/Game"
+import Three, { ThreeDirection } from "@cafemania/three/Three";
 import TileTextureFactory from "@cafemania/tileItem/TileTextureFactory";
 import GameScene from "./scene/GameScene";
 import SceneManager from "./SceneManager";
@@ -30,8 +31,38 @@ export default class GameClient extends Game
         test()
     }
 
-    private onReady(): void
+    private async onReady(): Promise<void>
     {
+        await Three.init()
+        await Three.loadModel('/static/cafemania/assets/char.glb')
+        Three.animate()
+
+        window['Three'] = Three
+
+
+
+
+        const texture = this.getGameScene().textures.createCanvas('aja', 800, 400)
+        
+        //this.getGameScene().textures.addCanvas('ajaxs', Three.renderer.domElement)
+        //const imageData = texture.context.createImageData(400, 400);
+        //imageData.data.set(pixels)
+
+        //texture.context.putImageData(imageData, 0, 0)
+
+        texture.context.drawImage(Three.renderer.domElement, 0, 0)
+
+        Three.setDirection(ThreeDirection.FRONT)
+        Three.animate()
+
+        texture.context.drawImage(Three.renderer.domElement, 400, 0)
+
+        texture.refresh()
+
+        const img = this.getGameScene().add.image(0, 0, 'aja')
+        img.setOrigin(0, 0)
+        img.setDepth(100)
+
         TileTextureFactory.init(this, this.getGameScene())
 
         const world = this.createWorld()

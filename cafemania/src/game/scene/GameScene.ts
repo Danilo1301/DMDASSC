@@ -1,3 +1,4 @@
+import Three from "@cafemania/three/Three";
 import Tile from "@cafemania/tile/Tile";
 import BaseScene from "./BaseScene";
 
@@ -70,7 +71,8 @@ export default class GameScene extends BaseScene
 
         const moveScene = new MoveScene(this);
 
-        this._fpsText = this.add.text(0, -300, `0 FPS`, {fontSize: '30px'})
+        this._fpsText = this.add.text(0, -300, `0 FPS`, {fontSize: '30px',color: 'black'})
+        this._fpsText.setDepth(100)
 
         setInterval(() => {
             this._fpsText.setText(`${this.game.loop.actualFps} FPS`)
@@ -84,6 +86,7 @@ export default class GameScene extends BaseScene
         const game = this.getGame()
         const world = game.getWorlds()[0]
 
-        world.render()
+        if(world) world.render()
     }
+    
 }

@@ -34,6 +34,8 @@ export default class TileItemRender
 
     private _scene: GameScene
 
+    private _debugText: Phaser.GameObjects.BitmapText
+
     constructor(scene: GameScene, tileItemInfo: TileItemInfo)
     {
         this._scene = scene
@@ -98,6 +100,12 @@ export default class TileItemRender
         }
 
         //console.log(this._sprites)
+
+        const text = this._debugText = scene.add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
+        text.setTintFill(0x000000)
+
+        
+        text.setDepth(10000)
 
     }
 
@@ -205,10 +213,15 @@ export default class TileItemRender
 
         collisionBox.on('pointerover', function (pointer) {
             collisionBox.setFillStyle(0xff0000, 0.3)
+
+            if(self._tileItem) self._tileItem.isHovering = true
         });
 
         collisionBox.on('pointerout', function (pointer) {
             collisionBox.setFillStyle(color, alpha)
+
+            if(self._tileItem) self._tileItem.isHovering = false
+
         });
     }
 
@@ -252,6 +265,24 @@ export default class TileItemRender
             }
 
         }
+
+        if(this._tileItem)
+        {
+            if(this._tileItem.isHovering)
+            {
+                const pos = this._tileItem.getTile().position
+
+                this._debugText.setAlpha(1)
+                this._debugText.setPosition(pos.x, pos.y)
+                this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
+            } else {
+                this._debugText.setAlpha(0)
+            }
+        }
+
+        
+
+        
     }
 
     public setPosition(x: number, y: number)
