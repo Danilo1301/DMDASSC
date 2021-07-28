@@ -1,5 +1,5 @@
+import GameScene from "@cafemania/game/scene/GameScene";
 import Tile from "@cafemania/tile/Tile";
-import { generateUUID } from "three/src/math/MathUtils";
 import TileItemInfo, { TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
@@ -30,7 +30,7 @@ export default class TileItem
 
     constructor(tileItemInfo: TileItemInfo)
     {
-        this._id = generateUUID()
+        this._id = 'id' + Math.random()
         this._tileItemInfo = tileItemInfo
     }
 
@@ -102,7 +102,7 @@ export default class TileItem
 
     private getScene()
     {
-        return this.getGame().getGameScene()
+        return GameScene.getScene()
     }
 
     public serialize()

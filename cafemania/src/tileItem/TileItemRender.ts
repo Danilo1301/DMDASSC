@@ -32,18 +32,15 @@ export default class TileItemRender
 
     private _sprites: {[extraLayer: string]: {[coord: string]: TileItemRenderSprite}} = {}
 
-    private _scene: GameScene
-
     private _debugText: Phaser.GameObjects.BitmapText
 
-    constructor(scene: GameScene, tileItemInfo: TileItemInfo)
+    constructor(tileItemInfo: TileItemInfo)
     {
-        this._scene = scene
-
         this._position = new Phaser.Math.Vector2(0, 0)
 
         this._tileItemInfo = tileItemInfo
 
+        const scene = this.getScene()
         const textureName = tileItemInfo.texture
         const size = tileItemInfo.size
         const sprites = tileItemInfo.sprites
@@ -101,7 +98,7 @@ export default class TileItemRender
 
         //console.log(this._sprites)
 
-        const text = this._debugText = scene.add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
+        const text = this._debugText = this.getScene().add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
         text.setTintFill(0x000000)
 
         
@@ -148,12 +145,17 @@ export default class TileItemRender
         return sprites
     }
 
+    private getScene()
+    {
+        return GameScene.getScene()
+    }
+
     private createSpriteCollision(sprite: TileItemRenderSprite)
     {
         const tileItemInfo = this._tileItemInfo
         const x = sprite.x
         const y = sprite.y
-        const scene = this._scene
+        const scene = this.getScene()
 
         const color = 0xff0000
         const alpha = 0

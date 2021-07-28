@@ -1,10 +1,9 @@
-import GameClient from "@cafemania/game/GameClient"
+
+import GameScene from "@cafemania/game/scene/GameScene"
 import Tile from "@cafemania/tile/Tile"
 
 export default class TileTextureFactory
 {
-    private static _game: GameClient
-    private static _scene: Phaser.Scene
     private static _canvas: Phaser.Textures.CanvasTexture
     private static _textureSheetCache: {[tileId: string]: {[coord: string]: string}} = {}
     private static sprites = 1
@@ -13,11 +12,8 @@ export default class TileTextureFactory
     private static sizeY = 1
     private static texture: Phaser.Textures.Texture
 
-    public static init(game: GameClient, scene: Phaser.Scene): void
+    public static init(): void
     {
-        this._game = game
-        this._scene = scene
-
         this.setupCanvas()
     }
 
@@ -34,7 +30,7 @@ export default class TileTextureFactory
         this.sizeY = size.y
         this.sprites = sprites
         this.layers = layers
-        this.texture = this._scene.textures.get(textureName)
+        this.texture = GameScene.getScene().textures.get(textureName)
 
         const image = this.getImage()
 
@@ -63,7 +59,7 @@ export default class TileTextureFactory
                 const coord = `${x}_${y}`
 
                 const storeToCacheName = `${textureName}_${coord}`
-                const textureCanvas = this._scene.textures.createCanvas(storeToCacheName, sprites * Tile.SIZE.x, layers * rectSize.y)
+                const textureCanvas = GameScene.getScene().textures.createCanvas(storeToCacheName, sprites * Tile.SIZE.x, layers * rectSize.y)
                 
                 this._textureSheetCache[textureName][coord] = storeToCacheName
 
@@ -112,7 +108,7 @@ export default class TileTextureFactory
 
     private static setupCanvas()
     {
-        this._canvas = this._scene.textures.createCanvas('TileTextureFactory_Canvas', 100, 100)
+        this._canvas = GameScene.getScene().textures.createCanvas('TileTextureFactory_Canvas', 100, 100)
     }
 
     private static setCanvasImage(image: HTMLImageElement)

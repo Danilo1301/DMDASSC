@@ -1,5 +1,3 @@
-import Three from "@cafemania/three/Three";
-import Tile from "@cafemania/tile/Tile";
 import BaseScene from "./BaseScene";
 
 class MoveScene
@@ -29,13 +27,20 @@ class MoveScene
 
             const delta = new Phaser.Math.Vector2(startPos.x - pointer.x, startPos.y - pointer.y);
 
-            scene.cameras.main.setScroll(startScenePos.x + delta.x, startScenePos.y + delta.y)
+            const zoom = scene.cameras.main.zoom
+
+            scene.cameras.main.setScroll(
+                Math.round(startScenePos.x + (delta.x / zoom)),
+                Math.round(startScenePos.y + (delta.y / zoom))
+            )
         });
     }
 }
 
 export default class GameScene extends BaseScene
 {
+    private static _instance: GameScene
+
     private _fpsText!: Phaser.GameObjects.Text
 
     public groundLayer!: Phaser.GameObjects.Layer
@@ -44,6 +49,8 @@ export default class GameScene extends BaseScene
     constructor()
     {
         super('GameScene')
+
+        GameScene._instance = this
     }
 
     public preload(): void
@@ -79,15 +86,8 @@ export default class GameScene extends BaseScene
         this._fpsText.setDepth(100)
 
         setInterval(() => {
-            this._fpsText.setText(`${this.game.loop.actualFps} FPS`)
+            this._fpsText.setText(`${Math.round(this.game.loop.actualFps)} FPS`)
         })
-
-        this.getGame().events.emit("ready");
-
-        this.getGame().createWorld()
-
-
-        
     }
 
     public update(): void
@@ -96,6 +96,11 @@ export default class GameScene extends BaseScene
         const world = game.getWorlds()[0]
 
         if(world) world.render()
+    }
+
+    public static getScene()
+    {
+        return this._instance
     }
     
 }

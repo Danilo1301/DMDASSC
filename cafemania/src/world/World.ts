@@ -3,6 +3,7 @@ import TileItem, { TileItemDirection } from "@cafemania/tileItem/TileItem";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import Tile from "@cafemania/tile/Tile"
 import Player from "@cafemania/player/Player";
+import GameScene from "@cafemania/game/scene/GameScene";
 
 export default class World
 {
@@ -182,7 +183,7 @@ export default class World
  
     public render(): void
     {
-        const scene = this.getGame().getGameScene()
+        const scene = GameScene.getScene()
 
         if(!scene.groundLayer) scene.groundLayer = scene.add.layer()
         if(!scene.objectsLayer) scene.objectsLayer = scene.add.layer()

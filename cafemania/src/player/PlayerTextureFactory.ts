@@ -1,7 +1,7 @@
 import SceneManager from "@cafemania/game/SceneManager";
 import Three from "@cafemania/three/Three";
 import * as THREE from 'three';
-import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import PlayerAnimations from "./PlayerAnimations";
 
 

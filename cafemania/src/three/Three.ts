@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+
 
 export enum ThreeDirection
 {
@@ -40,7 +41,7 @@ export default class Three
         const light = new THREE.AmbientLight( 0xffffff, 1 );
         scene.add( light );
 
-        document.body.appendChild( this.renderer.domElement );
+        //document.body.appendChild( this.renderer.domElement );
     }
 
     public static setDirection(direction: ThreeDirection)

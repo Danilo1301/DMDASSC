@@ -1,5 +1,7 @@
 import TileItem from "@cafemania/tileItem/TileItem"
 import World from "../world/World"
+import Phaser from 'phaser'
+import GameScene from "@cafemania/game/scene/GameScene";
 
 export default class Tile
 {
@@ -84,7 +86,7 @@ export default class Tile
 
     private getScene()
     {
-        return this.getWorld().getGame().getGameScene()
+        return GameScene.getScene()
     }
 
     public getWorld(): World

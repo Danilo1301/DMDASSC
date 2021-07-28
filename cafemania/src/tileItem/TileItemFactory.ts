@@ -150,10 +150,7 @@ export class TileItemFactory
 
         const tileItemInfo = this.getTileItemInfo(id)
 
-        const tileItemRender = new TileItemRender(
-            this.getGame().getGameScene(),
-            tileItemInfo
-        )
+        const tileItemRender = new TileItemRender(tileItemInfo)
 
         return tileItemRender
     }

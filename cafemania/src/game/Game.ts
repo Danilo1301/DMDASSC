@@ -1,8 +1,7 @@
 import World from "@cafemania/world/World"
-import "phaser"
+import Phaser from 'phaser'
 import SceneManager from "./SceneManager"
 import { TileItemFactory } from "../tileItem/TileItemFactory"
-import GameScene from "./scene/GameScene"
 import PlayerAnimations from "@cafemania/player/PlayerAnimations"
 
 export default class Game
@@ -12,8 +11,6 @@ export default class Game
     public tileItemFactory: TileItemFactory
 
     private _worlds = new Phaser.Structs.Map<string, World>([])
-
-    private _gameScene?: Phaser.Scene;
 
     constructor()
     {
@@ -30,7 +27,13 @@ export default class Game
     {
         await SceneManager.createPhaserInstance()
 
+        console.log("resolved")
+
         PlayerAnimations.init()
+
+        this.events.emit("ready")
+
+        this.createWorld()
     }
 
     public startScene(key: string, scene: typeof Phaser.Scene): Phaser.Scene
@@ -51,15 +54,5 @@ export default class Game
         this._worlds.set(id, world);
 
         return world
-    }
-
-    public getGameScene(): GameScene
-    {
-        return this._gameScene! as GameScene
-    }
-
-    public setGameScene(scene: Phaser.Scene): void
-    {
-        this._gameScene = scene
     }
 }
