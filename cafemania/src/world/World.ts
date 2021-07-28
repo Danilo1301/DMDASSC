@@ -2,6 +2,7 @@ import Game from "@cafemania/game/Game";
 import TileItem, { TileItemDirection } from "@cafemania/tileItem/TileItem";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import Tile from "@cafemania/tile/Tile"
+import Player from "@cafemania/player/Player";
 
 export default class World
 {
@@ -9,9 +10,16 @@ export default class World
 
     private _tiles = new Phaser.Structs.Map<string, Tile>([])
 
+    private _players = new Phaser.Structs.Map<string, Player>([])
+
     constructor(game: Game)
     {
         this._game = game
+
+        const player = new Player(this)
+
+ 
+        this._players.set('playerid', player)
 
         const mapSize = {x: 15, y: 15}
         
@@ -182,6 +190,11 @@ export default class World
         for (const tile of this.getTiles())
         {
             tile.render()
+        }
+
+        for (const player of this._players.values())
+        {
+            player.render()
         }
     }
 

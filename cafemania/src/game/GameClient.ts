@@ -36,44 +36,6 @@ export default class GameClient extends Game
     {
         await Three.init()
         
-
-        window['Three'] = Three
-
-        /*
-        Three.animate()
-
-        
-
-
-        const frames = 5
-
-        const texture = this.getGameScene().textures.createCanvas('aja', Three.size.x*frames, Three.size.y)
-
-        for (let i = 0; i < frames; i++) {
-            Three.setDirection(i)
-            Three.animate()
-            
-            texture.context.drawImage(Three.renderer.domElement, Three.size.x * i, 0)
-        }
-
-        texture.refresh()
-
-        const img = this.getGameScene().add.image(0, 300, 'aja')
-        img.setOrigin(0, 0)
-        img.setDepth(100)
-        */
-
-
-
-
         TileTextureFactory.init(this, this.getGameScene())
-
-        const world = this.createWorld()
-
-
-        const player = new Player()
-        player._scene = this.getGameScene()
-
-        player.render()
     }
 }

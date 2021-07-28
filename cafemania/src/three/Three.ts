@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export enum ThreeDirection
 {
@@ -12,7 +12,7 @@ export enum ThreeDirection
 
 export default class Three
 {
-    public static readonly size = {x: 150, y: 200}
+    public static size = new Phaser.Math.Vector2(175, 200)
     public static camera: THREE.OrthographicCamera
     public static scene: THREE.Scene
     public static renderer: THREE.WebGLRenderer
@@ -28,6 +28,8 @@ export default class Three
         camera.position.set( -200, 200, 200 );
 
         const scene = this.scene = new THREE.Scene();
+
+        scene.background = new THREE.Color( 0xff0000 )
 
         camera.lookAt( scene.position );
 
@@ -53,9 +55,9 @@ export default class Three
         this.renderer.render( this.scene, this.camera );
     }
 
-    public static async loadModel(path: string)
+    public static async loadGLTFModel(path: string)
     {
-        return new Promise<THREE.Group>((resolve) => {
+        return new Promise<GLTF>((resolve) => {
             const onProgress = () => console.log("onProgress")
     
             const onError = (error) => console.log("onError", error)
@@ -76,25 +78,10 @@ export default class Three
 
             var loader = new GLTFLoader();
             loader.load(path, function(gltf) {
+
                 const object = Three.object = gltf.scene
                 object.position.y = 1
 
-                object.traverse( function( o ) 
-                 {            
-                   if ((o instanceof THREE.Mesh))
-                    { 
-                        console.log(o.name)
-
-                        if(o.name != "Head") return
-
-                        let mat = o.material;
-
-                        //mat.map = map;
-
-                        //console.log(o.name, map)
- 
-                    }
-                });
 
                 /*
                     mixer = new THREE.AnimationMixer( object );
@@ -115,9 +102,9 @@ export default class Three
                 } );
                 */
         
-				scene.add( object );
+				scene.add(object);
 
-                resolve(object)
+                resolve(gltf)
             }, onProgress, onError);
         })
     }

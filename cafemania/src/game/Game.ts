@@ -3,6 +3,7 @@ import "phaser"
 import SceneManager from "./SceneManager"
 import { TileItemFactory } from "../tileItem/TileItemFactory"
 import GameScene from "./scene/GameScene"
+import PlayerAnimations from "@cafemania/player/PlayerAnimations"
 
 export default class Game
 {
@@ -28,6 +29,8 @@ export default class Game
     private async init(): Promise<void>
     {
         await SceneManager.createPhaserInstance()
+
+        PlayerAnimations.init()
     }
 
     public startScene(key: string, scene: typeof Phaser.Scene): Phaser.Scene

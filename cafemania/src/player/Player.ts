@@ -1,15 +1,17 @@
 import GameScene from "@cafemania/game/scene/GameScene"
+import World from "@cafemania/world/World"
 import PlayerTextureFactory from "./PlayerTextureFactory"
 
 export default class Player
 {
-    public _scene!: GameScene
+    public _scene: GameScene
 
-    private _createdSprites: boolean = false
+    private _creatingSprites: boolean = false
+    private _sprite?: Phaser.GameObjects.Sprite
 
-    constructor()
+    constructor(world: World)
     {
-
+        this._scene = world.getGame().getGameScene()
     }
 
     public getScene()
@@ -17,19 +19,26 @@ export default class Player
         return this._scene!
     }
 
-    public async render()
+    private async createSprite()
     {
-        console.log("render")
-
-        if(!this._createdSprites)
+        if(!this._creatingSprites)
         {
-            this._createdSprites = true
+            this._creatingSprites = true
 
-            await PlayerTextureFactory.create()
+            await PlayerTextureFactory.create(`playertexture1`)
 
-            var img = this.getScene().add.image(0, 0, 'tmp')
-            img.setDepth(100000)
-            img.setScale(0.2)
+            this._sprite = this.getScene().add.sprite(0, 0, 'playertexture1')
+            this._sprite.setDepth(100000)
+
+            this._creatingSprites = false
+        } 
+    }
+
+    public render()
+    {
+        if(!this._sprite)
+        {
+            this.createSprite()
         }
     }
 }

@@ -75,7 +75,7 @@ export default class GameScene extends BaseScene
 
         const moveScene = new MoveScene(this);
 
-        this._fpsText = this.add.text(0, -300, `0 FPS`, {fontSize: '30px',color: 'black'})
+        this._fpsText = this.add.text(0, -200, `0 FPS`, {fontSize: '30px',color: 'black'})
         this._fpsText.setDepth(100)
 
         setInterval(() => {
@@ -83,6 +83,11 @@ export default class GameScene extends BaseScene
         })
 
         this.getGame().events.emit("ready");
+
+        this.getGame().createWorld()
+
+
+        
     }
 
     public update(): void

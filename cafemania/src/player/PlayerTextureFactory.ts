@@ -1,62 +1,157 @@
 import SceneManager from "@cafemania/game/SceneManager";
 import Three from "@cafemania/three/Three";
 import * as THREE from 'three';
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import PlayerAnimations from "./PlayerAnimations";
 
-enum BodyPart
-{
-    HEAD = "Head",
-    HAIR = "Hair",
-    BODY = "Body",
-    LEGS = "Legs"
-}
+
 
 export default class PlayerTextureFactory
 {
-    private static _bodyParts = new Map<BodyPart, THREE.Mesh>()
+    private static _gltf?: GLTF
+    
+    private static _mixer: THREE.AnimationMixer
+    private static _anim: THREE.AnimationAction
+    private static _clip: THREE.AnimationClip
+
+    private static _cachedTextures: Phaser.Textures.CanvasTexture[] = []
 
     public static async init()
     {
-        const object = await Three.loadModel('/static/cafemania/assets/char.glb')
+        if(this._gltf) return
 
-        object.traverse(o => {
-            if (o instanceof THREE.Mesh)
-            {
-                if(o.name == "Head") this._bodyParts.set(BodyPart.HEAD, o)
-                if(o.name == "Hair") this._bodyParts.set(BodyPart.HAIR, o)
-                if(o.name == "Body") this._bodyParts.set(BodyPart.BODY, o)
-                if(o.name == "Legs") this._bodyParts.set(BodyPart.LEGS, o)
-            }
-        })
+        const gltf = this._gltf = await Three.loadGLTFModel('/static/cafemania/assets/char.glb')
 
-        console.log(this._bodyParts)
+        this._mixer = new THREE.AnimationMixer( gltf.scene );
 
         Three.animate()
     }
 
-    public static async create()
+    public static initAnimation(name: string)
+    {
+        for (const clip of this._gltf!.animations)
+        {
+            if(clip.name == name)
+            {
+                this._clip = clip
+
+                const anim = this._anim = this._mixer.clipAction(clip)
+                anim.play()
+
+                console.log(`Playing '${name}'`)
+
+                return
+            }
+        }
+    }
+
+    public static setAnimFrame(frame: number, totalFrames: number)
+    {
+        this._anim.time = 0
+        this._mixer.update(this._clip.duration / totalFrames * (frame))
+    }
+
+    public static async create(name: string)
     {
         await this.init()
 
-        const mixedHead = this.mixTextures(['head', 'eye', 'eye2'], 1024, 831)
+        const head_texture = this.mixTextures(['head'], 1024, 831)
+        const body_texture = this.mixTextures(['head'], 1024, 831)
+        const legs_texture = this.mixTextures(['head'], 1024, 831)
 
-        const texture = new THREE.CanvasTexture(mixedHead.getCanvas());
-        texture.flipY = false;
+        this._gltf!.scene.traverse(o => {
 
-        const mat: any = this._bodyParts.get(BodyPart.HEAD)!.material
+            if(o instanceof THREE.SkinnedMesh)
+            {
+                if(o.material.name == "HeadMaterial") o.material.map = head_texture
+                if(o.material.name == "BodyMaterial") o.material.map = body_texture
+                if(o.material.name == "LegMaterial") o.material.map = legs_texture
 
-        mat.map = texture
+                console.log(o.material.name)
+            }
 
-        Three.animate()
+            
+        })
 
-        //mixedHead.destroy()
 
-    
+
+        const animFrames = 2
+        const directions = 5
+
+        const scene = SceneManager.getScene()
+        const frames = directions * animFrames
+        const texture = scene.textures.createCanvas(name, Three.size.x*frames, Three.size.y)
+
+        const anims = PlayerAnimations.getAnimations()
+
+        let px = 0
+        let py = 0
+
+        for (const anim of anims)
+        {
+            this.initAnimation(anim.name)
+
+            for (let direction = 0; direction < directions; direction++)
+            {
+                for (let frame = 0; frame < anim.frames; frame++)
+                {
+                    this.setAnimFrame(frame, animFrames)
+
+                    Three.setDirection(direction)
+                    Three.animate()
+
+                    const rect = new Phaser.Geom.Rectangle(Three.size.x * px, Three.size.y * py, Three.size.x, Three.size.y)
+                    
+                    texture.context.drawImage(Three.renderer.domElement, rect.x, rect.y)    
+
+                    const frameName = `${anim.name}_${direction}_${frame}`
+
+                    texture.add(frameName, 0, rect.x, rect.y, rect.width, rect.height)
+
+                    console.log(frameName)
+                }
+
+                px++
+            }
+
+            px = 0
+            py++
+        }
+
+        let n = 0
+
+        for (let anim = 0; anim < 1; anim++)
+        {
+            for (let d = 0; d < directions; d++)
+            {
+                for (let f = 0; f < animFrames; f++)
+                {
+                    this.setAnimFrame(f, animFrames)
+
+                    Three.setDirection(d)
+                    Three.animate()
+                    
+                    texture.context.drawImage(Three.renderer.domElement, Three.size.x * n, 0)    
+
+                    texture.add(`${anim}_${d}_${f}`, 0, Three.size.x * n, 0, Three.size.x, Three.size.y)
+
+                    n++
+                }
+            }
+        }
+
+        
+
+        texture.refresh()
+
+
+        //mixedHead.destroy()    
     }
 
     public static mixTextures(textures: string[], width: number, height: number)
     {
         const textureManager = SceneManager.getScene().textures
-        const canvasTexture = textureManager.createCanvas('tmp', width, height)
+        const canvasTexture = textureManager.createCanvas('tmp' + this._cachedTextures.length, width, height)
 
         for (const t of textures) {
             const texture = textureManager.get(t)
@@ -66,7 +161,12 @@ export default class PlayerTextureFactory
 
         canvasTexture.refresh()
 
-        return canvasTexture
+        const texture = new THREE.CanvasTexture(canvasTexture.getCanvas());
+        texture.flipY = false;
+
+        this._cachedTextures.push(canvasTexture)
+
+        return texture
     }
 
 
