@@ -28,6 +28,9 @@ export default class Player
 
             this._sprite = this.getScene().add.sprite(0, 0, 'playertexture1')
             this._sprite.setDepth(100000)
+            this._sprite.setFrame('TestLiftHand_2_0')
+
+            console.log("t")
 
             this._creatingSprites = false
         } 
