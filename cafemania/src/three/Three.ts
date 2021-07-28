@@ -28,7 +28,7 @@ export default class Three
         camera.position.set( -200, 200, 200 );
 
         const scene = this.scene = new THREE.Scene();
-        //sbcene.ackground = new THREE.Color( 0xFF00FF );
+
         camera.lookAt( scene.position );
 
         const renderer = this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, preserveDrawingBuffer: true } );
@@ -39,10 +39,6 @@ export default class Three
         scene.add( light );
 
         document.body.appendChild( this.renderer.domElement );
-
-        //this.loadGLTF('/static/cafemania/assets/player.glb')
-
-        //this.animate()
     }
 
     public static setDirection(direction: ThreeDirection)
@@ -54,29 +50,52 @@ export default class Three
 
     public static animate()
     {
-        //requestAnimationFrame( this.animate.bind(this) );
-        
-        //if(this.object) this.object.rotation.y += 0.01;
-    
-        this.scene.background = new THREE.Color( Math.random()*1000 );
-
         this.renderer.render( this.scene, this.camera );
-
-        
     }
 
     public static async loadModel(path: string)
     {
-        return new Promise<void>((resolve) => {
+        return new Promise<THREE.Group>((resolve) => {
             const onProgress = () => console.log("onProgress")
     
             const onError = (error) => console.log("onError", error)
         
             const scene = this.scene;
 
+            /*
+            const textureLoader = new THREE.TextureLoader();
+
+            const map1 = textureLoader.load("/static/cafemania/assets/eye.png");
+            const map = textureLoader.load("/static/cafemania/assets/eye2.png");
+
+            map.encoding = THREE.sRGBEncoding;
+
+            map.flipY = false;
+
+            */
+
             var loader = new GLTFLoader();
-            loader.load(path, function(object) {
-                
+            loader.load(path, function(gltf) {
+                const object = Three.object = gltf.scene
+                object.position.y = 1
+
+                object.traverse( function( o ) 
+                 {            
+                   if ((o instanceof THREE.Mesh))
+                    { 
+                        console.log(o.name)
+
+                        if(o.name != "Head") return
+
+                        let mat = o.material;
+
+                        //mat.map = map;
+
+                        //console.log(o.name, map)
+ 
+                    }
+                });
+
                 /*
                     mixer = new THREE.AnimationMixer( object );
 
@@ -95,16 +114,10 @@ export default class Three
 
                 } );
                 */
+        
+				scene.add( object );
 
-                Three.object = object.scene
-
-                object.scene.position.y = 1
-
-    
-
-				scene.add( object.scene );
-
-                resolve()
+                resolve(object)
             }, onProgress, onError);
         })
     }

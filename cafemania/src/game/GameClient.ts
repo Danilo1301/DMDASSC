@@ -1,4 +1,5 @@
 import Game from "@cafemania/game/Game"
+import Player from "@cafemania/player/Player";
 import Three, { ThreeDirection } from "@cafemania/three/Three";
 import TileTextureFactory from "@cafemania/tileItem/TileTextureFactory";
 import GameScene from "./scene/GameScene";
@@ -17,8 +18,8 @@ export default class GameClient extends Game
         const game = SceneManager.getGame()
 
         document.body.style.height = "100%"
-        game.canvas.style.width = "100%"
-        game.canvas.style.height = "100%"
+        //game.canvas.style.width = "100%"
+        //game.canvas.style.height = "100%"
 
         const test = () => {
             this.getGameScene().scale.setGameSize( Math.round(700 * window.innerWidth/window.innerHeight), 725)
@@ -34,10 +35,14 @@ export default class GameClient extends Game
     private async onReady(): Promise<void>
     {
         await Three.init()
-        await Three.loadModel('/static/cafemania/assets/char.glb')
-        Three.animate()
+        
 
         window['Three'] = Three
+
+        /*
+        Three.animate()
+
+        
 
 
         const frames = 5
@@ -56,9 +61,19 @@ export default class GameClient extends Game
         const img = this.getGameScene().add.image(0, 300, 'aja')
         img.setOrigin(0, 0)
         img.setDepth(100)
+        */
+
+
+
 
         TileTextureFactory.init(this, this.getGameScene())
 
         const world = this.createWorld()
+
+
+        const player = new Player()
+        player._scene = this.getGameScene()
+
+        player.render()
     }
 }
