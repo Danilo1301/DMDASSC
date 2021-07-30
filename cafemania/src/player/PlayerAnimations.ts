@@ -10,7 +10,8 @@ export default class PlayerAnimations
 
     public static init()
     {
-        this.add('TestLiftHand', 2)
+        this.add('Eat', 3)
+        this.add('Idle', 3)
     }
 
     public static getAnimations(): PlayerAnimationInfo[]

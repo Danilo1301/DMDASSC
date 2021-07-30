@@ -26,13 +26,27 @@ export default class Player
 
             await PlayerTextureFactory.default.create(`playertexture1`)
 
+      
+
             this._sprite = this.getScene().add.sprite(0, 0, 'playertexture1')
             this._sprite.setDepth(100000)
-            this._sprite.setFrame('TestLiftHand_2_0')
+            //this._sprite.setOrigin(0, 0)
+
+            //this._sprite.setFrame('TestLiftHand_2_0')
 
             console.log("t")
 
             this._creatingSprites = false
+
+            this._sprite.anims.create({
+                key: 'pulse',
+                frames: this._sprite.anims.generateFrameNumbers('playertexture1', { }),
+                frameRate: 5,
+                repeat: -1
+            });
+
+            this._sprite.anims.play('pulse')
+            
         } 
     }
 

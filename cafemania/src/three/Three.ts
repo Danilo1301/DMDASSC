@@ -1,16 +1,6 @@
 import * as THREE from 'three';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-
-export enum ThreeDirection
-{
-    FRONT,
-    FRONT_ISO,
-    SIDE,
-    BACK_ISO,
-    BACK
-}
-
 export default class Three
 {
     public static size = new Phaser.Math.Vector2(175, 200)
@@ -30,7 +20,7 @@ export default class Three
 
         const scene = this.scene = new THREE.Scene();
 
-        scene.background = new THREE.Color( 0xff0000 )
+        //scene.background = new THREE.Color( 0xff0000 )
 
         camera.lookAt( scene.position );
 
@@ -44,11 +34,9 @@ export default class Three
         //document.body.appendChild( this.renderer.domElement );
     }
 
-    public static setDirection(direction: ThreeDirection)
+    public static setAngle(deg: number)
     {
-        const angles = [-45, 0, 45*3, 45*2, 45]
-        const object = this.object!
-        object.rotation.y = Phaser.Math.DegToRad(angles[direction])
+        this.object!.rotation.y = Phaser.Math.DegToRad(deg)
     }
 
     public static animate()

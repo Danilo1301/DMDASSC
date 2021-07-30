@@ -1,10 +1,9 @@
+import { Direction, Directions } from "@cafemania/game/Direction";
 import SceneManager from "@cafemania/game/SceneManager";
 import Three from "@cafemania/three/Three";
 import * as THREE from 'three';
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import PlayerAnimations from "./PlayerAnimations";
-
-
 
 export default class PlayerTextureFactory
 {
@@ -16,6 +15,29 @@ export default class PlayerTextureFactory
 
     private static _cachedTextures: Phaser.Textures.CanvasTexture[] = []
 
+    private static _spritesDirections = [
+        {
+            angle: -45,
+            name: "Front"
+        },
+        {
+            angle: 0,
+            name: "FrontIso"
+        },
+        {
+            angle: 45,
+            name: "Side"
+        },
+        {
+            angle: 45*3,
+            name: "Back"
+        },
+        {
+            angle: 45*4,
+            name: "BackIso"
+        }
+    ]
+
     public static async init()
     {
         if(this._gltf) return
@@ -23,32 +45,37 @@ export default class PlayerTextureFactory
         const gltf = this._gltf = await Three.loadGLTFModel('/static/cafemania/assets/char.glb')
 
         this._mixer = new THREE.AnimationMixer( gltf.scene );
+        this._clip = gltf.animations[0]
+
+        const anim = this._anim = this._mixer.clipAction(this._clip)
+                
+        anim.reset()
+        anim.play()
 
         Three.animate()
     }
 
-    public static initAnimation(name: string)
-    {
-        for (const clip of this._gltf!.animations)
-        {
-            if(clip.name == name)
-            {
-                this._clip = clip
-
-                const anim = this._anim = this._mixer.clipAction(clip)
-                anim.play()
-
-                console.log(`Playing '${name}'`)
-
-                return
-            }
-        }
-    }
-
     public static setAnimFrame(frame: number, totalFrames: number)
     {
-        this._anim.time = 0
-        this._mixer.update(this._clip.duration / totalFrames * (frame))
+        /*
+        console.log(this._clip.duration)
+
+        this._anim.time = frame * (this._clip.duration / totalFrames)
+        this._mixer.update(0)
+
+        console.log(`setAnimFrame`, frame, totalFrames, this._clip.duration / totalFrames * (frame), this._clip.duration)
+        */
+        const timeInSeconds = frame * ((this._clip.duration - (this._clip.duration*0.01)) / (totalFrames-1))
+        const animMixer: any = this._mixer
+        
+        console.log(this._clip.duration)
+
+
+        animMixer.time=0;
+            for(var i=0;i<animMixer._actions.length;i++){
+            animMixer._actions[i].time=0;
+        }
+        animMixer.update(timeInSeconds)
     }
 
     public static async create(name: string)
@@ -75,75 +102,88 @@ export default class PlayerTextureFactory
 
 
 
-        const animFrames = 2
-        const directions = 5
+        const anims = PlayerAnimations.getAnimations()
+
+        let animFrames = 0
+
+        anims.map(anim => {
+            animFrames += anim.frames * this._spritesDirections.length
+        })
+
 
         const scene = SceneManager.getScene()
-        const frames = directions * animFrames
-        const texture = scene.textures.createCanvas(name, Three.size.x*frames, Three.size.y)
+        
 
-        const anims = PlayerAnimations.getAnimations()
+
+        let numFrames = 0
+
+        let totalAnimFrames = 0
+
+        for (const anim of anims)
+        {
+            totalAnimFrames += anim.frames
+
+            for (let direction = 0; direction < this._spritesDirections.length; direction++)
+            {
+                for (let frame = 0; frame < anim.frames; frame++) {
+                    numFrames++
+                    
+                }
+            }
+        }
+
+        const maxX = Math.floor(Math.sqrt(numFrames))
+        
+        const texture = scene.textures.createCanvas(name, Three.size.x*maxX, Three.size.y*Math.ceil(Math.sqrt(numFrames)))
+
 
         let px = 0
         let py = 0
 
+        let frameI = 0
+
+        let pastFrames = 0
+
         for (const anim of anims)
         {
-            this.initAnimation(anim.name)
-
-            for (let direction = 0; direction < directions; direction++)
+            for (let direction = 0; direction < this._spritesDirections.length; direction++)
             {
                 for (let frame = 0; frame < anim.frames; frame++)
                 {
-                    this.setAnimFrame(frame, animFrames)
+                    this.setAnimFrame(pastFrames + frame, totalAnimFrames)
 
-                    Three.setDirection(direction)
+                    console.log(`setAnimFrame ${pastFrames + frame} / ${totalAnimFrames}`)
+
+                    Three.setAngle(this._spritesDirections[direction].angle)
                     Three.animate()
 
                     const rect = new Phaser.Geom.Rectangle(Three.size.x * px, Three.size.y * py, Three.size.x, Three.size.y)
                     
                     texture.context.drawImage(Three.renderer.domElement, rect.x, rect.y)    
 
-                    const frameName = `${anim.name}_${direction}_${frame}`
-
-                    texture.add(frameName, 0, rect.x, rect.y, rect.width, rect.height)
-
-                    console.log(frameName)
-                }
-
-                px++
-            }
-
-            px = 0
-            py++
-        }
-
-        let n = 0
-
-        for (let anim = 0; anim < 1; anim++)
-        {
-            for (let d = 0; d < directions; d++)
-            {
-                for (let f = 0; f < animFrames; f++)
-                {
-                    this.setAnimFrame(f, animFrames)
-
-                    Three.setDirection(d)
-                    Three.animate()
+                    console.log(frameI, maxX, '-', px, py)
                     
-                    texture.context.drawImage(Three.renderer.domElement, Three.size.x * n, 0)    
+                    texture.add(frameI, 0, rect.x, rect.y, rect.width, rect.height)
 
-                    texture.add(`${anim}_${d}_${f}`, 0, Three.size.x * n, 0, Three.size.x, Three.size.y)
+                    frameI++;
+                    px++
 
-                    n++
+                    if(frameI % maxX == 0 && frameI != 0)
+                    {
+                        py++
+                        px = 0
+                    }
                 }
             }
-        }
 
-        
+            pastFrames += anim.frames
+  
+        }
 
         texture.refresh()
 
+
+        console.log("C ",name)
 
         //mixedHead.destroy()    
     }
