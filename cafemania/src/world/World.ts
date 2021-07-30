@@ -17,10 +17,10 @@ export default class World
     {
         this._game = game
 
-        const player = new Player(this)
-
- 
-        this._players.set('playerid', player)
+        for (let i = 0; i < 20; i++) 
+        {
+            this._players.set('player'+i, new Player(this, 'player'+i))
+        }
 
         const mapSize = {x: 15, y: 15}
         
@@ -39,7 +39,7 @@ export default class World
         }
 
         for (let x = 2; x < 12; x += 2) {
-            this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(x, 1)) 
+            this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(x, 1)) 
         }
 
         for (let x = 4; x < 12; x += 2) {
@@ -57,7 +57,7 @@ export default class World
             this.putTileItemInTile(tileItem, this.getTile(x, 0))
         }
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(3, 3))
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
     }
 
     public putTileItemInTile(tileItem: TileItem, tile: Tile): void
@@ -68,7 +68,7 @@ export default class World
         
         tile.addTileItem(tileItem)
 
-        console.log(`[World] TileItem '${tileItem.getTileItemInfo().name}' was placed at tile (${tile.x}, ${tile.y})`)
+        //console.log(`[World] TileItem '${tileItem.getTileItemInfo().name}' was placed at tile (${tile.x}, ${tile.y})`)
     }
 
     public tileExists(x: number, y: number): boolean

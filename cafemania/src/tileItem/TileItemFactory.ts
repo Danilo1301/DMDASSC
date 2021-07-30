@@ -80,6 +80,24 @@ export class TileItemFactory
         })
 
         this.addTileItemInfo({
+            id: 'stove1',
+            name: 'stove1',
+            texture: 'stove1',
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            type: TileItemType.STOVE,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1,2),
+            sprites: 2,
+            layers: 2,
+            extraLayers: 1,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 40
+            }
+        })
+
+        this.addTileItemInfo({
             id: 'floor1',
             name: 'floor1',
             texture: 'floor1',
@@ -114,6 +132,8 @@ export class TileItemFactory
                 height: 0
             }
         })
+
+
     }
 
     public createTileItem(id: string): TileItem

@@ -142,10 +142,10 @@ export default class Tile
 
     public static getPosition(x: number, y: number)
     {
-        const position = {
-            x: x * ((Tile.SIZE.x/2)-1),
-            y: y * ((Tile.SIZE.y/2)-0.5)
-        }
+        const position = new Phaser.Math.Vector2(
+            x * ((Tile.SIZE.x/2)-1),
+            y * ((Tile.SIZE.y/2)-0.5)
+        )
 
         position.y -= x * ((Tile.SIZE.y/2)-0.5)
         position.x += y * ((Tile.SIZE.x/2)-1)

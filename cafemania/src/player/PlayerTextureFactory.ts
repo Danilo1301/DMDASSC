@@ -5,6 +5,12 @@ import * as THREE from 'three';
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import PlayerAnimations from "./PlayerAnimations";
 
+interface QueryItem
+{
+    callback: () => void
+    name: string
+}
+
 export default class PlayerTextureFactory
 {
     private static _gltf?: GLTF
@@ -14,6 +20,9 @@ export default class PlayerTextureFactory
     private static _clip: THREE.AnimationClip
 
     private static _cachedTextures: Phaser.Textures.CanvasTexture[] = []
+
+    private static _query: QueryItem[] = []
+    private static _running: boolean = false
 
     private static _spritesDirections = [
         {
@@ -42,7 +51,11 @@ export default class PlayerTextureFactory
     {
         if(this._gltf) return
 
+        console.log(this._gltf)
+
         const gltf = this._gltf = await Three.loadGLTFModel('/static/cafemania/assets/char.glb')
+
+        console.log(this._gltf)
 
         this._mixer = new THREE.AnimationMixer( gltf.scene );
         this._clip = gltf.animations[0]
@@ -78,12 +91,41 @@ export default class PlayerTextureFactory
         animMixer.update(timeInSeconds)
     }
 
-    public static async create(name: string)
+    private static async process()
     {
+        if(this._running)
+        {
+            console.log("Running, wait")
+            return
+        }
+
+        if(this._query.length == 0)
+        {
+            console.log("Query is empty")
+            return
+        }
+
+        this._running = true
+
+        const queryItem = this._query.splice(0, 1)[0]
+
+        console.log("Started")
+
         await this.init()
 
+        //
+        let t: string[] = []
+
+        if(Math.random() > 0.5)
+        {
+            t.push('body2')
+        } else {
+            t.push('body1')
+        }
+        //
+
         const head_texture = this.mixTextures(['head'], 1024, 831)
-        const body_texture = this.mixTextures(['head'], 1024, 831)
+        const body_texture = this.mixTextures(t, 1024, 1024)
         const legs_texture = this.mixTextures(['head'], 1024, 831)
 
         this._gltf!.scene.traverse(o => {
@@ -94,7 +136,7 @@ export default class PlayerTextureFactory
                 if(o.material.name == "BodyMaterial") o.material.map = body_texture
                 if(o.material.name == "LegMaterial") o.material.map = legs_texture
 
-                console.log(o.material.name)
+                //console.log(o.material.name)
             }
 
             
@@ -134,7 +176,7 @@ export default class PlayerTextureFactory
 
         const maxX = Math.floor(Math.sqrt(numFrames))
         
-        const texture = scene.textures.createCanvas(name, Three.size.x*maxX, Three.size.y*Math.ceil(Math.sqrt(numFrames)))
+        const texture = scene.textures.createCanvas(queryItem.name, Three.size.x*maxX, Three.size.y*Math.ceil(Math.sqrt(numFrames)))
 
 
         let px = 0
@@ -152,7 +194,7 @@ export default class PlayerTextureFactory
                 {
                     this.setAnimFrame(pastFrames + frame, totalAnimFrames)
 
-                    console.log(`setAnimFrame ${pastFrames + frame} / ${totalAnimFrames}`)
+                    //console.log(`setAnimFrame ${pastFrames + frame} / ${totalAnimFrames}`)
 
                     Three.setAngle(this._spritesDirections[direction].angle)
                     Three.animate()
@@ -161,7 +203,7 @@ export default class PlayerTextureFactory
                     
                     texture.context.drawImage(Three.renderer.domElement, rect.x, rect.y)    
 
-                    console.log(frameI, maxX, '-', px, py)
+                    //console.log(frameI, maxX, '-', px, py)
                     
                     texture.add(frameI, 0, rect.x, rect.y, rect.width, rect.height)
 
@@ -182,10 +224,29 @@ export default class PlayerTextureFactory
 
         texture.refresh()
 
+        console.log("Completed")
+        queryItem.callback()
 
-        console.log("C ",name)
+        setTimeout(() => {
+            this._running = false
 
-        //mixedHead.destroy()    
+            this.process()
+        }, 10);
+        
+    }
+
+    public static async create(name: string)
+    {
+        return new Promise<void>(resolve => {
+            let queryItem: QueryItem = {
+                callback: resolve,
+                name: name
+            }
+
+            this._query.push(queryItem)
+
+            this.process()
+        })
     }
 
     public static mixTextures(textures: string[], width: number, height: number)
@@ -195,6 +256,8 @@ export default class PlayerTextureFactory
 
         for (const t of textures) {
             const texture = textureManager.get(t)
+
+
 
             canvasTexture.context.drawImage(texture.getSourceImage() as HTMLImageElement , 0, 0)
         }
