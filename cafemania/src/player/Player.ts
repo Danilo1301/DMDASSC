@@ -26,7 +26,7 @@ export default class Player
 
         setTimeout(() => {
             setInterval(() => {
-                if(!this._walking)
+                if(!this._walking && this._sprite)
                 {  
                     this._walking = true
     
@@ -50,14 +50,22 @@ export default class Player
         return GameScene.getScene()
     }
 
-    private async createSprite()
+    private async createSprite(textureName?: string)
     {
         const scene = this.getScene()
-        const PlayerTextureFactory = await import("./PlayerTextureFactory")
+        
+        const useDefaultTexture = textureName === undefined
 
-        const textureName = 'PlayerSpritesTexture_'+this._id
+        if(textureName)
+        {
+            const PlayerTextureFactory = await import("./PlayerTextureFactory")
 
-        await PlayerTextureFactory.default.create(textureName)
+            await PlayerTextureFactory.default.create(textureName, {}) 
+        } else {
+            textureName = "PlayerSpritesTextureNoTexture"
+        }
+
+        if(this._sprite) this._sprite.destroy()
 
         this._sprite = this.getScene().add.sprite(0, 0, textureName)
         //this._sprite.setOrigin(0, 0)
@@ -76,6 +84,9 @@ export default class Player
         this._container!.add(this._sprite)
 
         this._sprite.setPosition(0, -25)
+
+        
+        if(useDefaultTexture) this.createSprite('PlayerSpritesTexture' + this._id)
     }
 
     public render()

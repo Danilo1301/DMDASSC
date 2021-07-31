@@ -13,14 +13,28 @@ export default class World
 
     private _players = new Phaser.Structs.Map<string, Player>([])
 
+    private async testGenPlayers()
+    {
+        for (let i = 0; i < 30; i++) 
+        {
+            await new Promise<void>(resolve => {
+                this._players.set('player'+i, new Player(this, 'player'+i))
+
+                setTimeout(() => {
+                    resolve()
+                }, Math.random()*1000+1000);
+            })
+
+            
+        }
+    }
+
     constructor(game: Game)
     {
         this._game = game
 
-        for (let i = 0; i < 20; i++) 
-        {
-            this._players.set('player'+i, new Player(this, 'player'+i))
-        }
+        this.testGenPlayers()
+       
 
         const mapSize = {x: 15, y: 15}
         

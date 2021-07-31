@@ -46,6 +46,8 @@ export default class GameScene extends BaseScene
     public groundLayer!: Phaser.GameObjects.Layer
     public objectsLayer!: Phaser.GameObjects.Layer
 
+    private _loaded: boolean = false
+
     constructor()
     {
         super('GameScene')
@@ -66,6 +68,8 @@ export default class GameScene extends BaseScene
         this.load.image('chair1', 'chair1.png')
         this.load.image('stove1', 'stove1.png')
 
+        this.load.image('1x1white', '1x1white.png')
+        
         this.load.image('eye', 'eye.png')
         this.load.image('eye2', 'eye2.png')
         this.load.image('head', 'head.png')
@@ -91,10 +95,29 @@ export default class GameScene extends BaseScene
         setInterval(() => {
             this._fpsText.setText(`${Math.round(this.game.loop.actualFps)} FPS`)
         })
+
+        this.test()
+        
+    }
+
+    private async test()
+    {
+        const textureName = 'PlayerSpritesTextureNoTexture'
+
+
+
+        const PlayerTextureFactory = await import("../../player/PlayerTextureFactory")
+        await PlayerTextureFactory.default.create(textureName, {default: true})
+
+        console.log(textureName)
+
+        this._loaded = true
     }
 
     public update(): void
     {
+        if(!this._loaded) return
+        
         const game = this.getGame()
         const world = game.getWorlds()[0]
 

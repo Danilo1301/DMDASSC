@@ -9,6 +9,12 @@ interface QueryItem
 {
     callback: () => void
     name: string
+    options: PlayerTextureOptions
+}
+
+interface PlayerTextureOptions
+{
+    default?: boolean
 }
 
 export default class PlayerTextureFactory
@@ -91,6 +97,13 @@ export default class PlayerTextureFactory
         animMixer.update(timeInSeconds)
     }
 
+    private static sleep(t: number)
+    {
+        return new Promise<void>(resolve => {
+            setTimeout(() => resolve(), t);
+        })
+    }
+
     private static async process()
     {
         if(this._running)
@@ -124,9 +137,37 @@ export default class PlayerTextureFactory
         }
         //
 
-        const head_texture = this.mixTextures(['head'], 1024, 831)
-        const body_texture = this.mixTextures(t, 1024, 1024)
-        const legs_texture = this.mixTextures(['head'], 1024, 831)
+        const headTextures: string[] = []
+        const bodyTextures: string[] = []
+        const legTextures: string[] = []
+
+        if(queryItem.options.default === true)
+        {
+            headTextures.push('1x1white')
+            bodyTextures.push('1x1white')
+            legTextures.push('1x1white')
+        } else {
+            headTextures.push('head')
+            bodyTextures.push('body1')
+            legTextures.push('head')
+        }
+
+        var t1 = performance.now()
+
+            
+        const head_texture = this.mixTextures(headTextures, 1024, 831)
+
+        await this.sleep(queryItem.options.default === true ? 0 : 100)
+
+        const body_texture = this.mixTextures(bodyTextures, 1024, 1024)
+
+        await this.sleep(queryItem.options.default === true ? 0 : 100)
+
+        const legs_texture = this.mixTextures(legTextures, 1024, 831)
+
+        await this.sleep(queryItem.options.default === true ? 0 : 100)
+
+        console.log(performance.now() - t1)
 
         this._gltf!.scene.traverse(o => {
 
@@ -141,7 +182,7 @@ export default class PlayerTextureFactory
 
             
         })
-
+        
 
 
         const anims = PlayerAnimations.getAnimations()
@@ -169,7 +210,6 @@ export default class PlayerTextureFactory
             {
                 for (let frame = 0; frame < anim.frames; frame++) {
                     numFrames++
-                    
                 }
             }
         }
@@ -186,12 +226,17 @@ export default class PlayerTextureFactory
 
         let pastFrames = 0
 
+        
+
         for (const anim of anims)
         {
             for (let direction = 0; direction < this._spritesDirections.length; direction++)
             {
                 for (let frame = 0; frame < anim.frames; frame++)
                 {
+
+                   
+
                     this.setAnimFrame(pastFrames + frame, totalAnimFrames)
 
                     //console.log(`setAnimFrame ${pastFrames + frame} / ${totalAnimFrames}`)
@@ -215,12 +260,18 @@ export default class PlayerTextureFactory
                         py++
                         px = 0
                     }
+
+                    
+
+                    await this.sleep(queryItem.options.default === true ? 0 : 0)
                 }
             }
 
             pastFrames += anim.frames
   
         }
+
+       
 
         texture.refresh()
 
@@ -231,16 +282,17 @@ export default class PlayerTextureFactory
             this._running = false
 
             this.process()
-        }, 10);
+        }, 1000);
         
     }
 
-    public static async create(name: string)
+    public static async create(name: string, options: PlayerTextureOptions)
     {
         return new Promise<void>(resolve => {
             let queryItem: QueryItem = {
                 callback: resolve,
-                name: name
+                name: name,
+                options: options
             }
 
             this._query.push(queryItem)
@@ -257,9 +309,7 @@ export default class PlayerTextureFactory
         for (const t of textures) {
             const texture = textureManager.get(t)
 
-
-
-            canvasTexture.context.drawImage(texture.getSourceImage() as HTMLImageElement , 0, 0)
+            canvasTexture.context.drawImage(texture.getSourceImage() as HTMLImageElement , 0, 0, width, height)
         }
 
         canvasTexture.refresh()
