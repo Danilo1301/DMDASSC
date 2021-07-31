@@ -16,6 +16,8 @@ export default class Player
 
     private _direction = new Phaser.Math.Vector2(0, 0)
 
+    private _debugText?: Phaser.GameObjects.BitmapText
+
     private _id: string
 
     constructor(world: World, id: string)
@@ -24,16 +26,16 @@ export default class Player
 
         this._position.x = Tile.SIZE.x/2
 
-        setTimeout(() => {
-            setInterval(() => {
-                if(!this._walking && this._sprite)
-                {  
-                    this._walking = true
-    
-                    this.walkToPosition(Tile.getPosition(Math.round(Math.random()*10), Math.round(Math.random()*10)).add(new Phaser.Math.Vector2(0, -Tile.SIZE.y/2)))
-                }            
-            }, Math.random()*1000)
-        }, Math.random()*1000);
+        
+        setInterval(() => {
+            if(!this._walking && this._sprite)
+            {  
+                this._walking = true
+
+                this.walkToPosition(Tile.getPosition(Math.round(Math.random()*10), Math.round(Math.random()*10)).add(new Phaser.Math.Vector2(0, -Tile.SIZE.y/2)))
+            }            
+        }, Math.random()*1000)
+
 
         
 
@@ -72,14 +74,19 @@ export default class Player
         //this._sprite.setFrame('TestLiftHand_2_0')
 
  
+
+        const o = 3*1
+
         this._sprite.anims.create({
             key: 'test',
-            frames: this._sprite.anims.generateFrameNumbers(textureName, { start: 15 }),
+            frames: this._sprite.anims.generateFrameNumbers(textureName, { frames: [0+o, 1+o, 2+o, 1+o] }),
             frameRate: 4,
             repeat: -1
         });
 
         this._sprite.anims.play('test')
+
+        
 
         this._container!.add(this._sprite)
 
@@ -91,19 +98,36 @@ export default class Player
 
     public render()
     {
+        const scene = this.getScene()
+
         if(!this._container)
         {
-            this._container = this.getScene().add.container(0, 0)
+            this._container = scene.add.container(0, 0)
 
-            GameScene.getScene().objectsLayer.add(this._container)
+            scene.objectsLayer.add(this._container)
 
             this.createSprite()
+        }
+
+        if(!this._debugText)
+        {
+            this._debugText = scene.add.bitmapText(0, 0, 'gem', `${this._id}`, 16).setOrigin(0.5);
+            this._debugText.setTint(0x000)
+            
         }
 
         this.processMovement()
 
         this._container.setPosition(this._position.x, this._position.y)
         this._container.setDepth(this._position.y + Tile.SIZE.y/2)
+
+        let str = `${this._sprite?.anims.currentFrame.index}`
+        
+        str += `\n${this._direction.x},${this._direction.y}`
+
+        this._debugText.setText(str)
+        this._debugText.setDepth(100000)
+        this._debugText.setPosition(this._position.x, this._position.y)
     }
 
     private processMovement()

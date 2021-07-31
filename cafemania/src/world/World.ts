@@ -15,14 +15,14 @@ export default class World
 
     private async testGenPlayers()
     {
-        for (let i = 0; i < 30; i++) 
+        for (let i = 0; i < 20; i++) 
         {
             await new Promise<void>(resolve => {
                 this._players.set('player'+i, new Player(this, 'player'+i))
 
                 setTimeout(() => {
                     resolve()
-                }, Math.random()*1000+1000);
+                }, Math.random()*3000+2000);
             })
 
             

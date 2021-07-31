@@ -214,9 +214,11 @@ export default class PlayerTextureFactory
             }
         }
 
-        const maxX = Math.floor(Math.sqrt(numFrames))
+        const maxX = Math.ceil(numFrames / Math.ceil(Math.sqrt(numFrames)))
         
-        const texture = scene.textures.createCanvas(queryItem.name, Three.size.x*maxX, Three.size.y*Math.ceil(Math.sqrt(numFrames)))
+        const texture = scene.textures.createCanvas(queryItem.name, Three.size.x*maxX, Three.size.y* Math.ceil(Math.sqrt(numFrames)) )
+
+        console.log(numFrames)
 
 
         let px = 0
