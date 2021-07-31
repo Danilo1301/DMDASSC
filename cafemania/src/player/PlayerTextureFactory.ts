@@ -165,7 +165,7 @@ export default class PlayerTextureFactory
 
         const legs_texture = this.mixTextures(legTextures, 1024, 831)
 
-        await this.sleep(queryItem.options.default === true ? 0 : 100)
+  
 
         console.log(performance.now() - t1)
 
@@ -282,7 +282,7 @@ export default class PlayerTextureFactory
             this._running = false
 
             this.process()
-        }, 1000);
+        }, 500);
         
     }
 
