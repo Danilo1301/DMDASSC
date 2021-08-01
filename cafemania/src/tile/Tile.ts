@@ -16,8 +16,11 @@ export default class Tile
 
     private _position = new Phaser.Math.Vector2()
 
-    private _sprite?: Phaser.GameObjects.Sprite
-    private _debugText?: Phaser.GameObjects.BitmapText
+    //private _sprite?: Phaser.GameObjects.Sprite
+
+    //private _debugText?: Phaser.GameObjects.BitmapText
+
+    //public testOcuppied: boolean = true
 
     constructor(world: World, x: number, y: number)
     {
@@ -41,6 +44,14 @@ export default class Tile
 
     public get position(): Phaser.Math.Vector2 { return this._position }
 
+    public getCenterPosition()
+    {
+        return new Phaser.Math.Vector2(
+            this.position.x,
+            this.position.y - Tile.SIZE.y/2
+        )
+    }
+
     public render()
     {
         const scene = this.getScene()
@@ -61,15 +72,31 @@ export default class Tile
         this._sprite.setPosition(position.x, position.y)
         */
 
-        if(!this._debugText)
-        {
-            this._debugText = scene.add.bitmapText(position.x, position.y, 'gem', `${this.id}`, 16).setOrigin(0.5);
-        }
-        
         for (const tileItem of this._tileItems)
         {
             tileItem.render()
         }
+
+        /*
+        if(!this._debugText)
+        {
+            this._debugText = scene.add.bitmapText(0, 0, 'gem', `${this.id}`, 16).setOrigin(0.5);
+        }
+
+        const ocuppiedMap = this._world.getOccupiedTilesMap()
+
+        this.testOcuppied = ocuppiedMap[`${this.x}:${this.y}`] === true
+
+        if(this.testOcuppied)
+        {
+            this._debugText.setTint(0xff0000)
+        } else {
+            this._debugText.setTint(0xffffff)
+        }
+
+        this._debugText.setPosition(this.position.x, this.position.y)
+        this._debugText.setDepth(10000)
+        */
     }
 
     public addTileItem(tileItem: TileItem): void
@@ -152,6 +179,7 @@ export default class Tile
 
         return position
     }
+    
 
     public static SIZE = new Phaser.Math.Vector2(170, 85)
 }

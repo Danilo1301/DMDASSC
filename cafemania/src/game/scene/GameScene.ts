@@ -75,6 +75,8 @@ export default class GameScene extends BaseScene
         this.load.image('head', 'head.png')
         this.load.image('body1', 'body1.png')
         this.load.image('body2', 'body2.png')
+
+        this.load.image('2by3', '2by3.png')
     }
 
     public create(): void

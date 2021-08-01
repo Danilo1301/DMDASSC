@@ -2,29 +2,35 @@ interface PlayerAnimationInfo
 {
     name: string
     frames: number
+    frameOrder: number[]
+    frameRate: number
 }
 
 export default class PlayerAnimations
 {
-    private static _animations = new Phaser.Structs.Map<string, PlayerAnimationInfo>([])
-
-    public static init()
-    {
-        this.add('Walk', 3)
+    private static _animations: {[key: string]: PlayerAnimationInfo} = {
+        "Walk": {
+            name: 'Walk',
+            frames: 3,
+            frameOrder: [0, 1, 2, 1],
+            frameRate: 4
+        },
+        "Idle": {
+            name: 'Idle',
+            frames: 3,
+            frameOrder: [0, 1, 2, 1],
+            frameRate: 2
+        }
     }
 
     public static getAnimations(): PlayerAnimationInfo[]
     {
-        return this._animations.values()
-    }
+        const anims: PlayerAnimationInfo[] = []
 
-    public static add(name: string, frames: number)
-    {
-        const anim: PlayerAnimationInfo = {
-            name: name,
-            frames: frames
+        for (const key in this._animations) {
+            anims.push(this._animations[key])
         }
 
-        this._animations.set(name, anim)
+        return anims
     }
 }

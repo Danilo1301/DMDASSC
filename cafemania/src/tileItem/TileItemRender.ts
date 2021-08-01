@@ -11,7 +11,8 @@ interface TileItemRenderSprite
     x: number
     y: number
     container: Phaser.GameObjects.Container
-    sprite: Phaser.GameObjects.Sprite
+    sprite?: Phaser.GameObjects.Sprite
+    collision?: Phaser.GameObjects.Polygon
 }
 
 export default class TileItemRender
@@ -62,31 +63,29 @@ export default class TileItemRender
                     const key = `${x}_${y}`
                     const textureKey = textureKeys[key]
 
-                    if(!textureKey) continue
-
                     const pos = Tile.getPosition(x, y)
 
-                    const tileItemRenderSprite: TileItemRenderSprite =  this._sprites[spriteLayer][key] = {
+                    const tileItemRenderSprite: TileItemRenderSprite = this._sprites[spriteLayer][key] = {
                         x: x,
                         y: y,
                         spriteLayer: spriteLayer,
-                        container: scene.add.container(),
-                        sprite: scene.add.sprite(0, 0, textureKey, '0_0')
+                        container: scene.add.container()
+                    }
+                    
+                    if(textureKey)
+                    {
+                        tileItemRenderSprite.sprite = scene.add.sprite(0, 0, textureKey, '0_0')
+     
+                        tileItemRenderSprite.sprite.setOrigin(0.5, 1)
+                        tileItemRenderSprite.sprite.setPosition(
+                            0,
+                            -pos.y + (gridBounds.bottom + gridBounds.height) + 1
+                        )
+
+                        tileItemRenderSprite.container.add(tileItemRenderSprite.sprite)
                     }
 
-                    
-                    //console.log(tileItemInfo.texture, x, y, spriteLayer)
-
-                    tileItemRenderSprite.sprite.setOrigin(0.5, 1)
-                    tileItemRenderSprite.sprite.setPosition(
-                        0,
-                        -pos.y + (gridBounds.bottom + gridBounds.height) + 1
-                    )
-
-                    tileItemRenderSprite.container.add(tileItemRenderSprite.sprite)
-
                     scene.objectsLayer!.add(tileItemRenderSprite.container)
-
 
                     if(spriteLayer == 0)
                     {
@@ -123,7 +122,12 @@ export default class TileItemRender
 
     public setSceneLayer(layer: Phaser.GameObjects.Layer): void
     {
-        this.getAllSprites().map(sprite => layer.add( sprite.container ))
+        this.getAllSprites().map(sprite => {
+            layer.add( sprite.container )
+
+            if(sprite.collision) layer.add( sprite.collision )
+        })
+   
     }
 
     private getAllSprites(): TileItemRenderSprite[]
@@ -191,10 +195,10 @@ export default class TileItemRender
             )
         }
 
-        const collisionBox = scene.add.polygon(0, 0, points, color, alpha)
+        const collisionBox = sprite.collision = scene.add.polygon(0, 0, points, color, alpha)
         collisionBox.setOrigin(0, 0)
 
-        sprite.container.add(collisionBox)
+        //sprite.container.add(collisionBox)
 
         collisionBox.setPosition(
             - Tile.SIZE.x/2, - Tile.SIZE.y/2
@@ -247,23 +251,52 @@ export default class TileItemRender
 
                 const pos = Tile.getPosition(tileItemRenderSprite.x, tileItemRenderSprite.y)
 
+                
+
                 const container = tileItemRenderSprite.container
                 container.setPosition(
                     this._position.x + ((this._flipSprites ? -1 : 1) * pos.x),
                     this._position.y + (pos.y)
                 )
                 container.setScale(this._flipSprites ? -1 : 1, 1)
-                container.setDepth(container.y - this.depth - (tileItemRenderSprite.spriteLayer * 5))
-    
+
+                const depth = container.y - this.depth - (tileItemRenderSprite.spriteLayer * 5)
+
+                container.setDepth(depth)
+
+                
+                
                 const sprite = tileItemRenderSprite.sprite
 
-                const frame = {
-                    layer: this._currentLayer + (tileItemRenderSprite.spriteLayer * this._tileItemInfo.extraLayers),
-                    sprite: this._currentSprite
+                if(sprite)
+                {
+                    const frame = {
+                        layer: this._currentLayer + (tileItemRenderSprite.spriteLayer * this._tileItemInfo.extraLayers),
+                        sprite: this._currentSprite
+                    }
+    
+                    
+                    sprite.setFrame(`${frame.layer}_${frame.sprite}`)
+                    sprite.setAlpha(this._transparent ? 0.3 : 1)
+                    
                 }
 
-                sprite.setFrame(`${frame.layer}_${frame.sprite}`)
-                sprite.setAlpha(this._transparent ? 0.3 : 1)
+
+                if(tileItemRenderSprite.collision)
+                {
+
+            
+                    tileItemRenderSprite.collision.setPosition(
+                        container.x - ((this._flipSprites ? -1 : 1) * Tile.SIZE.x/2),
+                        container.y - (Tile.SIZE.y/2)
+                    )
+
+        
+                    tileItemRenderSprite.collision.setDepth(depth + 100)
+                    tileItemRenderSprite.collision.setScale(container.scaleX, container.scaleY)
+
+                }
+                
             }
 
         }

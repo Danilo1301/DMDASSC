@@ -252,7 +252,7 @@ export default class PlayerTextureFactory
 
                     //console.log(frameI, maxX, '-', px, py)
                     
-                    texture.add(frameI, 0, rect.x, rect.y, rect.width, rect.height)
+                        texture.add(frameI, 0, rect.x, rect.y, rect.width, rect.height)
 
                     frameI++;
                     px++

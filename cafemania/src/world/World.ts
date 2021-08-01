@@ -1,6 +1,6 @@
 import Game from "@cafemania/game/Game";
 import TileItem, { TileItemDirection } from "@cafemania/tileItem/TileItem";
-import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
+import { TileItemPlaceType, TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import Tile from "@cafemania/tile/Tile"
 import Player from "@cafemania/player/Player";
 import GameScene from "@cafemania/game/scene/GameScene";
@@ -13,28 +13,9 @@ export default class World
 
     private _players = new Phaser.Structs.Map<string, Player>([])
 
-    private async testGenPlayers()
-    {
-        for (let i = 0; i < 20; i++) 
-        {
-            await new Promise<void>(resolve => {
-                this._players.set('player'+i, new Player(this, 'player'+i))
-
-                setTimeout(() => {
-                    resolve()
-                }, Math.random()*3000+2000);
-            })
-
-            
-        }
-    }
-
     constructor(game: Game)
     {
         this._game = game
-
-        this.testGenPlayers()
-       
 
         const mapSize = {x: 15, y: 15}
         
@@ -56,6 +37,12 @@ export default class World
             this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(x, 1)) 
         }
 
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(6, 6)) 
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
+
+        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('2by3'), this.getTile(8, 8)) 
+
+
         for (let x = 4; x < 12; x += 2) {
             this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('chair1'), this.getTile(x, 3)) 
         }
@@ -72,6 +59,49 @@ export default class World
         }
 
         this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
+
+        this.testGenPlayers()
+    }
+
+    private async testGenPlayers()
+    {
+        
+        for (let i = 0; i < 12; i++) 
+        {
+            await new Promise<void>(resolve => {
+                const player = this.createPlayer()
+
+                setInterval(() => {
+
+                    if(!player._walking)
+                        player.testWalkToTile(Math.round(Math.random()*10), Math.round(Math.random()*10))
+                }, 2000)
+
+
+
+                
+
+                setTimeout(() => {
+                    resolve()
+                }, Math.random()*3000+2000);
+            })
+
+            
+        }
+        
+
+        
+    }
+
+    public createPlayer(): Player
+    {
+        const player = new Player(this)
+
+        player.setAtTile(0, 1)
+
+        this._players.set(player.id, player)
+
+        return player
     }
 
     public putTileItemInTile(tileItem: TileItem, tile: Tile): void
@@ -144,19 +174,29 @@ export default class World
             const occupiedCoords = World.getCoordsTileItemOccupes(size.x, size.y, tileItem.direction)
             const tile = tileItem.getTile()
 
+            let ocuppied = false
+
+            if(compareTileItem)
+            {
+                if(tileItem.getTileItemInfo().type == TileItemType.WALL)
+                    ocuppied = true
+
+                if(compareTileItem.getTileItemInfo().type == tileItem.getTileItemInfo().type) 
+                    ocuppied = true
+                    
+                if(compareTileItem.getTileItemInfo().placeType == tileItem.getTileItemInfo().placeType && compareTileItem.getTileItemInfo().type != TileItemType.FLOOR && tileItem.getTileItemInfo().type != TileItemType.FLOOR)
+                    ocuppied = true
+            }
+            else
+            {
+                if(tileItem.getTileItemInfo().type != TileItemType.FLOOR)
+                    ocuppied = true
+            }
+
             for (const oc of occupiedCoords) {
                 const key = `${tile.x + oc.x}:${tile.y + oc.y}`
 
-                let canBePlaced = true
-
-                if(compareTileItem)
-                {
-                    if(tileItem.getTileItemInfo().type == TileItemType.WALL) canBePlaced = false
-                    if(compareTileItem.getTileItemInfo().type == tileItem.getTileItemInfo().type) canBePlaced = false
-                    if(compareTileItem.getTileItemInfo().placeType == tileItem.getTileItemInfo().placeType && compareTileItem.getTileItemInfo().type != TileItemType.FLOOR && tileItem.getTileItemInfo().type != TileItemType.FLOOR) canBePlaced = false
-                }
-
-                if(!canBePlaced) map[key] = true
+                if(ocuppied) map[key] = ocuppied
             }
         }
 

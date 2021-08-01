@@ -133,6 +133,23 @@ export class TileItemFactory
             }
         })
 
+        this.addTileItemInfo({
+            id: '2by3',
+            name: '2by3',
+            texture: '2by3',
+            type: TileItemType.STOVE, //----------------
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR, //----------------
+            size: new Phaser.Math.Vector2(2,3),
+            sprites: 1,
+            layers: 2,
+            extraLayers: 1,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 0
+            }
+        })
 
     }
 

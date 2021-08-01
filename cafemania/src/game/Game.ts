@@ -29,8 +29,6 @@ export default class Game
 
         console.log("resolved")
 
-        PlayerAnimations.init()
-
         this.events.emit("ready")
 
         this.createWorld()
