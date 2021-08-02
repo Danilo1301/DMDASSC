@@ -2,10 +2,10 @@ const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     transparent: false,
     backgroundColor: 0x000,
-    roundPixels: false,
+    roundPixels: true,
     scale: {
-        //mode: Phaser.Scale.,
-        //autoCenter: Phaser.Scale.CENTER_BOTH,
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 900,
         height: 600
     },

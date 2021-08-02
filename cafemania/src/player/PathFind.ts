@@ -53,18 +53,77 @@ export default class PathFind
     {
         this._callback = callback
 
-        for (const node of this._nodes.values()) {
-            this.findNodeNeighbours(node)
-        }
+        this._nodes.forEach(node => {
+            
+            const neighbours: Node[] = []
+
+            const allNeighbours = this.findNodeNeighbours(node)
+            const posx = node.x
+            const posy = node.y
+
+            for (const neighbour of allNeighbours)
+            {
+                const isAtDiagonals = (Math.abs(neighbour.x - posx) == 1 && Math.abs(neighbour.y - posy) == 1)
+
+                let canAddThisNeightbour = neighbour.canWalk
+
+                if(isAtDiagonals)
+                {
+                    let canWalkInThisDiagonal = neighbour.canWalk
+
+                    //console.log(neighbour.x - posx, neighbour.y - posy, isAtDiagonals)
+
+                    const diagonalNeighbours = this.findNodeNeighbours(neighbour)
+
+                    for (const dn of diagonalNeighbours) {
+            
+                        let isInsideMainTest = false
+
+                        for (const a of allNeighbours) {
+                            if(a.x == dn.x && a.y == dn.y)
+                            {
+                                isInsideMainTest = true
+                                break
+                            }
+                        }
+
+                        
+                        if(isInsideMainTest)
+                        {
+                            if(!dn.canWalk && neighbour.canWalk)
+                            {
+                                canWalkInThisDiagonal = false
+                            }
+                        }
+
+                        //console.log(`diagonal ${neighbour.x} ${neighbour.y}: test ${dn.x}, ${dn.y} ${isInsideMainTest} (${canWalkInThisDiagonal})`)
+                    
+                    }
+
+                    //console.log(`diagonal ${neighbour.x} ${neighbour.y}: (${canWalkInThisDiagonal})`)
+                    
+
+                    canAddThisNeightbour = canWalkInThisDiagonal
+                }
+
+
+                if(canAddThisNeightbour) neighbours.push(neighbour)
+                
+                //console.log(neighbour.x - posx, neighbour.y - posy, isAtDiagonals)
+            }
+
+            node.neighbours = neighbours
+            
+        })
 
         this._openNodes.push(this.getNode(this._start.x, this._start.y))
 
         this.process()
     }
     
-    public findNodeNeighbours(node: Node)
+    public findNodeNeighbours(node: Node): Node[]
     {
-        node.neighbours = []
+        const neighbours: Node[] = []
 
         for (let x = -1; x <= 1; x++)
         {
@@ -77,13 +136,12 @@ export default class PathFind
 
                 if(this.hasNode(nx, ny))
                 {
-                    const nNode = this.getNode(nx, ny)
-
-                    if(nNode.canWalk)
-                        node.neighbours.push(this.getNode(nx, ny))
+                    neighbours.push(this.getNode(nx, ny))
                 }
             }
         }
+
+        return neighbours
     }
 
     public hasNode(x: number, y: number)

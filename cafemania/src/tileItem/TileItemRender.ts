@@ -76,6 +76,8 @@ export default class TileItemRender
                     {
                         tileItemRenderSprite.sprite = scene.add.sprite(0, 0, textureKey, '0_0')
      
+                        tileItemRenderSprite.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST)
+
                         tileItemRenderSprite.sprite.setOrigin(0.5, 1)
                         tileItemRenderSprite.sprite.setPosition(
                             0,
@@ -260,7 +262,7 @@ export default class TileItemRender
                 )
                 container.setScale(this._flipSprites ? -1 : 1, 1)
 
-                const depth = container.y - this.depth - (tileItemRenderSprite.spriteLayer * 5)
+                const depth = (container.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))) - this.depth - (tileItemRenderSprite.spriteLayer * 5)
 
                 container.setDepth(depth)
 

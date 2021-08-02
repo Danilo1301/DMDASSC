@@ -29,20 +29,27 @@ class MoveScene
 
             const zoom = scene.cameras.main.zoom
 
+        
+   
+            /*
+            scene.cameras.main.setScroll(
+                startScenePos.x + (delta.x / zoom),
+                startScenePos.y + (delta.y / zoom)
+            )
+            */
+
             scene.cameras.main.setScroll(
                 Math.round(startScenePos.x + (delta.x / zoom)),
                 Math.round(startScenePos.y + (delta.y / zoom))
             )
+
+            console.log(zoom, scene.cameras.main.scrollX, scene.cameras.main.scrollY)
         });
     }
 }
 
 export default class GameScene extends BaseScene
 {
-    private static _instance: GameScene
-
-    private _fpsText!: Phaser.GameObjects.Text
-
     public groundLayer!: Phaser.GameObjects.Layer
     public objectsLayer!: Phaser.GameObjects.Layer
 
@@ -81,6 +88,7 @@ export default class GameScene extends BaseScene
 
     public create(): void
     {
+        
         this.groundLayer = this.add.layer()
         this.groundLayer.setDepth(0)
 
@@ -91,15 +99,10 @@ export default class GameScene extends BaseScene
 
         const moveScene = new MoveScene(this);
 
-        this._fpsText = this.add.text(0, -200, `0 FPS`, {fontSize: '30px',color: 'black'})
-        this._fpsText.setDepth(100)
-
-        setInterval(() => {
-            this._fpsText.setText(`${Math.round(this.game.loop.actualFps)} FPS`)
-        })
-
+ 
         this.test()
         
+   
     }
 
     private async test()
@@ -125,6 +128,10 @@ export default class GameScene extends BaseScene
 
         if(world) world.render()
     }
+
+
+
+    private static _instance: GameScene
 
     public static getScene()
     {

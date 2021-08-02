@@ -4,6 +4,7 @@ import { TileItemPlaceType, TileItemType } from "@cafemania/tileItem/TileItemInf
 import Tile from "@cafemania/tile/Tile"
 import Player from "@cafemania/player/Player";
 import GameScene from "@cafemania/game/scene/GameScene";
+import PathFind from "@cafemania/player/PathFind";
 
 export default class World
 {
@@ -26,6 +27,11 @@ export default class World
                 this.addTile(x, y)
             }
         }
+
+
+        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(1, 1)) 
+        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(2, 2)) 
+
 
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
