@@ -29,9 +29,12 @@ export default class GameClient extends Game
 
         window['SceneManager'] = SceneManager
 
-        /*
+        
         const test = () => {
 
+            SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)
+
+            /*
             SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)
 
             console.log(window.innerWidth/window.innerHeight)
@@ -42,6 +45,7 @@ export default class GameClient extends Game
             {
                 GameScene.getScene().cameras.main.setZoom( parseFloat((window.innerWidth/window.innerHeight).toFixed(2)) )
             }
+            */
 
             
         }
@@ -51,7 +55,7 @@ export default class GameClient extends Game
         })
 
         test()
-        */
+        
 
         
         await Three.init()
