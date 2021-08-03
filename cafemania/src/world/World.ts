@@ -241,6 +241,14 @@ export default class World
     }
 
  
+    public update(delta: number)
+    {
+        for (const player of this._players.values())
+        {
+            player.update(delta)
+        }
+    }
+
     public render(): void
     {
         const scene = GameScene.getScene()

@@ -111,13 +111,16 @@ export default class GameScene extends BaseScene
         this._loaded = true
     }
 
-    public update(): void
+    public update(time: number, delta: number): void
     {
         if(!this._loaded) return
         
         const game = this.getGame()
         const world = game.getWorlds()[0]
 
-        if(world) world.render()
+        if(world) {
+            world.update(delta)
+            world.render()
+        }
     }  
 }

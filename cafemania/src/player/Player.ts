@@ -173,6 +173,11 @@ export default class Player
         if(useDefaultTexture) this.createSprite('PlayerSpritesTexture' + this._id)
     }
 
+    public update(delta: number)
+    {
+        this.processMovement(delta)
+    }
+
     public render()
     {
         const scene = this.getScene()
@@ -192,7 +197,6 @@ export default class Player
             this._debugText.setTint(0xffffff)
         }
 
-        this.processMovement()
         this._animation.update()
 
         this._container.setPosition(this._position.x, this._position.y)
@@ -207,7 +211,7 @@ export default class Player
         this._debugText.setPosition(this._position.x, this._position.y)
     }
 
-    private processMovement()
+    private processMovement(delta: number)
     {
         if(!this._walking) return
 
@@ -250,8 +254,8 @@ export default class Player
         const tp = p.normalize()
         const speed = 1.5
 
-        this._position.x += tp.x * speed
-        this._position.y += tp.y * speed
+        this._position.x += tp.x * speed * delta * 0.05
+        this._position.y += tp.y * speed * delta * 0.05
 
         if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < speed*2)
         {
