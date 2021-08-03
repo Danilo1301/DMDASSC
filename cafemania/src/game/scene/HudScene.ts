@@ -67,8 +67,12 @@ export default class HudScene extends BaseScene
 
         fullscreen.on('pointerdown', this.goFullscreen.bind(this))
 
-        this._fpsText = this.add.text(10, 10, `0 FPS`, {fontSize: '30px',color: 'black'})
-        this._fpsText.setDepth(100)
+        const text = this._fpsText = this.add.text(10, 10, `0 FPS`, {fontSize: '30px', color: '#FFF4E1', fontStyle: "bold"})
+        
+        text.setDepth(100)
+        text.setStroke("#543603", 8)
+
+
 
         setInterval(() => {
             this._fpsText.setText(`${Math.round(this.game.loop.actualFps)} FPS`)
