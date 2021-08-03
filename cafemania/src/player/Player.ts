@@ -189,7 +189,7 @@ export default class Player
         if(!this._debugText)
         {
             this._debugText = scene.add.bitmapText(0, 0, 'gem', `${this._id}`, 16).setOrigin(0.5);
-            this._debugText.setTint(0x000)
+            this._debugText.setTint(0xffffff)
         }
 
         this.processMovement()

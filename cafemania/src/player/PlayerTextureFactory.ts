@@ -148,7 +148,7 @@ export default class PlayerTextureFactory
             legTextures.push('1x1white')
         } else {
             headTextures.push('head')
-            bodyTextures.push('body1')
+            bodyTextures.push('body2')
             legTextures.push('head')
         }
 
