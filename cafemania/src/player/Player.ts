@@ -209,13 +209,18 @@ export default class Player
         this._debugText.setText(str)
         this._debugText.setDepth(100000)
         this._debugText.setPosition(this._position.x, this._position.y)
+
+        if(this._walking)
+        {
+            this._animation.play("Walk")
+        } else {
+            this._animation.play("Idle")
+        }
     }
 
     private processMovement(delta: number)
     {
         if(!this._walking) return
-
-        this._animation.play("Walk")
 
         const dir = Phaser.Math.Angle.BetweenPoints(this._position, this._targetPosition)
 
@@ -257,7 +262,7 @@ export default class Player
         this._position.x += tp.x * speed * delta * 0.05
         this._position.y += tp.y * speed * delta * 0.05
 
-        if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < speed*2)
+        if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < 2)
         {
             this._position.set(this._targetPosition.x, this._targetPosition.y)
 
@@ -265,8 +270,6 @@ export default class Player
             
             this._onStopWalking?.()
             this._onStopWalking = undefined
-
-            this._animation.play("Idle")
         }
     }
 }

@@ -39,20 +39,26 @@ export default class World
             }
         }
 
-        for (let x = 2; x < 12; x += 2) {
-            this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(x, 1)) 
+        for (let x = 2; x < mapSize.x-1; x += 1) {
+            for (let y = 1; y < 14; y += 3) {
+                this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove2'), this.getTile(x, y)) 
+
+                const chair = this.getGame().tileItemFactory.createTileItem('chair1')
+
+                chair.direction = TileItemDirection.BACK_FLIPPED
+
+                this.putTileItemInTile(chair, this.getTile(x, y+1)) 
+            }
+            
         }
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(6, 6)) 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
+        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(6, 6)) 
+        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
 
         this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('2by3'), this.getTile(8, 8)) 
 
 
-        for (let x = 4; x < 12; x += 2) {
-            this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('chair1'), this.getTile(x, 3)) 
-        }
-
+ 
         for (let y = 1; y < 15; y += 1) this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('wall1'), this.getTile(mapSize.x-1, y))
         
         for (let x = 0; x < 14; x += 1) 
@@ -80,7 +86,7 @@ export default class World
                 setInterval(() => {
 
                     if(!player._walking)
-                        player.testWalkToTile(Math.round(Math.random()*10), Math.round(Math.random()*10))
+                        player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
                 }, 2000)
 
 
