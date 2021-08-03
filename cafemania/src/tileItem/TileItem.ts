@@ -89,6 +89,8 @@ export default class TileItem
         newRotationOffset.y = newPos.y
      
         this._tileItemRender.setPosition(position.x + newRotationOffset.x, position.y + newRotationOffset.y)
+
+        this._tileItemRender.render()
     }
 
     public setTile(tile: Tile): void

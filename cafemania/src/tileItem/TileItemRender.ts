@@ -2,7 +2,7 @@ import GameScene from "@cafemania/game/scene/GameScene"
 import Tile from "@cafemania/tile/Tile"
 import TileCollisionFactory from "./TileCollisionFactory"
 import TileItem from "./TileItem"
-import TileItemInfo from "./TileItemInfo"
+import TileItemInfo, { TileItemType } from "./TileItemInfo"
 import TileTextureFactory from "./TileTextureFactory"
 
 interface TileItemRenderSprite
@@ -29,17 +29,24 @@ export default class TileItemRender
     private _flipSprites: boolean = false
     private _transparent: boolean = false
 
-    private _position: Phaser.Math.Vector2
+    private _position: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0)
 
     private _sprites: {[extraLayer: string]: {[coord: string]: TileItemRenderSprite}} = {}
 
-    private _debugText: Phaser.GameObjects.BitmapText
+    private _debugText?: Phaser.GameObjects.BitmapText
 
     constructor(tileItemInfo: TileItemInfo)
     {
-        this._position = new Phaser.Math.Vector2(0, 0)
-
         this._tileItemInfo = tileItemInfo
+
+        this.createSprites()
+    }
+
+    private createSprites()
+    {
+        const tileItemInfo = this._tileItemInfo
+
+        const canCreateCollision = tileItemInfo.type != TileItemType.FLOOR && tileItemInfo.type != TileItemType.WALL
 
         const scene = this.getScene()
         const textureName = tileItemInfo.texture
@@ -89,7 +96,7 @@ export default class TileItemRender
 
                     scene.objectsLayer!.add(tileItemRenderSprite.container)
 
-                    if(spriteLayer == 0)
+                    if(spriteLayer == 0 && canCreateCollision)
                     {
                         this.createSpriteCollision(tileItemRenderSprite)
                     }
@@ -99,12 +106,18 @@ export default class TileItemRender
 
         //console.log(this._sprites)
 
+        /*
         const text = this._debugText = this.getScene().add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
         text.setTintFill(0x000000)
-
-        
         text.setDepth(10000)
+        */
+    }
 
+    public render()
+    {
+        this.updateSprites()
+
+        //console.log(this._sprites)
     }
 
     public setTileItem(tileItem: TileItem): void
@@ -235,12 +248,10 @@ export default class TileItemRender
 
     public setSprite(sprite: number) {
         this._currentSprite = sprite
-        this.updateSprites()
     }
 
     public setLayer(layer: number) {
         this._currentLayer = layer
-        this.updateSprites()
     }
 
     public updateSprites()
@@ -303,17 +314,22 @@ export default class TileItemRender
 
         }
 
-        if(this._tileItem)
+        if(this._tileItem && this._debugText)
         {
+            const pos = this._tileItem.getTile().position
+
+            this._debugText.setAlpha(1)
+            this._debugText.setPosition(pos.x, pos.y)
+            this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
+
             if(this._tileItem.isHovering)
             {
                 const pos = this._tileItem.getTile().position
 
-                this._debugText.setAlpha(1)
-                this._debugText.setPosition(pos.x, pos.y)
-                this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
+                
+                
             } else {
-                this._debugText.setAlpha(0)
+                
             }
         }
 
@@ -325,21 +341,15 @@ export default class TileItemRender
     public setPosition(x: number, y: number)
     {
         this._position.set(x, y)
-
-        this.updateSprites()
     }
     
     public setFlipSprites(value: boolean)
     {
         this._flipSprites = value
-
-        this.updateSprites()
     }
 
     public setTransparent(value: boolean)
     {
         this._transparent = value
-
-        this.updateSprites()
     }
 }

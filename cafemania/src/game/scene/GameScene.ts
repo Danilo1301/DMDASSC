@@ -29,8 +29,6 @@ class MoveScene
 
             const zoom = scene.cameras.main.zoom
 
-        
-   
             /*
             scene.cameras.main.setScroll(
                 startScenePos.x + (delta.x / zoom),
@@ -50,6 +48,10 @@ class MoveScene
 
 export default class GameScene extends BaseScene
 {
+    private static _instance: GameScene
+
+    public static getScene() { return this._instance }
+    
     public groundLayer!: Phaser.GameObjects.Layer
     public objectsLayer!: Phaser.GameObjects.Layer
 
@@ -64,9 +66,8 @@ export default class GameScene extends BaseScene
 
     public preload(): void
     {
-        this.load.bitmapFont('gem', '/static/cafemania/assets/fonts/gem.png', '/static/cafemania/assets/fonts/gem.xml');
-
-        this.load.setPath('/static/cafemania/assets')
+        this.load.setPath('/static/cafemania/assets/')
+        this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
         this.load.image('floor1', 'floor1.png')
         this.load.image('floor2', 'floor2.png')
         this.load.image('wall1', 'wall1.png')
@@ -74,21 +75,17 @@ export default class GameScene extends BaseScene
         this.load.image('window1', 'window1.png')
         this.load.image('chair1', 'chair1.png')
         this.load.image('stove1', 'stove1.png')
-
         this.load.image('1x1white', '1x1white.png')
-        
         this.load.image('eye', 'eye.png')
         this.load.image('eye2', 'eye2.png')
         this.load.image('head', 'head.png')
         this.load.image('body1', 'body1.png')
         this.load.image('body2', 'body2.png')
-
         this.load.image('2by3', '2by3.png')
     }
 
     public create(): void
     {
-        
         this.groundLayer = this.add.layer()
         this.groundLayer.setDepth(0)
 
@@ -99,17 +96,12 @@ export default class GameScene extends BaseScene
 
         const moveScene = new MoveScene(this);
 
- 
         this.test()
-        
-   
     }
 
     private async test()
     {
         const textureName = 'PlayerSpritesTextureNoTexture'
-
-
 
         const PlayerTextureFactory = await import("../../player/PlayerTextureFactory")
         await PlayerTextureFactory.default.create(textureName, {default: true})
@@ -127,15 +119,5 @@ export default class GameScene extends BaseScene
         const world = game.getWorlds()[0]
 
         if(world) world.render()
-    }
-
-
-
-    private static _instance: GameScene
-
-    public static getScene()
-    {
-        return this._instance
-    }
-    
+    }  
 }

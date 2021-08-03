@@ -56,8 +56,8 @@ export class TileItemFactory
                 isWall: true,
                 wallSize: 0,
                 x: 20,
-                y: 70,
-                height: 35
+                y: 75,
+                height: 20
             }
         })
 
@@ -73,9 +73,9 @@ export class TileItemFactory
             layers: 2,
             extraLayers: 2,
             collision: {
-                x: 15,
-                y: 15,
-                height: 110
+                x: 28,
+                y: 20,
+                height: 100
             }
         })
 
