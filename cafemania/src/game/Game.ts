@@ -53,4 +53,9 @@ export default class Game
 
         return world
     }
+
+    public getPhaser()
+    {
+        return SceneManager.getGame()
+    }
 }

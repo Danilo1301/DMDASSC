@@ -25,7 +25,18 @@ export default class GameClient extends Game
         //game.canvas.style.height = "100%"
 
         const test = () => {
-            SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)
+            const a = window.innerWidth / window.innerHeight
+
+            if(a < 1)
+            {
+                SceneManager.getGame().scale.setGameSize(600, 900)
+            }
+            else
+            {
+                SceneManager.getGame().scale.setGameSize(900, 600)
+            }
+
+            //SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)
 
             /*
             SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)

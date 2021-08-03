@@ -21,6 +21,19 @@ export default class HudScene extends BaseScene
         this.load.setPath('/static/cafemania/assets')
         this.load.image('button/zoom_in', 'button/zoom_in.png')
         this.load.image('button/zoom_out', 'button/zoom_out.png')
+        this.load.image('button/fullscreen', 'button/fullscreen.png')
+    }
+
+    public goFullscreen() {
+
+        if (this.game.scale.isFullscreen)
+        {
+            this.game.scale.stopFullscreen();
+        }
+        else
+        {
+            this.game.scale.startFullscreen({});
+        }
     }
 
     public create(): void
@@ -30,9 +43,11 @@ export default class HudScene extends BaseScene
 
         const zoomIn = this.add.sprite(30, 80, 'button/zoom_in')
         const zoomOut = this.add.sprite(30, 140, 'button/zoom_out')
+        const fullscreen = this.add.sprite(30, 200, 'button/fullscreen')
 
         zoomIn.setInteractive()
         zoomOut.setInteractive()
+        fullscreen.setInteractive()
 
         const camera = GameScene.getScene().cameras.main
 
@@ -49,6 +64,8 @@ export default class HudScene extends BaseScene
 
             camera.setZoom(zoomList[currentZoom])
         })
+
+        fullscreen.on('pointerdown', this.goFullscreen.bind(this))
 
         this._fpsText = this.add.text(10, 10, `0 FPS`, {fontSize: '30px',color: 'black'})
         this._fpsText.setDepth(100)

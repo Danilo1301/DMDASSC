@@ -57,11 +57,11 @@ export default class PlayerTextureFactory
     {
         if(this._gltf) return
 
-        console.log(this._gltf)
+        //console.log(this._gltf)
 
         const gltf = this._gltf = await Three.loadGLTFModel('/static/cafemania/assets/char.glb')
 
-        console.log(this._gltf)
+        //console.log(this._gltf)
 
         this._mixer = new THREE.AnimationMixer( gltf.scene );
         this._clip = gltf.animations[0]
@@ -87,7 +87,7 @@ export default class PlayerTextureFactory
         const timeInSeconds = frame * ((this._clip.duration - (this._clip.duration*0.01)) / (totalFrames-1))
         const animMixer: any = this._mixer
         
-        console.log(this._clip.duration)
+        //console.log(this._clip.duration)
 
 
         animMixer.time=0;
@@ -167,7 +167,7 @@ export default class PlayerTextureFactory
 
   
 
-        console.log(performance.now() - t1)
+        //console.log(performance.now() - t1)
 
         this._gltf!.scene.traverse(o => {
 
