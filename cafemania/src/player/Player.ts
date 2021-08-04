@@ -7,6 +7,7 @@ import PlayerAnimation from "./PlayerAnimation";
 import PlayerAnimations from "./PlayerAnimations";
 
 import { v4 as uuidv4 } from 'uuid';
+import TileItemChair from "@cafemania/tileItem/TileItemChair";
 
 export default class Player
 {
@@ -34,6 +35,8 @@ export default class Player
 
     private _atTile?: Tile
 
+    private _sittingAtChair?: TileItemChair
+
     constructor(world: World)
     {
         this._id = uuidv4();
@@ -47,6 +50,8 @@ export default class Player
 
     public get isWalking() { return this._isWalking }
 
+    public get isSitting() { return this._sittingAtChair != undefined }
+
     public getSprite()
     {
         return this._sprite!
@@ -57,6 +62,11 @@ export default class Player
         this._atTile = tile
         const position = tile.getCenterPosition()
         this._position.set(position.x, position.y)
+    }
+
+    public sitAtChair(chair: TileItemChair)
+    {
+        this._sittingAtChair = chair
     }
 
     public testWalkToTile(x: number, y: number, walkToEnd?: boolean, callback?: () => void)
@@ -211,7 +221,27 @@ export default class Player
         {
             this._animation.play("Walk")
         } else {
-            this._animation.play("Idle")
+            if(this.isSitting)
+            {
+
+            } else {
+                this._animation.play("Idle")
+            }
+            
+        }
+
+        if(this.isSitting)
+        {
+            const chair = this._sittingAtChair!
+
+            const directions = [
+                Direction.East,
+                Direction.South,
+                Direction.West,
+                Direction.North
+            ]
+
+            this._direction = directions[chair.direction]
         }
     }
 

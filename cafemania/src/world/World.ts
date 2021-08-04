@@ -37,7 +37,7 @@ export default class World
         }
 
    
-        for (let x = 2; x < 9; x += 1) {
+        for (let x = 2; x < 4; x += 1) {
             for (let y = 1; y < 9; y += 3) {
                 this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
 
@@ -120,7 +120,9 @@ export default class World
 
                     const tile = chair.getTile()
 
-                    player.testWalkToTile(tile.x, tile.y, true)
+                    player.testWalkToTile(tile.x, tile.y, true, () => {
+                        player.sitAtChair(chair)
+                    })
                 } else {
                     console.log("No empty chairs")
 
