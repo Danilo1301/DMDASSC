@@ -1,9 +1,9 @@
 import GameScene from "@cafemania/game/scene/GameScene"
 import Tile from "@cafemania/tile/Tile"
-import TileCollisionFactory from "./TileCollisionFactory"
+import TileCollisionFactory from "../tile/TileCollisionFactory"
 import TileItem from "./TileItem"
 import TileItemInfo, { TileItemType } from "./TileItemInfo"
-import TileTextureFactory from "./TileTextureFactory"
+import TileTextureFactory from "../tile/TileTextureFactory"
 
 interface TileItemRenderSprite
 {
@@ -55,11 +55,11 @@ export default class TileItemRender
         const layers = tileItemInfo.layers
         const extraLayers = tileItemInfo.extraLayers
 
-        const textureKeys = TileTextureFactory.generateTextures(textureName, size, sprites, layers * extraLayers);
+        const textureKeys = TileTextureFactory.generateTextures(textureName, size, sprites, layers * (extraLayers+1));
 
         const gridBounds = Tile.getGridBounds(size.x, size.y)
 
-        for (let spriteLayer = 0; spriteLayer < tileItemInfo.extraLayers; spriteLayer++)
+        for (let spriteLayer = 0; spriteLayer < (extraLayers+1); spriteLayer++)
         {
             if(!this._sprites[spriteLayer]) this._sprites[spriteLayer] = {}
 
@@ -226,22 +226,25 @@ export default class TileItemRender
             Phaser.Geom.Polygon.Contains
         );
 
-        collisionBox.on('pointerdown', function (pointer) {
-            console.log(self._tileItemInfo.name);
+        
+        collisionBox.on('pointerup', function (pointer) {
+            if(self._tileItem) self._tileItem.events.emit("pointerup")
+        });
 
-            if(self._tileItem) self._tileItem.rotate()
+        collisionBox.on('pointerdown', function (pointer) {
+            if(self._tileItem) self._tileItem.events.emit("pointerdown")
         });
 
         collisionBox.on('pointerover', function (pointer) {
-            collisionBox.setFillStyle(0xff0000, 0.3)
+            collisionBox.setFillStyle(0xff0000, 0.2)
 
-            if(self._tileItem) self._tileItem.isHovering = true
+            if(self._tileItem) self._tileItem.events.emit("pointerover")
         });
 
         collisionBox.on('pointerout', function (pointer) {
             collisionBox.setFillStyle(color, alpha)
 
-            if(self._tileItem) self._tileItem.isHovering = false
+            if(self._tileItem) self._tileItem.events.emit("pointerout")
 
         });
     }
@@ -284,7 +287,7 @@ export default class TileItemRender
                 if(sprite)
                 {
                     const frame = {
-                        layer: this._currentLayer + (tileItemRenderSprite.spriteLayer * this._tileItemInfo.extraLayers),
+                        layer: this._currentLayer + (tileItemRenderSprite.spriteLayer * (this._tileItemInfo.extraLayers+1)),
                         sprite: this._currentSprite
                     }
     
@@ -321,16 +324,6 @@ export default class TileItemRender
             this._debugText.setAlpha(1)
             this._debugText.setPosition(pos.x, pos.y)
             this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
-
-            if(this._tileItem.isHovering)
-            {
-                const pos = this._tileItem.getTile().position
-
-                
-                
-            } else {
-                
-            }
         }
 
         

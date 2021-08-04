@@ -1,6 +1,6 @@
 import Game from "@cafemania/game/Game"
 import Three from "@cafemania/three/Three";
-import TileTextureFactory from "@cafemania/tileItem/TileTextureFactory";
+import TileTextureFactory from "@cafemania/tile/TileTextureFactory";
 import GameScene from "./scene/GameScene";
 import HudScene from "./scene/HudScene";
 import SceneManager from "./SceneManager";

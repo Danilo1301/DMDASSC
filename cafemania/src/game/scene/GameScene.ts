@@ -70,6 +70,7 @@ export default class GameScene extends BaseScene
         this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
         this.load.image('floor1', 'floor1.png')
         this.load.image('floor2', 'floor2.png')
+        this.load.image('table1', 'table1.png')
         this.load.image('wall1', 'wall1.png')
         this.load.image('tile1', 'tile1.png')
         this.load.image('window1', 'window1.png')

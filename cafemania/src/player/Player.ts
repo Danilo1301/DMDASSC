@@ -1,8 +1,8 @@
-import { Direction } from "@cafemania/game/Direction";
+import { Direction } from "@cafemania/utils/Direction";
 import GameScene from "@cafemania/game/scene/GameScene"
 import Tile from "@cafemania/tile/Tile"
 import World from "@cafemania/world/World"
-import PathFind from "./PathFind";
+import PathFind from "../utils/PathFind";
 import PlayerAnimation from "./PlayerAnimation";
 import PlayerAnimations from "./PlayerAnimations";
 
@@ -18,7 +18,7 @@ export default class Player
 
     private _targetPosition = new Phaser.Math.Vector2(0, 0)
 
-    public _walking: boolean = false
+    private _isWalking: boolean = false
 
     private _onStopWalking?: () => void
 
@@ -45,26 +45,23 @@ export default class Player
 
     public get direction(): Direction { return this._direction }
 
+    public get isWalking() { return this._isWalking }
+
     public getSprite()
     {
         return this._sprite!
     }
 
-    public setAtTile(x: number, y: number)
+    public setAtTile(tile: Tile)
     {
-        const tile = this._world.getTile(x, y)
-
         this._atTile = tile
-
         const position = tile.getCenterPosition()
-
         this._position.set(position.x, position.y)
     }
 
-    public testWalkToTile(x: number, y: number, walkToEnd?: boolean)
+    public testWalkToTile(x: number, y: number, walkToEnd?: boolean, callback?: () => void)
     {
         const pathFind = new PathFind()
-
         const ocuppiedMap = this._world.getOccupiedTilesMap()
 
         for (const tile of this._world.getTiles())
@@ -80,8 +77,6 @@ export default class Player
         const atX = this._atTile?.x || 0
         const atY = this._atTile?.y || 0
 
-        
-
         pathFind.setStart(atX, atY)
         pathFind.setEnd(x, y)
         pathFind.find(async (path) => {
@@ -94,19 +89,18 @@ export default class Player
                     this.moveToTile(p.x, p.y, () => resolve())
                 })
             } 
+
+            callback?.()
         })
     }
 
     public moveToTile(x: number, y: number, callback?: () => void)
     {
         const tile = this._world.getTile(x, y)
-
         const position = tile.getCenterPosition()
 
         this.moveToPosition(position, () => {
-
             this._atTile = tile
-
             callback?.()
         })
     }
@@ -114,10 +108,8 @@ export default class Player
     public moveToPosition(position: Phaser.Math.Vector2, callback?: () => void)
     {
         this._onStopWalking = callback
-
         this._targetPosition = position
-
-        this._walking = true
+        this._isWalking = true
     }
 
     public getScene()
@@ -215,7 +207,7 @@ export default class Player
         this._debugText.setDepth(100000)
         this._debugText.setPosition(this._position.x, this._position.y)
 
-        if(this._walking)
+        if(this._isWalking)
         {
             this._animation.play("Walk")
         } else {
@@ -225,7 +217,7 @@ export default class Player
 
     private processMovement(delta: number)
     {
-        if(!this._walking) return
+        if(!this._isWalking) return
 
         const dir = Phaser.Math.Angle.BetweenPoints(this._position, this._targetPosition)
 
@@ -271,7 +263,7 @@ export default class Player
         {
             this._position.set(this._targetPosition.x, this._targetPosition.y)
 
-            this._walking = false
+            this._isWalking = false
             
             this._onStopWalking?.()
             this._onStopWalking = undefined

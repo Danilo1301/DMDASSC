@@ -14,6 +14,7 @@ export enum TileItemDirection
 
 export default class TileItem
 {
+    public events = new Phaser.Events.EventEmitter()
 
     private _tileItemInfo: TileItemInfo
 
@@ -27,12 +28,26 @@ export default class TileItem
 
     private _currentAnim: number = 0
 
-    public isHovering: boolean = false
-
+    private _debugText?: Phaser.GameObjects.BitmapText
+    
+    private _isHovering: boolean = false
+    
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = uuidv4()
         this._tileItemInfo = tileItemInfo
+
+        this.events.on("pointerup", () => {
+            this.rotate()
+        })
+
+        this.events.on("pointerover", () => {
+            this._isHovering = true
+        })
+
+        this.events.on("pointerout", () => {
+            this._isHovering = false
+        })
     }
 
     public getTile(): Tile
@@ -51,16 +66,21 @@ export default class TileItem
     }
 
     public get direction(): TileItemDirection { return this._direction }
-    public set direction(value) { this._direction = value }
+
+    public setDirection(direction: TileItemDirection)
+    {
+        this._direction = direction
+    }
 
     public render(): void
     {
+        const scene = this.getScene()
+
         if(!this._tileItemRender)
         {
             const tileItemRender = this._tileItemRender = this.getGame().tileItemFactory.createTileItemRender(this._tileItemInfo.id)
             tileItemRender.setTileItem(this)
 
-            const scene = this.getScene()
             const layer = this._tileItemInfo.type == TileItemType.FLOOR ? scene.groundLayer : scene.objectsLayer
 
             tileItemRender.setSceneLayer(layer)
@@ -91,6 +111,35 @@ export default class TileItem
         this._tileItemRender.setPosition(position.x + newRotationOffset.x, position.y + newRotationOffset.y)
 
         this._tileItemRender.render()
+
+        this.renderDebugText()
+    }
+
+    private renderDebugText()
+    {
+        const scene = this.getScene()
+
+        if(this._isHovering)
+        {
+            if(!this._debugText)
+            {
+                this._debugText = scene.add.bitmapText(0, 0, 'gem', `TileItem`, 16).setOrigin(0.5);
+                this._debugText.setTint(0xffffff)
+                this._debugText.setDepth(10000)
+            }
+
+            this._debugText.setPosition(this.getTile().position.x, this.getTile().position.y)
+
+            this._debugText.setText(`${JSON.stringify(this.serialize())}`)
+        } else {
+            if(this._debugText) {
+                this._debugText.destroy()
+                this._debugText = undefined
+            }
+
+        }
+
+        
     }
 
     public setTile(tile: Tile): void
@@ -146,7 +195,7 @@ export default class TileItem
 
         if(canRotate)
         {
-            this.direction = rotateTo
+            this.setDirection(rotateTo)
 
             console.log("Direction changed to " + this.direction)
         } else {

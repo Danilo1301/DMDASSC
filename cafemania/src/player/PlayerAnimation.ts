@@ -1,4 +1,4 @@
-import { Direction } from "@cafemania/game/Direction"
+import { Direction } from "@cafemania/utils/Direction"
 import Player from "./Player"
 
 export default class PlayerAnimation

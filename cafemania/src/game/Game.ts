@@ -2,7 +2,6 @@ import World from "@cafemania/world/World"
 import Phaser from 'phaser'
 import SceneManager from "./SceneManager"
 import { TileItemFactory } from "../tileItem/TileItemFactory"
-import PlayerAnimations from "@cafemania/player/PlayerAnimations"
 
 export default class Game
 {

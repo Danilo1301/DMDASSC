@@ -1,10 +1,9 @@
 import Game from "@cafemania/game/Game";
 import TileItem, { TileItemDirection } from "@cafemania/tileItem/TileItem";
-import { TileItemPlaceType, TileItemType } from "@cafemania/tileItem/TileItemInfo";
+import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import Tile from "@cafemania/tile/Tile"
 import Player from "@cafemania/player/Player";
 import GameScene from "@cafemania/game/scene/GameScene";
-import PathFind from "@cafemania/player/PathFind";
 import TileItemChair from "@cafemania/tileItem/TileItemChair";
 
 export default class World
@@ -29,27 +28,21 @@ export default class World
             }
         }
 
-
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(1, 1)) 
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(2, 2)) 
-
+        const tileItemFactory = this.getGame().tileItemFactory
         
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
-                this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('floor2'), this.getTile(x, y))
+                this.putTileItemInTile(tileItemFactory.createTileItem('floor2'), this.getTile(x, y))
             }
         }
 
    
         for (let x = 2; x < 9; x += 1) {
             for (let y = 1; y < 9; y += 3) {
-                this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove2'), this.getTile(x, y)) 
+                this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
 
-                const chair = this.getGame().tileItemFactory.createTileItem('chair1') as TileItemChair
-
-                chair.direction = TileItemDirection.BACK_FLIPPED
-
-                console.log(chair)
+                const chair = tileItemFactory.createTileItem('chair1') as TileItemChair
+                chair.setDirection(TileItemDirection.BACK_FLIPPED)
 
                 this.putTileItemInTile(chair, this.getTile(x, y+1)) 
             }
@@ -57,25 +50,26 @@ export default class World
         }
     
 
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(6, 6)) 
-        //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 4)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 6)) 
+        //this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('2by3'), this.getTile(8, 8)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('2by3'), this.getTile(8, 8)) 
 
 
  
-        for (let y = 1; y < 15; y += 1) this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('wall1'), this.getTile(mapSize.x-1, y))
+        for (let y = 1; y < 15; y += 1) this.putTileItemInTile(tileItemFactory.createTileItem('wall1'), this.getTile(mapSize.x-1, y))
         
         for (let x = 0; x < 14; x += 1) 
         {
-            const tileItem = this.getGame().tileItemFactory.createTileItem('wall1')
+            const tileItem = tileItemFactory.createTileItem('wall1')
 
-            tileItem.direction = TileItemDirection.BACK_FLIPPED
+            tileItem.setDirection(TileItemDirection.BACK_FLIPPED)
 
             this.putTileItemInTile(tileItem, this.getTile(x, 0))
         }
 
-        this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
+        this.putTileItemInTile(tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
 
         this.testGenPlayers()
     }
@@ -99,7 +93,6 @@ export default class World
 
     private async testGenPlayers()
     {
-        
         for (let i = 0; i < 10; i++) 
         {
             await new Promise<void>(resolve => {
@@ -132,7 +125,7 @@ export default class World
                     console.log("No empty chairs")
 
                     setInterval(() => {
-                        if(!player._walking) player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
+                        if(!player.isWalking) player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
                     }, 2000)
                 }
 
@@ -151,22 +144,14 @@ export default class World
                     resolve()
                 }, Math.random()*3000+2000);
             })
-
-            
         }
-        
-
-        
     }
 
     public createPlayer(): Player
     {
         const player = new Player(this)
-
-        player.setAtTile(0, 1)
-
         this._players.set(player.id, player)
-
+        player.setAtTile(this.getTile(0, 1))
         return player
     }
 
@@ -184,39 +169,6 @@ export default class World
     public tileExists(x: number, y: number): boolean
     {
         return this._tiles.has(`${x}:${y}`)
-    }
-
-    public static getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection): Phaser.Math.Vector2[]
-    {
-        const coords: Phaser.Math.Vector2[] = []
-
-        const isFlipped = direction == TileItemDirection.FRONT_FLIPPED || direction == TileItemDirection.BACK_FLIPPED
-
-        const size = {
-            x: isFlipped ? sizeY : sizeX,
-            y: isFlipped ? sizeX : sizeY
-        }
-        
-        const off = TileItem.getOffsetByDirection(sizeX, sizeY, direction)
-
-        for (let iy = 0; iy <= (size.y-1); iy++)
-        {
-            for (let ix = 0; ix <= (size.x-1); ix++)
-            {
-                let testingX = ix + off.x
-                let testingY = iy + off.y
-
-                if(isFlipped)
-                {
-                    testingX -= (size.x-1)
-                    testingY -= (size.y-1)
-                }
-
-                coords.push(new Phaser.Math.Vector2(testingX, testingY))
-            }
-        }
-
-        return coords
     }
 
     public getOccupiedTilesMap(compareTileItem?: TileItem): {[coord: string]: boolean }
@@ -300,7 +252,6 @@ export default class World
         return true
     }
 
- 
     public update(delta: number)
     {
         for (const player of this._players.values())
@@ -349,6 +300,39 @@ export default class World
     public getTiles(): Tile[]
     {
         return this._tiles.values()
+    }
+
+    public static getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection): Phaser.Math.Vector2[]
+    {
+        const coords: Phaser.Math.Vector2[] = []
+
+        const isFlipped = direction == TileItemDirection.FRONT_FLIPPED || direction == TileItemDirection.BACK_FLIPPED
+
+        const size = {
+            x: isFlipped ? sizeY : sizeX,
+            y: isFlipped ? sizeX : sizeY
+        }
+        
+        const off = TileItem.getOffsetByDirection(sizeX, sizeY, direction)
+
+        for (let iy = 0; iy <= (size.y-1); iy++)
+        {
+            for (let ix = 0; ix <= (size.x-1); ix++)
+            {
+                let testingX = ix + off.x
+                let testingY = iy + off.y
+
+                if(isFlipped)
+                {
+                    testingX -= (size.x-1)
+                    testingY -= (size.y-1)
+                }
+
+                coords.push(new Phaser.Math.Vector2(testingX, testingY))
+            }
+        }
+
+        return coords
     }
 }
 

@@ -17,10 +17,6 @@ export class TileItemFactory
 
     public init(): void
     {   
-        /*
-        todo: Allow extraLayers to be 0 instead of 1
-        */
-
         this.addTileItemInfo({
             id: 'wall1',
             name: 'wall1',
@@ -31,7 +27,7 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,1),
             sprites: 1,
             layers: 1,
-            extraLayers: 1,
+            extraLayers: 0,
             collision: {
                 wallAtFront: true,
                 isWall: true,
@@ -52,7 +48,7 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,2),
             sprites: 1,
             layers: 1,
-            extraLayers: 1,
+            extraLayers: 0,
             collision: {
                 isWall: true,
                 wallSize: 0,
@@ -72,11 +68,11 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,1),
             sprites: 2,
             layers: 2,
-            extraLayers: 2,
+            extraLayers: 1,
             collision: {
                 x: 28,
-                y: 20,
-                height: 100
+                y: 25,
+                height: 80
             }
         })
 
@@ -90,7 +86,7 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,2),
             sprites: 2,
             layers: 2,
-            extraLayers: 1,
+            extraLayers: 0,
             collision: {
                 x: 0,
                 y: 0,
@@ -108,7 +104,25 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,1),
             sprites: 1,
             layers: 1,
-            extraLayers: 1,
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 40
+            }
+        })
+
+        this.addTileItemInfo({
+            id: 'table1',
+            name: 'table1',
+            texture: 'table1',
+            rotationType: TileItemRotationType.SIDE_ONLY,
+            type: TileItemType.TABLE,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1,1),
+            sprites: 1,
+            layers: 1,
+            extraLayers: 0,
             collision: {
                 x: 0,
                 y: 0,
@@ -126,7 +140,7 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,1),
             sprites: 2,
             layers: 2,
-            extraLayers: 1,
+            extraLayers: 0,
             collision: {
                 x: 0,
                 y: 0,
@@ -144,7 +158,7 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(1,1),
             sprites: 1,
             layers: 1,
-            extraLayers: 1,
+            extraLayers: 0,
             collision: {
                 x: 0,
                 y: 0,
@@ -162,14 +176,13 @@ export class TileItemFactory
             size: new Phaser.Math.Vector2(2,3),
             sprites: 1,
             layers: 2,
-            extraLayers: 1,
+            extraLayers: 0,
             collision: {
                 x: 0,
                 y: 0,
                 height: 0
             }
         })
-
     }
 
     public createTileItem(id: string): TileItem

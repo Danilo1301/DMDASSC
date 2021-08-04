@@ -1,4 +1,4 @@
-import { Direction, Directions } from "@cafemania/game/Direction";
+import { Direction, Directions } from "@cafemania/utils/Direction";
 import SceneManager from "@cafemania/game/SceneManager";
 import Three from "@cafemania/three/Three";
 import * as THREE from 'three';
