@@ -3,6 +3,7 @@ import TileItem from "./TileItem";
 import TileItemChair from "./TileItemChair";
 import TileItemInfo, { TileItemPlaceType, TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
+import TileItemStove from "./TileItemStove";
 
 export class TileItemFactory
 {
@@ -13,9 +14,11 @@ export class TileItemFactory
     constructor(game: Game)
     {
         this._game = game
+
+        this.init()
     }
 
-    public init(): void
+    private init(): void
     {   
         this.addTileItemInfo({
             id: 'wall1',
@@ -191,11 +194,9 @@ export class TileItemFactory
 
         const tileItemInfo = this.getTileItemInfo(id)
 
-        if(tileItemInfo.type == TileItemType.CHAIR)
-        {
-            return new TileItemChair(tileItemInfo)
-        }
-
+        if(tileItemInfo.type == TileItemType.CHAIR) return new TileItemChair(tileItemInfo)
+        if(tileItemInfo.type == TileItemType.STOVE) return new TileItemStove(tileItemInfo)
+        
         return new TileItem(tileItemInfo)
     }
 

@@ -254,10 +254,8 @@ export default class World
 
     public update(delta: number)
     {
-        for (const player of this._players.values())
-        {
-            player.update(delta)
-        }
+        for (const tile of this.getTiles()) tile.update(delta)
+        for (const player of this._players.values()) player.update(delta)
     }
 
     public render(): void
@@ -267,15 +265,9 @@ export default class World
         if(!scene.groundLayer) scene.groundLayer = scene.add.layer()
         if(!scene.objectsLayer) scene.objectsLayer = scene.add.layer()
 
-        for (const tile of this.getTiles())
-        {
-            tile.render()
-        }
 
-        for (const player of this._players.values())
-        {
-            player.render()
-        }
+        for (const tile of this.getTiles()) tile.render()
+        for (const player of this._players.values()) player.render()
     }
 
     public getTile(x: number, y: number): Tile

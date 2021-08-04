@@ -111,6 +111,8 @@ export default class GameScene extends BaseScene
         console.log(textureName)
 
         this._loaded = true
+
+        this.drawWorldText("AOE================", new Phaser.Math.Vector2(0, 0))
     }
 
     public update(time: number, delta: number): void
@@ -124,5 +126,26 @@ export default class GameScene extends BaseScene
             world.update(delta)
             world.render()
         }
-    }  
+    }
+
+    public drawWorldText(text: string, position: Phaser.Math.Vector2, color?: string)
+    {
+        const worldText = this.add.text(position.x, position.y, text, {color: color || "black", fontStyle: "bold"})
+        worldText.setDepth(10000)
+
+        let n = 0
+
+        const interval = setInterval(() => {
+            worldText.setPosition(worldText.x, worldText.y - 0.2)
+
+            n++
+
+            if(n >= 600)
+            {
+                clearInterval(interval)
+                
+                worldText.destroy()
+            }
+        }, 1)
+    }
 }

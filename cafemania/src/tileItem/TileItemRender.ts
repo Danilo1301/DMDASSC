@@ -293,7 +293,7 @@ export default class TileItemRender
     
                     
                     sprite.setFrame(`${frame.layer}_${frame.sprite}`)
-                    sprite.setAlpha(this._transparent ? 0.3 : 1)
+                    sprite.setAlpha(this._transparent ? 0.5 : 1)
                     
                 }
 

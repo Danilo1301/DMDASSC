@@ -50,6 +50,16 @@ export default class TileItem
         })
     }
 
+    public setIsTransparent(transparent: boolean)
+    {
+        return this._tileItemRender?.setTransparent(transparent)
+    }
+
+    public getPosition()
+    {
+        return this.getTile().getCenterPosition()
+    }
+
     public getTile(): Tile
     {
         return this._tile
@@ -70,6 +80,11 @@ export default class TileItem
     public setDirection(direction: TileItemDirection)
     {
         this._direction = direction
+    }
+
+    public update(delta: number)
+    {
+        
     }
 
     public render(): void
@@ -147,7 +162,7 @@ export default class TileItem
         this._tile = tile
     }
 
-    private getGame()
+    protected getGame()
     {
         return this._tile.getWorld().getGame()
     }

@@ -52,6 +52,11 @@ export default class Tile
         )
     }
 
+    public update(delta: number)
+    {
+        for (const tileItem of this._tileItems) tileItem.update(delta)
+    }
+
     public render()
     {
         const scene = this.getScene()
@@ -72,10 +77,7 @@ export default class Tile
         this._sprite.setPosition(position.x, position.y)
         */
 
-        for (const tileItem of this._tileItems)
-        {
-            tileItem.render()
-        }
+        for (const tileItem of this._tileItems) tileItem.render()
 
         /*
         if(!this._debugText)

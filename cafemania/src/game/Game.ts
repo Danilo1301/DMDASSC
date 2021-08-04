@@ -2,19 +2,21 @@ import World from "@cafemania/world/World"
 import Phaser from 'phaser'
 import SceneManager from "./SceneManager"
 import { TileItemFactory } from "../tileItem/TileItemFactory"
+import FoodFactory from "@cafemania/food/FoodFactory"
 
 export default class Game
 {
     public events = new Phaser.Events.EventEmitter()
 
     public tileItemFactory: TileItemFactory
+    public foodFactory: FoodFactory
 
     private _worlds = new Phaser.Structs.Map<string, World>([])
 
     constructor()
     {
         this.tileItemFactory = new TileItemFactory(this)
-        this.tileItemFactory.init()
+        this.foodFactory = new FoodFactory(this)
     }
 
     public async start(): Promise<void>
