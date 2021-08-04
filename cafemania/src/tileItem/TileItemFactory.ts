@@ -1,5 +1,6 @@
 import Game from "../game/Game";
 import TileItem from "./TileItem";
+import TileItemChair from "./TileItemChair";
 import TileItemInfo, { TileItemPlaceType, TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 
@@ -177,9 +178,12 @@ export class TileItemFactory
 
         const tileItemInfo = this.getTileItemInfo(id)
 
-        const tileItem = new TileItem(tileItemInfo)
+        if(tileItemInfo.type == TileItemType.CHAIR)
+        {
+            return new TileItemChair(tileItemInfo)
+        }
 
-        return tileItem
+        return new TileItem(tileItemInfo)
     }
 
     public addTileItemInfo(tileItemInfo: TileItemInfo): TileItemInfo

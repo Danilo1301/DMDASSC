@@ -41,7 +41,7 @@ class MoveScene
                 Math.round(startScenePos.y + (delta.y / zoom))
             )
 
-            console.log(zoom, scene.cameras.main.scrollX, scene.cameras.main.scrollY)
+            //console.log(zoom, scene.cameras.main.scrollX, scene.cameras.main.scrollY)
         });
     }
 }

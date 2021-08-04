@@ -5,6 +5,7 @@ import Tile from "@cafemania/tile/Tile"
 import Player from "@cafemania/player/Player";
 import GameScene from "@cafemania/game/scene/GameScene";
 import PathFind from "@cafemania/player/PathFind";
+import TileItemChair from "@cafemania/tileItem/TileItemChair";
 
 export default class World
 {
@@ -32,25 +33,29 @@ export default class World
         //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(1, 1)) 
         //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(2, 2)) 
 
-
+        
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
                 this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('floor2'), this.getTile(x, y))
             }
         }
 
-        for (let x = 2; x < mapSize.x-1; x += 1) {
-            for (let y = 1; y < 14; y += 3) {
+   
+        for (let x = 2; x < 9; x += 1) {
+            for (let y = 1; y < 9; y += 3) {
                 this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove2'), this.getTile(x, y)) 
 
-                const chair = this.getGame().tileItemFactory.createTileItem('chair1')
+                const chair = this.getGame().tileItemFactory.createTileItem('chair1') as TileItemChair
 
                 chair.direction = TileItemDirection.BACK_FLIPPED
+
+                console.log(chair)
 
                 this.putTileItemInTile(chair, this.getTile(x, y+1)) 
             }
             
         }
+    
 
         //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(6, 6)) 
         //this.putTileItemInTile(this.getGame().tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
@@ -75,20 +80,69 @@ export default class World
         this.testGenPlayers()
     }
 
+    public getAllChairs()
+    {
+        const chairs: TileItemChair[] = []
+        const tiles = this.getTiles()
+
+        for (const tile of tiles) {
+            for (const tileItem of tile.getTileItems()) {
+                if(tileItem.getTileItemInfo().type == TileItemType.CHAIR)
+                {
+                    chairs.push(tileItem as TileItemChair)
+                }
+            }
+        }
+
+        return chairs
+    }
+
     private async testGenPlayers()
     {
         
-        for (let i = 0; i < 12; i++) 
+        for (let i = 0; i < 10; i++) 
         {
             await new Promise<void>(resolve => {
                 const player = this.createPlayer()
 
+                const chairs = this.getAllChairs()
+
+                const emptyChairs: TileItemChair[] = []
+
+                for (const chair of chairs)
+                {
+                    if(!chair.getIsOcuppied())
+                    {
+                        emptyChairs.push(chair)
+                    }
+                }
+
+                if(emptyChairs.length > 0)
+                {
+                    const chair = emptyChairs[Math.round(Math.random()*(emptyChairs.length-1))]
+
+                    chair.setOcuppied(true)
+
+                    console.log("Going to chair", chair)
+
+                    const tile = chair.getTile()
+
+                    player.testWalkToTile(tile.x, tile.y, true)
+                } else {
+                    console.log("No empty chairs")
+
+                    setInterval(() => {
+                        if(!player._walking) player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
+                    }, 2000)
+                }
+
+                /*
                 setInterval(() => {
 
                     if(!player._walking)
                         player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
                 }, 2000)
-
+                */
 
 
                 

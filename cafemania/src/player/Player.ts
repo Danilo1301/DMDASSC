@@ -61,7 +61,7 @@ export default class Player
         this._position.set(position.x, position.y)
     }
 
-    public testWalkToTile(x: number, y: number)
+    public testWalkToTile(x: number, y: number, walkToEnd?: boolean)
     {
         const pathFind = new PathFind()
 
@@ -69,13 +69,18 @@ export default class Player
 
         for (const tile of this._world.getTiles())
         {
-            const canWalk = !ocuppiedMap[`${tile.x}:${tile.y}`]
+            let canWalk = !ocuppiedMap[`${tile.x}:${tile.y}`]
+
+            if(walkToEnd)
+                if(tile.x == x && tile.y == y) canWalk = true
 
             pathFind.add(tile.x, tile.y, canWalk)
         }
 
         const atX = this._atTile?.x || 0
         const atY = this._atTile?.y || 0
+
+        
 
         pathFind.setStart(atX, atY)
         pathFind.setEnd(x, y)
