@@ -122,6 +122,10 @@ export default class World
 
                     player.testWalkToTile(tile.x, tile.y, true, () => {
                         player.sitAtChair(chair)
+
+                        setTimeout(() => {
+                            player.setIsEating(true)
+                        }, 3000);
                     })
                 } else {
                     console.log("No empty chairs")

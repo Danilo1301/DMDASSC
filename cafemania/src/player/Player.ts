@@ -19,6 +19,8 @@ export default class Player
 
     private _targetPosition = new Phaser.Math.Vector2(0, 0)
 
+    private _isEating: boolean = false
+
     private _isWalking: boolean = false
 
     private _onStopWalking?: () => void
@@ -180,6 +182,11 @@ export default class Player
         if(useDefaultTexture) this.createSprite('PlayerSpritesTexture' + this._id)
     }
 
+    public setIsEating(isEating: boolean)
+    {
+        this._isEating = isEating
+    }
+
     public update(delta: number)
     {
         this.processMovement(delta)
@@ -223,7 +230,13 @@ export default class Player
         } else {
             if(this.isSitting)
             {
-
+                if(this._isEating)
+                {
+                    this._animation.play("Eat")
+                } else {
+                    this._animation.play("Sit")
+                }
+                
             } else {
                 this._animation.play("Idle")
             }

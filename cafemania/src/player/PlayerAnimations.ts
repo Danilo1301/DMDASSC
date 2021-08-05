@@ -20,7 +20,19 @@ export default class PlayerAnimations
             frames: 3,
             frameOrder: [0, 1, 2, 1],
             frameRate: 2
-        }
+        },
+        "Sit": {
+            name: 'Sit',
+            frames: 1,
+            frameOrder: [0],
+            frameRate: 2
+        },
+        "Eat": {
+            name: 'Eat',
+            frames: 3,
+            frameOrder: [0, 1, 2, 1],
+            frameRate: 4
+        },
     }
 
     public static getAnimations(): PlayerAnimationInfo[]
