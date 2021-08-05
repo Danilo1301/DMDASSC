@@ -163,13 +163,15 @@ export default class PathFind
         let node: Node | undefined = endNode
 
         do {
-            if(node)
+            if(node != undefined)
             {
                 path.unshift(node)
                 //console.log(node.x, node.y)
+
+                node = node.cameFrom
             }
 
-            node = node.cameFrom
+            
         }
         while(node)
 

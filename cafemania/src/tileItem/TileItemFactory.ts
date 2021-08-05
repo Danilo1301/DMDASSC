@@ -46,7 +46,7 @@ export class TileItemFactory
             name: 'window1',
             texture: 'window1',
             rotationType: TileItemRotationType.SIDE_ONLY,
-            type: TileItemType.WALL_OBJECT,
+            type: TileItemType.WALL_DECORATION,
             placeType: TileItemPlaceType.WALL,
             size: new Phaser.Math.Vector2(1,2),
             sprites: 1,
@@ -173,7 +173,7 @@ export class TileItemFactory
             id: '2by3',
             name: '2by3',
             texture: '2by3',
-            type: TileItemType.STOVE, //----------------
+            type: TileItemType.FLOOR_DECORATION, //----------------
             rotationType: TileItemRotationType.SIDE_AND_BACK,
             placeType: TileItemPlaceType.FLOOR, //----------------
             size: new Phaser.Math.Vector2(2,3),

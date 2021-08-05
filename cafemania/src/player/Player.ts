@@ -9,6 +9,164 @@ import PlayerAnimations from "./PlayerAnimations";
 import { v4 as uuidv4 } from 'uuid';
 import TileItemChair from "@cafemania/tileItem/TileItemChair";
 
+
+abstract class Task
+{
+    public completed: boolean = false
+
+    public onStart() {}
+
+    protected completeTask()
+    {
+        this.completed = true
+    }
+}
+
+class TaskWalkToTile extends Task
+{
+    private player: Player
+    private tile: Tile
+ 
+    constructor(player: Player, tile: Tile)
+    {
+        super()
+
+        this.player = player
+        this.tile = tile
+    }
+
+    public onStart()
+    {
+        const world = this.player.getWorld()
+        const pathFind = new PathFind()
+        const ocuppiedMap = world.getOccupiedTilesMap()
+
+        for (const tile of world.getTiles())
+        {
+            let canWalk = !ocuppiedMap[`${tile.x}:${tile.y}`]
+
+            if(tile.x == this.tile.x && tile.y == this.tile.y) canWalk = true
+
+            pathFind.add(tile.x, tile.y, canWalk)
+        }
+
+        console.log(this.player.getAtTile())
+
+        const atX = this.player.getAtTile().x || 0
+        const atY = this.player.getAtTile().y || 0
+
+        console.log(`${atX},${atY} to ${this.tile.x},${this.tile.y}`)
+
+        pathFind.setStart(atX, atY)
+        pathFind.setEnd(this.tile.x, this.tile.y)
+        pathFind.find(async (path) => {
+            if(path.length == 0) return
+
+            path.splice(0, 1)
+
+            const tasks: Task[] = []
+
+            for (const p of path)
+            {
+                const task = new TaskWalkToSingleTile(this.player, world.getTile(p.x, p.y), (p.x != this.tile.x && p.y != this.tile.y))
+
+                tasks.push(task)
+            } 
+
+            tasks.reverse().map(task => this.player.getTaskManager().addTaskAt(task, 1))
+        })
+
+        this.completeTask()
+    }
+}
+
+class TaskWalkToSingleTile extends Task
+{
+    private player: Player
+    private tile: Tile
+    private dontStopWalking: boolean
+
+    constructor(player: Player, tile: Tile, dontStopWalking: boolean)
+    {
+        super()
+
+        this.player = player
+        this.tile = tile
+        this.dontStopWalking = dontStopWalking
+    }
+
+    public onStart()
+    {
+        this.player.moveToTile(this.tile.x, this.tile.y, () => {
+
+            if(this.dontStopWalking) this.player.setIsWalking(true)
+
+            this.completeTask()
+        })
+    }
+}
+
+class TaskExecuteAction extends Task
+{
+    private action: () => void
+
+    constructor(action: () => void)
+    {
+        super()
+
+        this.action = action
+    }
+
+    public onStart()
+    {
+        this.action()
+        this.completeTask()
+    }
+}
+
+class TaskManager
+{
+    private _tasks: Task[] = []
+
+    private _executingTask = false
+
+    public addTask(task: Task)
+    {
+        this._tasks.push(task)
+    }
+
+    public addTaskAt(task: Task, index: number)
+    {
+        this._tasks.splice(index, 0, task)
+    }
+
+    public update(delta: number)
+    {
+        if(this._executingTask)
+        {
+            const task = this._tasks[0]
+
+            if(task.completed)
+            {
+                this._tasks.splice(0, 1)
+                this._executingTask = false
+            }
+        } 
+
+        if(this._tasks.length > 0 && !this._executingTask)
+        {
+            const task = this._tasks[0]
+            this._executingTask = true
+            
+            console.log(task)
+
+            task.onStart()
+        }
+        
+    }
+}
+
+
 export default class Player
 {
     private _sprite?: Phaser.GameObjects.Sprite
@@ -25,6 +183,8 @@ export default class Player
 
     private _onStopWalking?: () => void
 
+    private _depth: number = 0
+
     private _direction: Direction = Direction.East
 
     private _debugText?: Phaser.GameObjects.BitmapText
@@ -39,11 +199,14 @@ export default class Player
 
     private _sittingAtChair?: TileItemChair
 
+    private _taskManager: TaskManager
+
     constructor(world: World)
     {
         this._id = uuidv4();
         this._world = world
         this._animation = new PlayerAnimation(this)
+        this._taskManager = new TaskManager()
     }
 
     public get id(): string { return this._id }
@@ -54,9 +217,29 @@ export default class Player
 
     public get isSitting() { return this._sittingAtChair != undefined }
 
+    public getTaskManager()
+    {
+        return this._taskManager
+    }
+
+    public setIsWalking(value: boolean)
+    {
+        this._isWalking = value
+    }
+
+    public getWorld()
+    {
+        return this._world
+    }
+
     public getSprite()
     {
         return this._sprite!
+    }
+
+    public getAtTile()
+    {
+        return this._atTile!
     }
 
     public setAtTile(tile: Tile)
@@ -69,6 +252,18 @@ export default class Player
     public sitAtChair(chair: TileItemChair)
     {
         this._sittingAtChair = chair
+
+        
+    }
+
+    public taskWalkToTile(tile: Tile)
+    {
+        this._taskManager.addTask(new TaskWalkToTile(this, tile))
+    }
+
+    public taskExecuteAction(action: () => void)
+    {
+        this._taskManager.addTask(new TaskExecuteAction(action))
     }
 
     public testWalkToTile(x: number, y: number, walkToEnd?: boolean, callback?: () => void)
@@ -98,11 +293,21 @@ export default class Player
 
             for (const p of path) {
                 await new Promise<void>(resolve => {
-                    this.moveToTile(p.x, p.y, () => resolve())
+                    this.moveToTile(p.x, p.y, () => {
+
+                        if(p.x == x && p.y == y) {
+                            callback?.()
+                        } else {
+                            this._isWalking = true
+                        }
+
+                        console.log("Thats the callback")
+                        resolve()
+                    })
                 })
             } 
 
-            callback?.()
+            
         })
     }
 
@@ -119,6 +324,8 @@ export default class Player
 
     public moveToPosition(position: Phaser.Math.Vector2, callback?: () => void)
     {
+        console.log(`[Player] Move to position`)
+
         this._onStopWalking = callback
         this._targetPosition = position
         this._isWalking = true
@@ -179,7 +386,7 @@ export default class Player
 
         this._animation.play('Idle', true)
         
-        if(useDefaultTexture) this.createSprite('PlayerSpritesTexture' + this._id)
+        //if(useDefaultTexture) this.createSprite('PlayerSpritesTexture' + this._id)
     }
 
     public setIsEating(isEating: boolean)
@@ -189,40 +396,44 @@ export default class Player
 
     public update(delta: number)
     {
+        this._taskManager.update(delta)
+
         this.processMovement(delta)
+
+        this.processAnimations(delta)
     }
 
-    public render()
+    public processAnimations(delta: number)
     {
-        const scene = this.getScene()
-
-        if(!this._container)
+        if(this.isSitting)
         {
-            this._container = scene.add.container(0, 0)
+            const chair = this._sittingAtChair!
 
-            scene.objectsLayer.add(this._container)
+            const directions = [
+                Direction.East,
+                Direction.South,
+                Direction.West,
+                Direction.North
+            ]
 
-            this.createSprite()
+
+            //const d = (chair.getTileItemRender().getDepth() - chair.getDepth())
+
+            const d = chair.getTileItemRender().getDepth()
+
+            const depths = [
+                5,
+                -1,
+                -5,
+                5
+            ]
+
+            this._direction = directions[chair.direction]
+
+            this._depth = d + depths[chair.direction]
+        } else {
+            this._depth = this._position.y + Tile.SIZE.y/2
         }
-
-        if(!this._debugText)
-        {
-            this._debugText = scene.add.bitmapText(0, 0, 'gem', `${this._id}`, 16).setOrigin(0.5);
-            this._debugText.setTint(0xffffff)
-        }
-
-        this._animation.update()
-
-        this._container.setPosition(this._position.x, this._position.y)
-        this._container.setDepth(this._position.y + Tile.SIZE.y/2)
-
-        let str = `${this._sprite?.anims.currentFrame?.index}`
-        
-        //str += `\n${this._direction.x},${this._direction.y}`
-
-        this._debugText.setText(str)
-        this._debugText.setDepth(100000)
-        this._debugText.setPosition(this._position.x, this._position.y)
 
         if(this._isWalking)
         {
@@ -243,19 +454,40 @@ export default class Player
             
         }
 
-        if(this.isSitting)
+        this._animation.update(delta)
+    }
+
+    public render()
+    {
+        const scene = this.getScene()
+
+        if(!this._container)
         {
-            const chair = this._sittingAtChair!
+            this._container = scene.add.container(0, 0)
 
-            const directions = [
-                Direction.East,
-                Direction.South,
-                Direction.West,
-                Direction.North
-            ]
+            scene.objectsLayer.add(this._container)
 
-            this._direction = directions[chair.direction]
+            this.createSprite()
         }
+
+        if(!this._debugText)
+        {
+            this._debugText = scene.add.bitmapText(0, 0, 'gem', `${this._id}`, 16).setOrigin(0.5);
+            this._debugText.setTint(0x0000ff)
+        }
+
+        this._container.setPosition(this._position.x, this._position.y)
+        this._container.setDepth(this._depth)
+
+        let str = `${this._sprite?.anims.currentFrame?.index}`
+
+        str += `\n${this._depth}`
+        
+        //str += `\n${this._direction.x},${this._direction.y}`
+
+        this._debugText.setText(str)
+        this._debugText.setDepth(100000)
+        this._debugText.setPosition(this._position.x, this._position.y)
     }
 
     private processMovement(delta: number)
@@ -304,10 +536,14 @@ export default class Player
 
         if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < 2)
         {
+            console.log(`[Player] Reached target position`)
+
             this._position.set(this._targetPosition.x, this._targetPosition.y)
 
             this._isWalking = false
             
+            console.log(`[Player] Calling onStopWalking`)
+
             this._onStopWalking?.()
             this._onStopWalking = undefined
         }

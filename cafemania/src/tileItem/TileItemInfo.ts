@@ -13,9 +13,10 @@ export enum TileItemType
     FLOOR,
     WALL,
     STOVE,
-    WALL_OBJECT,
+    WALL_DECORATION,
     CHAIR,
-    TABLE
+    TABLE,
+    FLOOR_DECORATION
 }
 
 export enum TileItemPlaceType

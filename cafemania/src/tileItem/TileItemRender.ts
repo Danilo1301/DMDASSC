@@ -46,7 +46,8 @@ export default class TileItemRender
     {
         const tileItemInfo = this._tileItemInfo
 
-        const canCreateCollision = tileItemInfo.type != TileItemType.FLOOR && tileItemInfo.type != TileItemType.WALL
+        let canCreateCollision = tileItemInfo.type != TileItemType.FLOOR && tileItemInfo.type != TileItemType.WALL
+        canCreateCollision = true
 
         const scene = this.getScene()
         const textureName = tileItemInfo.texture
@@ -106,11 +107,9 @@ export default class TileItemRender
 
         //console.log(this._sprites)
 
-        /*
-        const text = this._debugText = this.getScene().add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
-        text.setTintFill(0x000000)
-        text.setDepth(10000)
-        */
+        
+        
+        
     }
 
     public render()
@@ -257,6 +256,16 @@ export default class TileItemRender
         this._currentLayer = layer
     }
 
+    public getDepth()
+    {
+        let depth = this._position.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))
+
+        //let depth = this.getTileItem().getDepth()
+        //let fy = (this._tileItem?.getTile().y || 0)
+
+        return depth
+    }
+
     public updateSprites()
     {
         for (const spriteLayerKey in this._sprites) {
@@ -276,7 +285,30 @@ export default class TileItemRender
                 )
                 container.setScale(this._flipSprites ? -1 : 1, 1)
 
-                const depth = (container.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))) - this.depth - (tileItemRenderSprite.spriteLayer * 5)
+                //const depth = (container.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))) - this.depth - (tileItemRenderSprite.spriteLayer * 5)
+
+                
+                const dl = tileItemRenderSprite.spriteLayer*5
+
+                const depth = this.getDepth() + pos.y - dl
+                
+                //this._position.y - dl + (pos.y *(this._flipSprites ? -1 : 1))
+                    
+                /*
+
+                if(this.getTileItem().getTile().id == "2:2" && this.getTileItem().getTileItemInfo().name == "chair1")
+                {
+                    console.log(this.getTileItem().getTileItemInfo().name)
+
+                    console.log(coord, spriteLayerKey)
+
+                    console.log(depth, dl)
+                }
+
+                */
+
+
+
 
                 container.setDepth(depth)
 
@@ -317,13 +349,33 @@ export default class TileItemRender
 
         }
 
-        if(this._tileItem && this._debugText)
+        if(this._tileItem)
         {
-            const pos = this._tileItem.getTile().position
+            if(this._tileItem.isHovering)
+            {
+                if(!this._debugText)
+                {
+                    const text = this._debugText = this.getScene().add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
+                    text.setTintFill(0x000000)
+                    text.setDepth(10000)
+                    text.setOrigin(0.5, -1)
+                }
 
-            this._debugText.setAlpha(1)
-            this._debugText.setPosition(pos.x, pos.y)
-            this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
+                const pos = this._tileItem.getTile().position
+
+                this._debugText.setAlpha(1)
+                this._debugText.setPosition(pos.x, pos.y)
+                this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
+            } else {
+                if(this._debugText)
+                {
+                    this._debugText.destroy()
+                    this._debugText = undefined
+                }
+                
+            }
+
+            
         }
 
         

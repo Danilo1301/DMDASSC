@@ -38,6 +38,11 @@ export default class TileItem
         this._tileItemInfo = tileItemInfo
 
         this.events.on("pointerup", () => {
+
+            if(this._tileItemInfo.type == TileItemType.STOVE) return
+            if(this._tileItemInfo.type == TileItemType.WALL) return
+            if(this._tileItemInfo.type == TileItemType.FLOOR) return
+
             this.rotate()
         })
 
@@ -76,6 +81,13 @@ export default class TileItem
     }
 
     public get direction(): TileItemDirection { return this._direction }
+
+    public get isHovering(): boolean { return this._isHovering }
+
+    public getTileItemRender()
+    {
+        return this._tileItemRender!
+    }
 
     public setDirection(direction: TileItemDirection)
     {
@@ -130,6 +142,11 @@ export default class TileItem
         this.renderDebugText()
     }
 
+    public getDepth()
+    {
+        return this._tile.position.y
+    }
+
     private renderDebugText()
     {
         const scene = this.getScene()
@@ -145,7 +162,7 @@ export default class TileItem
 
             this._debugText.setPosition(this.getTile().position.x, this.getTile().position.y)
 
-            this._debugText.setText(`${JSON.stringify(this.serialize())}`)
+            this._debugText.setText(`${JSON.stringify(this.serialize())}\n${this.getDepth()}`)
         } else {
             if(this._debugText) {
                 this._debugText.destroy()

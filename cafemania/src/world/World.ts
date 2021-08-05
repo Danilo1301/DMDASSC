@@ -37,7 +37,7 @@ export default class World
         }
 
    
-        for (let x = 2; x < 4; x += 1) {
+        for (let x = 2; x < 6; x += 1) {
             for (let y = 1; y < 9; y += 3) {
                 this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
 
@@ -52,7 +52,9 @@ export default class World
 
         this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 4)) 
         this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 6)) 
-        //this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(3,2)) 
+  
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 2)) 
+        //this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(2, 3)) 
 
         this.putTileItemInTile(tileItemFactory.createTileItem('2by3'), this.getTile(8, 8)) 
 
@@ -93,15 +95,20 @@ export default class World
 
     private async testGenPlayers()
     {
-        for (let i = 0; i < 10; i++) 
+        for (let i = 0; i < 30; i++) 
         {
             await new Promise<void>(resolve => {
                 const player = this.createPlayer()
+
+
+                //player.taskWalkToTile(this.getTile(0, 5))
+      
 
                 const chairs = this.getAllChairs()
 
                 const emptyChairs: TileItemChair[] = []
 
+              
                 for (const chair of chairs)
                 {
                     if(!chair.getIsOcuppied())
@@ -120,6 +127,20 @@ export default class World
 
                     const tile = chair.getTile()
 
+                    player.taskWalkToTile(tile)
+                    player.taskExecuteAction(() => {
+                        player.sitAtChair(chair)
+                        player.setAtTile(tile)
+
+                        setTimeout(() => {
+                            player.setIsEating(true)
+
+                            //player.taskWalkToTile(this.getTile(0, 1))
+                        }, 3000);
+                    })
+                
+                    /*
+                    
                     player.testWalkToTile(tile.x, tile.y, true, () => {
                         player.sitAtChair(chair)
 
@@ -127,14 +148,17 @@ export default class World
                             player.setIsEating(true)
                         }, 3000);
                     })
+                    */
+                    
                 } else {
                     console.log("No empty chairs")
 
                     setInterval(() => {
                         if(!player.isWalking) player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
-                    }, 2000)
+                    }, 3000)
                 }
 
+                 
                 /*
                 setInterval(() => {
 
@@ -148,7 +172,7 @@ export default class World
 
                 setTimeout(() => {
                     resolve()
-                }, Math.random()*3000+2000);
+                }, Math.random()*1000+2000);
             })
         }
     }
