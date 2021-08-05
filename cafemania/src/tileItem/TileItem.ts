@@ -39,6 +39,13 @@ export default class TileItem
 
         this.events.on("pointerup", () => {
 
+            if(this._tileItemInfo.type == TileItemType.FLOOR)
+            {
+                const tile = this.getTile()
+
+                this.getScene().multiplayer.send("position", {x: tile.x, y: tile.y})
+            }
+
             if(this._tileItemInfo.type == TileItemType.STOVE) return
             if(this._tileItemInfo.type == TileItemType.WALL) return
             if(this._tileItemInfo.type == TileItemType.FLOOR) return

@@ -54,7 +54,7 @@ export default class PlayerAnimation
             this._oldAnim = this._currentAnim
             this._currentDirection = playerDirection
 
-            console.log(`Animation is now ${this._currentAnim} (${this._currentDirection})`)
+            //console.log(`Animation is now ${this._currentAnim} (${this._currentDirection})`)
         
             if(!this._player.getSprite()) return
 

@@ -1,3 +1,5 @@
+import Player from "@cafemania/player/Player";
+import TestMultiplayer from "../TestMultiplayer";
 import BaseScene from "./BaseScene";
 
 class MoveScene
@@ -51,6 +53,9 @@ export default class GameScene extends BaseScene
     private static _instance: GameScene
 
     public static getScene() { return this._instance }
+
+    public multiplayer: TestMultiplayer
+    public localPlayer?: Player
     
     public groundLayer!: Phaser.GameObjects.Layer
     public objectsLayer!: Phaser.GameObjects.Layer
@@ -62,6 +67,34 @@ export default class GameScene extends BaseScene
         super('GameScene')
 
         GameScene._instance = this
+
+        this.multiplayer = new TestMultiplayer("/api/cafemania")
+
+        this.multiplayer.onUpdatePlayer = (player: Player, data) => {
+
+            if(!player.getWorld().tileExists(data.x, data.y)) return
+
+            player.taskWalkToTile(player.getWorld().getTile(data.x, data.y))
+        }
+
+        this.multiplayer.onCreatePlayer = (data) => {
+            const player = this.getGame().getWorlds()[0].createPlayer()
+
+            player.setAtTile(player.getWorld().getTile(data.x, data.y))
+
+            player.name = data.id
+
+            return player
+        }
+
+        setInterval(() => {
+            console.log("send")
+            //this.multiplayer.send("position", {x: Math.ceil(Math.random()*14), y: Math.ceil(Math.random()*15)})
+        }, 5000)
+
+        
+
+        //this.localPlayer = this.getGame().getWorlds()[0].createPlayer()
     }
 
     public preload(): void
@@ -99,6 +132,8 @@ export default class GameScene extends BaseScene
         const moveScene = new MoveScene(this);
 
         this.test()
+
+    
     }
 
     private async test()

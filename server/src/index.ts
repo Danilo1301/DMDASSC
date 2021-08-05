@@ -81,6 +81,6 @@ console.log("Starting CafemaniaServer...")
 
 import CafemaniaServer from '@cafemania/game/GameServer'
 
-var cafemania = new CafemaniaServer()
+var cafemania = new CafemaniaServer(io.of("/api/cafemania"))
 cafemania.start()
 

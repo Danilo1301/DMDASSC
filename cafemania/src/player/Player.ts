@@ -50,12 +50,12 @@ class TaskWalkToTile extends Task
             pathFind.add(tile.x, tile.y, canWalk)
         }
 
-        console.log(this.player.getAtTile())
+        //console.log(this.player.getAtTile())
 
         const atX = this.player.getAtTile().x || 0
         const atY = this.player.getAtTile().y || 0
 
-        console.log(`${atX},${atY} to ${this.tile.x},${this.tile.y}`)
+        //console.log(`${atX},${atY} to ${this.tile.x},${this.tile.y}`)
 
         pathFind.setStart(atX, atY)
         pathFind.setEnd(this.tile.x, this.tile.y)
@@ -158,7 +158,7 @@ class TaskManager
             const task = this._tasks[0]
             this._executingTask = true
             
-            console.log(task)
+            //console.log(task)
 
             task.onStart()
         }
@@ -200,6 +200,8 @@ export default class Player
     private _sittingAtChair?: TileItemChair
 
     private _taskManager: TaskManager
+
+    public name?: string
 
     constructor(world: World)
     {
@@ -301,7 +303,7 @@ export default class Player
                             this._isWalking = true
                         }
 
-                        console.log("Thats the callback")
+                        //console.log("Thats the callback")
                         resolve()
                     })
                 })
@@ -324,7 +326,7 @@ export default class Player
 
     public moveToPosition(position: Phaser.Math.Vector2, callback?: () => void)
     {
-        console.log(`[Player] Move to position`)
+        //console.log(`[Player] Move to position`)
 
         this._onStopWalking = callback
         this._targetPosition = position
@@ -482,6 +484,13 @@ export default class Player
         let str = `${this._sprite?.anims.currentFrame?.index}`
 
         str += `\n${this._depth}`
+
+        if(this.name)
+        {
+            str += `\n(Online Player)\n${this.name}`
+
+            this._debugText.setTint(0xff0000)
+        }
         
         //str += `\n${this._direction.x},${this._direction.y}`
 
@@ -536,13 +545,13 @@ export default class Player
 
         if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < 2)
         {
-            console.log(`[Player] Reached target position`)
+            //console.log(`[Player] Reached target position`)
 
             this._position.set(this._targetPosition.x, this._targetPosition.y)
 
             this._isWalking = false
             
-            console.log(`[Player] Calling onStopWalking`)
+            //console.log(`[Player] Calling onStopWalking`)
 
             this._onStopWalking?.()
             this._onStopWalking = undefined

@@ -123,7 +123,7 @@ export default class World
 
                     chair.setOcuppied(true)
 
-                    console.log("Going to chair", chair)
+                    //console.log("Going to chair", chair)
 
                     const tile = chair.getTile()
 
