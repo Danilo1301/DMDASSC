@@ -2,7 +2,7 @@ import GameScene from "@cafemania/game/scene/GameScene";
 import Tile from "@cafemania/tile/Tile";
 import TileItemInfo, { TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export enum TileItemDirection
 {

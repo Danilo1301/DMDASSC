@@ -255,7 +255,7 @@ export default class Player
     {
         this._sittingAtChair = chair
 
-        
+        chair.setPlayerSitting(this)
     }
 
     public taskWalkToTile(tile: Tile)

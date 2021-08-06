@@ -32,14 +32,15 @@ export default class World
         
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
-                this.putTileItemInTile(tileItemFactory.createTileItem('floor2'), this.getTile(x, y))
+                this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
             }
         }
 
-   
         for (let x = 2; x < 6; x += 1) {
             for (let y = 1; y < 9; y += 3) {
-                this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
+
+                if(Math.random() >= 0.6)
+                    this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
 
                 const chair = tileItemFactory.createTileItem('chair1') as TileItemChair
                 chair.setDirection(TileItemDirection.BACK_FLIPPED)
@@ -49,14 +50,14 @@ export default class World
             
         }
     
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 2)) 
 
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 4)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 6)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 4)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 6)) 
   
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 2)) 
-        //this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(2, 3)) 
-
-        this.putTileItemInTile(tileItemFactory.createTileItem('2by3'), this.getTile(8, 8)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(0, 8)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(0, 9)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(0, 10)) 
 
 
  
@@ -74,23 +75,26 @@ export default class World
         this.putTileItemInTile(tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
 
         this.testGenPlayers()
+
+        this.getAllTileItemsOfType(TileItemType.COUNTER)
     }
 
-    public getAllChairs()
+    public getAllTileItemsOfType(type: TileItemType)
     {
-        const chairs: TileItemChair[] = []
+        const tileItems: TileItem[] = []
         const tiles = this.getTiles()
 
         for (const tile of tiles) {
             for (const tileItem of tile.getTileItems()) {
-                if(tileItem.getTileItemInfo().type == TileItemType.CHAIR)
+
+                if(tileItem.getTileItemInfo().type == type)
                 {
-                    chairs.push(tileItem as TileItemChair)
+                    tileItems.push(tileItem as TileItemChair)
                 }
             }
         }
 
-        return chairs
+        return tileItems
     }
 
     private async testGenPlayers()
@@ -104,14 +108,14 @@ export default class World
                 //player.taskWalkToTile(this.getTile(0, 5))
       
 
-                const chairs = this.getAllChairs()
+                const chairs = <TileItemChair[]>this.getAllTileItemsOfType(TileItemType.CHAIR) 
 
                 const emptyChairs: TileItemChair[] = []
 
               
                 for (const chair of chairs)
                 {
-                    if(!chair.getIsOcuppied())
+                    if(!chair.getIsReserved())
                     {
                         emptyChairs.push(chair)
                     }
@@ -121,7 +125,7 @@ export default class World
                 {
                     const chair = emptyChairs[Math.round(Math.random()*(emptyChairs.length-1))]
 
-                    chair.setOcuppied(true)
+                    chair.setReserved(true)
 
                     //console.log("Going to chair", chair)
 

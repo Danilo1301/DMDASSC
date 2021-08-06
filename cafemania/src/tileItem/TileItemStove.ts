@@ -1,17 +1,20 @@
-import Food from "@cafemania/food/Food"
+import Dish from "@cafemania/dish/Dish"
+import DishPlate from "@cafemania/dish/DishPlate"
 import GameScene from "@cafemania/game/scene/GameScene"
 import TileItem from "./TileItem"
-import TileItemInfo from "./TileItemInfo"
+import TileItemCounter from "./TileItemCounter"
+import TileItemInfo, { TileItemType } from "./TileItemInfo"
 
 export class StoveData
 {
-    public cookingFood?: Food
+    public cookingDish: Dish | null = null
+
     public startedAt: number = -1
 
     public serialize()
     {
         return {
-            cookingFood: this.cookingFood?.id,
+            cookingDish: this.cookingDish?.id || null,
             startedAt: this.startedAt
         }
     }
@@ -21,8 +24,10 @@ export default class TileItemStove extends TileItem
 {
     private _data = new StoveData()
 
-    private _isFoodReady: boolean = false
+    private _isDishReady: boolean = false
     
+    private _dishPlate?: DishPlate
+
     constructor(tileItemInfo: TileItemInfo)
     {
         super(tileItemInfo)
@@ -31,18 +36,37 @@ export default class TileItemStove extends TileItem
 
         this.events.on("pointerup", () => {
 
-            if(this._isFoodReady)
+            if(this._isDishReady)
             {
-                GameScene.getScene().drawWorldText(`Food served!`, this.getPosition())
+                GameScene.getScene().drawWorldText(`Dish served!`, this.getPosition())
 
-                this.clearFood()
+        
+                const world = this.getTile().getWorld()
 
-                this.setIsTransparent(false)
+                const counters = <TileItemCounter[]> world.getAllTileItemsOfType(TileItemType.COUNTER) 
+
+                const dish = this._data.cookingDish!
+
+                for (const counter of counters) {
+                    if(!counter.isEmpty)
+                    {
+                        if(counter.getDish().id != dish.id) continue
+                    }
+
+                    console.log(`found`, counter)
+
+                    counter.addDish(dish)
+
+                    break
+                }
+
+                this.clearDish()
+
 
                 return
             }
 
-            const foodFactory = this.getGame().foodFactory
+            const dishFactory = this.getGame().dishFactory
             
             if(this.isCooking)
             {
@@ -50,7 +74,7 @@ export default class TileItemStove extends TileItem
                 return
             }
 
-            const food = foodFactory.getFood("food1")
+            const food = dishFactory.getDish(Math.random() >= 0.5 ? "dish1" : "dish2")
 
             this.startCook(food)
 
@@ -60,23 +84,23 @@ export default class TileItemStove extends TileItem
         })
     }
 
-    public get isCooking() { return this._data.cookingFood != undefined }
+    public get isCooking() { return this._data.cookingDish != undefined }
 
-    public startCook(food: Food)
+    public startCook(dish: Dish)
     {
-        this._data.cookingFood = food
+        this._data.cookingDish = dish
         this._data.startedAt = new Date().getTime()
     }
 
-    public getCookingFood()
+    public getCookingDish()
     {
-        return this._data.cookingFood!
+        return this._data.cookingDish!
     }
 
-    public clearFood()
+    public clearDish()
     {
-        this._isFoodReady = false
-        this._data.cookingFood = undefined
+        this._isDishReady = false
+        this._data.cookingDish = null
         this._data.startedAt = -1
     }
 
@@ -86,18 +110,36 @@ export default class TileItemStove extends TileItem
 
         if(this.isCooking)
         {
+            if(!this._dishPlate)
+            {
+                const position = this.getPosition()
+
+                this._dishPlate = new DishPlate(this._data.cookingDish!)
+                this._dishPlate.setPosition(position.x, position.y + 25) 
+                this._dishPlate.setDepth(this.getDepth()-1)
+            }
+
+
             const now = new Date().getTime()
 
             const delta = now - this._data.startedAt
 
-            if(delta >= this.getCookingFood().cookTime)
+            if(delta >= this.getCookingDish().cookTime)
             {
-                if(!this._isFoodReady)
+                if(!this._isDishReady)
                 {
-                    this._isFoodReady = true
+                    this._isDishReady = true
 
-                    GameScene.getScene().drawWorldText(`Food is ready!`, this.getPosition(), "green")
+                    GameScene.getScene().drawWorldText(`Dish is ready!`, this.getPosition(), "green")
+
+                    this.setIsTransparent(false)
                 }
+            }
+        } else {
+            if(this._dishPlate)
+            {
+                this._dishPlate.destroy()
+                this._dishPlate = undefined
             }
         }
 

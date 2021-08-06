@@ -101,22 +101,32 @@ export default class GameScene extends BaseScene
     {
         this.load.setPath('/static/cafemania/assets/')
         this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
-        this.load.image('floor1', 'floor1.png')
-        this.load.image('floor2', 'floor2.png')
-        this.load.image('table1', 'table1.png')
-        this.load.image('wall1', 'wall1.png')
-        this.load.image('tile1', 'tile1.png')
-        this.load.image('window1', 'window1.png')
-        this.load.image('chair1', 'chair1.png')
-        this.load.image('stove1', 'stove1.png')
-        this.load.image('stove2', 'stove2.png')
+       
+        const tileItemInfoList = this.getGame().tileItemFactory.getTileItemInfoList()
+
+        for (const id in tileItemInfoList) {
+            const tileItemInfo = tileItemInfoList[id]
+            const texture = tileItemInfo.texture
+
+            this.load.image(texture, `tileItem/${texture}.png`)
+        }
+
+        const dishList = this.getGame().dishFactory.getDishList()
+
+        for (const id in dishList) {
+            const dish = dishList[id]
+            const texture = dish.texture
+
+            this.load.image(texture, `dish/${texture}.png`)
+        }
+
+
         this.load.image('1x1white', '1x1white.png')
         this.load.image('eye', 'eye.png')
         this.load.image('eye2', 'eye2.png')
         this.load.image('head', 'head.png')
         this.load.image('body1', 'body1.png')
         this.load.image('body2', 'body2.png')
-        this.load.image('2by3', '2by3.png')
     }
 
     public create(): void
