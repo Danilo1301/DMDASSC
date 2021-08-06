@@ -47,7 +47,18 @@ export default class TileItemTable extends TileItem
                 console.log("yes, dish", this._dishPlate)
             }
             
+        } else {
+            if(this._dishPlate)
+            {
+                this._dishPlate.destroy()
+                this._dishPlate = undefined
+            }
         }
+    }
+
+    public clearDish()
+    {
+        this._data.dish = null
     }
 
     public getDish()

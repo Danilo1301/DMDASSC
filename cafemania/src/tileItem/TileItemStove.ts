@@ -110,6 +110,8 @@ export default class TileItemStove extends TileItem
 
         if(this.isCooking)
         {
+            if(!this._isDishReady) this.setIsTransparent(true)
+
             if(!this._dishPlate)
             {
                 const position = this.getPosition()
@@ -136,6 +138,7 @@ export default class TileItemStove extends TileItem
                 }
             }
         } else {
+     
             if(this._dishPlate)
             {
                 this._dishPlate.destroy()

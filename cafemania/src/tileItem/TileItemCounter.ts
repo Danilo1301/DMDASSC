@@ -53,6 +53,11 @@ export default class TileItemCounter extends TileItem
     
                             this._data.amount -= 1
 
+                            setTimeout(() => {
+                                table.clearDish()
+                                player.setIsEating(false)
+                            }, 10000);
+
                             return
                         }
 

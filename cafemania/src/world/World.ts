@@ -14,12 +14,112 @@ export default class World
 
     private _players = new Phaser.Structs.Map<string, Player>([])
 
+    public sidewalkSize = 25
+
     constructor(game: Game)
     {
         this._game = game
 
-        const mapSize = {x: 15, y: 15}
+        const mapSize = new Phaser.Math.Vector2(20, 20)
+        const sidewalkSize = this.sidewalkSize
         
+        const tileItemFactory = this.getGame().tileItemFactory
+
+        for(let x = -sidewalkSize; x <= 2; x++)
+        {
+            const y = -2
+
+            this.addTile(x, y)
+            this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
+        }
+
+        for(let y = -1; y <= sidewalkSize; y++)
+        {
+            const x = 2
+
+            this.addTile(x, y)
+            this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
+        }
+
+        for(let y = 0; y <= mapSize.y; y++)
+        {
+            for(let x = -mapSize.x; x <= 0; x++)
+            {
+                let addWall = x == 0 ? 1 : y == 0 ? 2 : 0
+
+                if(x == 0 && y == 0) continue
+
+                
+
+                const tile = this.addTile(x + 1, y - 1)
+
+                if(addWall != 0)
+                {
+                    if(x == -14) continue
+
+                    const wall = tileItemFactory.createTileItem('wall1')
+
+                    if(addWall == 2) wall.setDirection(TileItemDirection.FRONT_FLIPPED)
+                 
+                    //wall.setIsTransparent(true)
+                    
+                    this.putTileItemInTile(wall, tile)
+                } else {
+                    this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), tile)
+                }
+
+               
+            }
+        }
+
+        this.testGenPlayers()
+
+        for (let x = -15; x < -12; x += 1) {
+            for (let y = 1; y < 9; y += 3) {
+
+                //if(Math.random() >= 0.3)
+                    this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
+
+                const chair = tileItemFactory.createTileItem('chair1') as TileItemChair
+                chair.setDirection(TileItemDirection.BACK_FLIPPED)
+
+                this.putTileItemInTile(chair, this.getTile(x, y+1)) 
+            }
+            
+        }
+
+        //this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(-18, 2)) 
+
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-18, 4)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-18, 5)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-17, 4)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-17, 5)) 
+  
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-18, 8)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-18, 9)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-18, 10)) 
+
+        return
+
+        for(let x = -10; x < mapSize.x + 8; x++)
+        {
+            const y = -1
+
+            this.addTile(x, y)
+
+            this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
+        }
+
+        for(let y = 0; y < mapSize.y; y++)
+        {
+            const x = mapSize.x
+
+            this.addTile(x, y)
+
+            this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
+        }
+        
+
         for(let y = 0; y < mapSize.y; y++)
         {
             for(let x = 0; x < mapSize.x; x++)
@@ -28,7 +128,7 @@ export default class World
             }
         }
 
-        const tileItemFactory = this.getGame().tileItemFactory
+        
         
         for (let y = 1; y < mapSize.y; y += 1) {
             for (let x = 0; x < mapSize.x-1; x += 1) {
@@ -50,19 +150,15 @@ export default class World
             
         }
     
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(0, 2)) 
-
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 4)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 6)) 
-  
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(0, 8)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(0, 9)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(0, 10)) 
+        
 
 
  
+        
+        /*
         for (let y = 1; y < 15; y += 1) this.putTileItemInTile(tileItemFactory.createTileItem('wall1'), this.getTile(mapSize.x-1, y))
         
+
         for (let x = 0; x < 14; x += 1) 
         {
             const tileItem = tileItemFactory.createTileItem('wall1')
@@ -71,6 +167,7 @@ export default class World
 
             this.putTileItemInTile(tileItem, this.getTile(x, 0))
         }
+        */
 
         this.putTileItemInTile(tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
 
@@ -104,7 +201,7 @@ export default class World
             await new Promise<void>(resolve => {
                 const player = this.createPlayer()
 
-
+                player.setAtTile(this.getTile(-this.sidewalkSize, -2))
                 //player.taskWalkToTile(this.getTile(0, 5))
       
 
@@ -158,7 +255,12 @@ export default class World
                     console.log("No empty chairs")
 
                     setInterval(() => {
-                        if(!player.isWalking) player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
+
+                        const x = Math.round(Math.random()*-19), y = Math.round(Math.random()*19)
+
+                        console.log(x, y)
+
+                        if(!player.isWalking) player.testWalkToTile(x, y)
                     }, 3000)
                 }
 
@@ -185,7 +287,7 @@ export default class World
     {
         const player = new Player(this)
         this._players.set(player.id, player)
-        player.setAtTile(this.getTile(0, 1))
+        player.setAtTile(this.getTile(0, 0))
         return player
     }
 

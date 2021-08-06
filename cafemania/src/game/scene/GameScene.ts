@@ -80,7 +80,12 @@ export default class GameScene extends BaseScene
         this.multiplayer.onCreatePlayer = (data) => {
             const player = this.getGame().getWorlds()[0].createPlayer()
 
-            player.setAtTile(player.getWorld().getTile(data.x, data.y))
+            try {
+                player.setAtTile(player.getWorld().getTile(data.x, data.y))
+            } catch (error) {
+                
+            }
+            
 
             player.name = data.id
 
@@ -137,7 +142,7 @@ export default class GameScene extends BaseScene
         this.objectsLayer = this.add.layer()
         this.objectsLayer.setDepth(100)
         
-        this.cameras.main.setBackgroundColor(0x21007F)
+        this.cameras.main.setBackgroundColor(0x72D267)
 
         const moveScene = new MoveScene(this);
 

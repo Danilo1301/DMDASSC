@@ -32,6 +32,8 @@ export default class TileItem
     
     private _isHovering: boolean = false
     
+    private _isTransparent: boolean = false
+
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = uuidv4()
@@ -55,16 +57,20 @@ export default class TileItem
 
         this.events.on("pointerover", () => {
             this._isHovering = true
+
+            this._isTransparent = true
         })
 
         this.events.on("pointerout", () => {
             this._isHovering = false
+
+            this._isTransparent = false
         })
     }
 
     public setIsTransparent(transparent: boolean)
     {
-        return this._tileItemRender?.setTransparent(transparent)
+        this._isTransparent = transparent
     }
 
     public getPosition()
@@ -131,6 +137,7 @@ export default class TileItem
         
         this._tileItemRender.setFlipSprites(isFlipped)
         this._tileItemRender.setSprite(this._currentAnim)
+        this._tileItemRender.setTransparent(this._isTransparent)
         
         if(this._tileItemInfo.layers > 1)
             this._tileItemRender.setLayer(isBack ? 1 : 0)

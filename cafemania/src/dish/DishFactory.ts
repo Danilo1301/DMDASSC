@@ -21,7 +21,7 @@ export default class DishFactory
             name: "Dish 1",
             cookTime: 12000,
             texture: "dish1",
-            servings: 2,
+            servings: 10,
             frames: {
                 cooking: 2,
                 eating: 2
@@ -33,7 +33,7 @@ export default class DishFactory
             name: "Dish 2",
             cookTime: 8000,
             texture: "dish2",
-            servings: 2,
+            servings: 10,
             frames: {
                 cooking: 2,
                 eating: 2
