@@ -49,7 +49,7 @@ export default class TileItemCounter extends TileItem
 
                             table.setDish(this.getDish())
 
-                            GameScene.getScene().drawWorldText(`Dish sent to player`, this.getPosition())
+                            //GameScene.getScene().drawWorldText(`Dish sent to player`, this.getPosition())
     
                             this._data.amount -= 1
 

@@ -42,7 +42,7 @@ export default class TileItemTable extends TileItem
                 this._dishPlate.setPosition(position.x, position.y + 25) 
                 this._dishPlate.setDepth(this.getDepth() + 1)
     
-                GameScene.getScene().drawWorldText(`Received dish`, this.getPosition())
+                //GameScene.getScene().drawWorldText(`Received dish`, this.getPosition())
 
                 console.log("yes, dish", this._dishPlate)
             }
