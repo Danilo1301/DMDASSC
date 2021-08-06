@@ -1,5 +1,7 @@
 import Player from "@cafemania/player/Player"
 import TileItem, { TileItemDirection } from "./TileItem"
+import { TileItemType } from "./TileItemInfo"
+import TileItemTable from "./TileItemTable"
 
 export default class TileItemChair extends TileItem
 {
@@ -22,26 +24,33 @@ export default class TileItemChair extends TileItem
         this._playerSitting = player
     }
 
+    public getPlayerSitting()
+    {
+        return this._playerSitting!
+    }
+
     public setReserved(value: boolean)
     {
         this._reserved = value
     }
 
+    public hasTableInFront()
+    {
+        return this.getTableInFront() != undefined
+    }
+
     public getTableInFront()
     {
-        const tile = this.getTile()
+        const tile = this.getTileInDirection(this.direction)
 
-        TileItemDirection
+        console.log(tile)
 
-        const offset = [
-            {x: 0, y: 1},
-            {x: 1, y: 0}
-        ]
+        if(!tile) return
 
-
-        this.getTile().getWorld()
-
-        return
+        for (const tileItem of tile.getTileItems()) {
+            if(tileItem.getTileItemInfo().type == TileItemType.TABLE) return tileItem as TileItemTable
+            
+        }
     }
 
 }

@@ -31,7 +31,7 @@ export default class TileItemCounter extends TileItem
         super(tileItemInfo)
 
         setInterval(() => {
-            if(!this.isEmpty)
+            if(!this.isEmpty && this._data.amount > 0)
             {
                 const chairs = <TileItemChair[]> this.getTile().getWorld().getAllTileItemsOfType(TileItemType.CHAIR)
 
@@ -39,6 +39,25 @@ export default class TileItemCounter extends TileItem
                 {
                     if(chair.getIsOcuppied())
                     {
+                        const table = chair.getTableInFront()!
+
+                        const player = chair.getPlayerSitting()
+
+                        if(!table.hasDish())
+                        {
+                            player.setIsEating(true)
+
+                            table.setDish(this.getDish())
+
+                            GameScene.getScene().drawWorldText(`Dish sent to player`, this.getPosition())
+    
+                            this._data.amount -= 1
+
+                            return
+                        }
+
+                        
+
                         //chair.rotate()
                         
                     }
@@ -61,7 +80,7 @@ export default class TileItemCounter extends TileItem
 
                 this._dishPlate = new DishPlate(this.getDish())
                 this._dishPlate.setPosition(position.x, position.y + 25) 
-                this._dishPlate.setDepth(this.getDepth()-1)
+                this._dishPlate.setDepth(this.getDepth() + 1)
 
                 console.log("yes, dish", this._dishPlate)
             }
@@ -69,6 +88,14 @@ export default class TileItemCounter extends TileItem
             
         }
 
+
+        if(!this.isEmpty)
+        {
+            if(this._data.amount <= 0)
+            {
+                this.clearCounter()
+            }
+        }
         //--
 
         
@@ -77,6 +104,18 @@ export default class TileItemCounter extends TileItem
     }
 
     public get isEmpty() { return this._data.dish == null }
+
+    public clearCounter()
+    {
+        this._data.dish = null
+        this._data.amount = 0
+
+        if(this._dishPlate)
+        {
+            this._dishPlate.destroy()
+            this._dishPlate = undefined
+        }
+    }
 
     public getDish()
     {

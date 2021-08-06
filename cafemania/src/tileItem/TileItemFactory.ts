@@ -5,6 +5,7 @@ import TileItemCounter from "./TileItemCounter";
 import TileItemInfo, { TileItemPlaceType, TileItemRotationType, TileItemType } from "./TileItemInfo";
 import TileItemRender from "./TileItemRender";
 import TileItemStove from "./TileItemStove";
+import TileItemTable from "./TileItemTable";
 
 export class TileItemFactory
 {
@@ -223,6 +224,7 @@ export class TileItemFactory
         if(tileItemInfo.type == TileItemType.CHAIR) return new TileItemChair(tileItemInfo)
         if(tileItemInfo.type == TileItemType.STOVE) return new TileItemStove(tileItemInfo)
         if(tileItemInfo.type == TileItemType.COUNTER) return new TileItemCounter(tileItemInfo)
+        if(tileItemInfo.type == TileItemType.TABLE) return new TileItemTable(tileItemInfo)
 
         return new TileItem(tileItemInfo)
     }

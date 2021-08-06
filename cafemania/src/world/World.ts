@@ -39,7 +39,7 @@ export default class World
         for (let x = 2; x < 6; x += 1) {
             for (let y = 1; y < 9; y += 3) {
 
-                if(Math.random() >= 0.6)
+                //if(Math.random() >= 0.3)
                     this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
 
                 const chair = tileItemFactory.createTileItem('chair1') as TileItemChair
@@ -115,7 +115,7 @@ export default class World
               
                 for (const chair of chairs)
                 {
-                    if(!chair.getIsReserved())
+                    if(!chair.getIsReserved() && chair.hasTableInFront())
                     {
                         emptyChairs.push(chair)
                     }
@@ -137,7 +137,7 @@ export default class World
                         player.setAtTile(tile)
 
                         setTimeout(() => {
-                            player.setIsEating(true)
+                            //player.setIsEating(true)
 
                             //player.taskWalkToTile(this.getTile(0, 1))
                         }, 3000);
@@ -361,4 +361,3 @@ export default class World
         return coords
     }
 }
-

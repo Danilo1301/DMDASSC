@@ -219,6 +219,8 @@ export default class Player
 
     public get isSitting() { return this._sittingAtChair != undefined }
 
+    public get isEating() { return this._isEating }
+
     public getTaskManager()
     {
         return this._taskManager

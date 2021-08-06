@@ -151,7 +151,10 @@ export default class TileItem
 
     public getDepth()
     {
-        return this._tile.position.y
+        const isFlipped = this._direction == TileItemDirection.FRONT_FLIPPED || this._direction == TileItemDirection.BACK_FLIPPED
+        
+        return this._tile.position.y - ((isFlipped ? -1 : 1)*(this.getTile().y || 0))
+
     }
 
     private renderDebugText()
@@ -287,5 +290,24 @@ export default class TileItem
             case TileItemDirection.BACK: return `BACK`
             case TileItemDirection.BACK_FLIPPED: return `BACK_FLIPPED`
         }
+    }
+
+    public getTileInDirection(direction: TileItemDirection)
+    {
+        TileItemDirection.FRONT
+        TileItemDirection.BACK_FLIPPED
+        TileItemDirection.BACK
+        TileItemDirection.FRONT_FLIPPED
+
+        const offset = [
+            {x: -1, y: 0},
+            {x: 0, y: -1},
+            {x: 1, y: 0},
+            {x: 0, y: 1},
+        ]
+
+        const thisOffset = offset[direction]
+
+        return this.getTile().getTileInOffset(thisOffset.x, thisOffset.y)
     }
 }

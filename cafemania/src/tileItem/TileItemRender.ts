@@ -258,7 +258,11 @@ export default class TileItemRender
 
     public getDepth()
     {
-        let depth = this._position.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))
+        //let depth = this._position.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))
+
+        const tileItem = this.getTileItem()
+
+        let depth = tileItem.getDepth()
 
         //let depth = this.getTileItem().getDepth()
         //let fy = (this._tileItem?.getTile().y || 0)
@@ -291,6 +295,15 @@ export default class TileItemRender
                 const dl = tileItemRenderSprite.spriteLayer*5
 
                 const depth = this.getDepth() + pos.y - dl
+
+                //console.log(pos.y, coord)
+
+                if(this._tileItemInfo.name == "stove2")
+                {
+                    //var a: any = window["asd"].kekyou
+
+                }
+                
                 
                 //this._position.y - dl + (pos.y *(this._flipSprites ? -1 : 1))
                     

@@ -41,9 +41,11 @@ export default class DishPlate
             texture.add('1', 0, 0, 0, 138, 100)
         }
 
-        const sprite = this._sprite = GameScene.getScene().add.sprite(0, 0, dish.texture)
+        const sprite = this._sprite = scene.add.sprite(0, 0, dish.texture)
         sprite.setFrame('1')
         sprite.setOrigin(0.5, 1)
+
+        scene.objectsLayer.add(sprite)
     }
 
     public setPosition(x: number, y: number)

@@ -116,7 +116,7 @@ export default class TileItemStove extends TileItem
 
                 this._dishPlate = new DishPlate(this._data.cookingDish!)
                 this._dishPlate.setPosition(position.x, position.y + 25) 
-                this._dishPlate.setDepth(this.getDepth()-1)
+                this._dishPlate.setDepth(this.getDepth() + 1)
             }
 
 

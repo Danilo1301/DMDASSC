@@ -132,6 +132,17 @@ export default class Tile
         }
     }
 
+    public getTileInOffset(x: number, y: number) : Tile | undefined
+    {
+        const world = this.getWorld()
+        const findX = this.x + x
+        const findY = this.y + y
+
+        if(!world.tileExists(findX, findY)) return
+
+        return world.getTile(findX, findY)
+    }
+
     //---
 
     public static getGridBounds(sizeX: number, sizeY: number)
