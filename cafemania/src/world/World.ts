@@ -201,9 +201,10 @@ export default class World
             await new Promise<void>(resolve => {
                 const player = this.createPlayer()
 
-                player.setAtTile(this.getTile(-this.sidewalkSize, -2))
-                //player.taskWalkToTile(this.getTile(0, 5))
-      
+                //player.setAtTile(this.getTile(-this.sidewalkSize, -2))
+                player.setAtTile(this.getTile(-19, 0))
+         
+   
 
                 const chairs = <TileItemChair[]>this.getAllTileItemsOfType(TileItemType.CHAIR) 
 

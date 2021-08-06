@@ -186,6 +186,7 @@ export default class Player
     private _depth: number = 0
 
     private _direction: Direction = Direction.East
+    private _moveDirection = new Phaser.Math.Vector2(0, 0)
 
     private _debugText?: Phaser.GameObjects.BitmapText
 
@@ -333,6 +334,44 @@ export default class Player
         this._onStopWalking = callback
         this._targetPosition = position
         this._isWalking = true
+
+        const dir = Phaser.Math.Angle.BetweenPoints(this._position, this._targetPosition)
+
+        const directions = [
+            {x: 1, y: 0, d: Direction.West},
+            {x: -1, y: 0, d: Direction.East},
+            {x: 0, y: 1, d: Direction.North},
+            {x: 0, y: -1, d: Direction.South},
+
+            {x: 1, y: -1, d: Direction.SouthWest},
+            {x: 1, y: 1, d: Direction.NorthWest},
+
+            {x: -1, y: 1, d: Direction.NorthEast},
+            {x: -1, y: -1, d: Direction.SouthEast}
+        ]
+
+        let closestDir = 0
+        let closestDirValue = -1
+
+        for (const d of directions) {
+            var dPos = Tile.getPosition(d.x, d.y)
+            var r = Phaser.Math.Angle.BetweenPoints(Phaser.Math.Vector2.ZERO, dPos)
+
+            var v = Math.abs(r - dir)
+
+            if(closestDirValue == -1 || (v < closestDirValue))
+            {
+                closestDirValue = v
+                closestDir = directions.indexOf(d)
+            }
+        }
+
+        this._direction = directions[closestDir].d
+
+        this._moveDirection.x = directions[closestDir].x
+        this._moveDirection.y = directions[closestDir].y
+        
+        console.log(directions[closestDir])
     }
 
     public getScene()
@@ -505,51 +544,45 @@ export default class Player
     {
         if(!this._isWalking) return
 
-        const dir = Phaser.Math.Angle.BetweenPoints(this._position, this._targetPosition)
+        const speed = 1.5
 
-        const directions = [
-            {x: 1, y: 0, d: Direction.West},
-            {x: -1, y: 0, d: Direction.East},
-            {x: 0, y: 1, d: Direction.North},
-            {x: 0, y: -1, d: Direction.South},
+        const ang = Phaser.Math.Angle.BetweenPoints(this._position, this._targetPosition)
 
-            {x: 1, y: -1, d: Direction.SouthWest},
-            {x: 1, y: 1, d: Direction.NorthWest},
+        this._position.x += speed * Math.cos(ang) * delta * 0.05
+        this._position.y += speed * Math.sin(ang) * delta * 0.05
 
-            {x: -1, y: 1, d: Direction.NorthEast},
-            {x: -1, y: -1, d: Direction.SouthEast}
-        ]
+        if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < delta / speed * 0.5)
+        {
+            //console.log(`[Player] Reached target position`)
 
-        let closestDir = 0
-        let closestDirValue = -1
+            //this._position.set(this._targetPosition.x, this._targetPosition.y)
 
-        for (const d of directions) {
-            var dPos = Tile.getPosition(d.x, d.y)
-            var r = Phaser.Math.Angle.BetweenPoints(Phaser.Math.Vector2.ZERO, dPos)
+            this._isWalking = false
+            
+            //console.log(`[Player] Calling onStopWalking`)
 
-            var v = Math.abs(r - dir)
-
-            if(closestDirValue == -1 || v < closestDirValue)
-            {
-                closestDirValue = v
-                closestDir = directions.indexOf(d)
-            }
+            this._onStopWalking?.()
+            this._onStopWalking = undefined
         }
 
-        this._direction = directions[closestDir].d
+        return
 
-        const p = Tile.getPosition(directions[closestDir].x,directions[closestDir].y)
+        const moveDirection = this._moveDirection
+
+        const p = Tile.getPosition(moveDirection.x, moveDirection.y)
         const tp = p.normalize()
-        const speed = 1.5
+        //const speed = 1.5
 
         this._position.x += tp.x * speed * delta * 0.05
         this._position.y += tp.y * speed * delta * 0.05
 
-        if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < 2)
+        console.log(delta)
+
+        if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < 10)
         {
             //console.log(`[Player] Reached target position`)
 
-            this._position.set(this._targetPosition.x, this._targetPosition.y)
+            //this._position.set(this._targetPosition.x, this._targetPosition.y)
 
             this._isWalking = false
             
