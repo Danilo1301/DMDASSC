@@ -140,6 +140,11 @@ class TaskManager
         this._tasks.splice(index, 0, task)
     }
 
+    public clearTasks()
+    {
+        this._tasks = []
+    }
+
     public update(delta: number)
     {
         if(this._executingTask)

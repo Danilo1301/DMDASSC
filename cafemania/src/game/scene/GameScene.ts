@@ -74,7 +74,8 @@ export default class GameScene extends BaseScene
 
             if(!player.getWorld().tileExists(data.x, data.y)) return
 
-            player.taskWalkToTile(player.getWorld().getTile(data.x, data.y))
+            player.getTaskManager().clearTasks()
+            player.testWalkToTile(data.x, data.y)
         }
 
         this.multiplayer.onCreatePlayer = (data) => {
