@@ -19,7 +19,7 @@ export default class DishFactory
         this.createDish({
             id: "dish1",
             name: "Dish 1",
-            cookTime: 12000,
+            cookTime: 100,
             texture: "dish1",
             servings: 10,
             frames: {
@@ -31,7 +31,7 @@ export default class DishFactory
         this.createDish({
             id: "dish2",
             name: "Dish 2",
-            cookTime: 8000,
+            cookTime: 100,
             texture: "dish2",
             servings: 10,
             frames: {

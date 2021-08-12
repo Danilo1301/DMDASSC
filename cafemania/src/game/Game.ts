@@ -1,8 +1,9 @@
-import World from "@cafemania/world/World"
+import World, { WorldType } from "@cafemania/world/World"
 import Phaser from 'phaser'
 import SceneManager from "./SceneManager"
 import { TileItemFactory } from "../tileItem/TileItemFactory"
 import DishFactory from "@cafemania/dish/DishFactory"
+import Network from "@cafemania/network/Network"
 
 export default class Game
 {
@@ -31,8 +32,6 @@ export default class Game
         console.log("resolved")
 
         this.events.emit("ready")
-
-        this.createWorld()
     }
 
     public startScene(key: string, scene: typeof Phaser.Scene): Phaser.Scene
@@ -45,10 +44,20 @@ export default class Game
         return this._worlds.values()
     }
 
-    public createWorld(): World
+    public createClientWorld(): World
+    {
+        return this.createWorld(WorldType.CLIENT)
+    }
+
+    public createServerWorld(): World
+    {
+        return this.createWorld(WorldType.SERVER)
+    }
+
+    public createWorld(type: WorldType): World
     {
         const id = "World" + Math.random()
-        const world = new World(this)
+        const world = new World(this, type)
 
         this._worlds.set(id, world);
 

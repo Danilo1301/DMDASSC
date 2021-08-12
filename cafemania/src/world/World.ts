@@ -5,23 +5,91 @@ import Tile from "@cafemania/tile/Tile"
 import Player from "@cafemania/player/Player";
 import GameScene from "@cafemania/game/scene/GameScene";
 import TileItemChair from "@cafemania/tileItem/TileItemChair";
+import PlayerWaiter from "@cafemania/player/PlayerWaiter";
+import PlayerClient from "@cafemania/player/PlayerClient";
+
+export enum WorldType
+{
+    SERVER,
+    CLIENT,
+    VISIT
+}
 
 export default class World
 {
+    public static SIDE_WALK_SIZE = 25
+
     private _game: Game
 
     private _tiles = new Phaser.Structs.Map<string, Tile>([])
 
     private _players = new Phaser.Structs.Map<string, Player>([])
 
-    public sidewalkSize = 25
+    private _mapSize = new Phaser.Math.Vector2(0, 0)
+    
+    private _type: WorldType
 
-    constructor(game: Game)
+    private _paused: boolean = false
+
+    private _lastSpawnedPlayer: number = -1
+    private _playerSpawnTime: number = 5000
+    private _canSpawnPlayer: boolean = false
+
+    constructor(game: Game, type: WorldType)
     {
         this._game = game
+        this._type = type
 
-        const mapSize = new Phaser.Math.Vector2(20, 20)
-        const sidewalkSize = this.sidewalkSize
+        if(this.type == WorldType.SERVER)
+        {
+            return
+            
+            this.generateNewCafe()
+
+            this._canSpawnPlayer = true
+
+            const waiter1 = this.createPlayerWaiter()
+            waiter1.setAtTile(this.getTile(0, 5))
+            
+            const waiter2 = this.createPlayerWaiter()
+            waiter2.setAtTile(this.getTile(-1, 5))
+        }
+
+        if(this.type == WorldType.CLIENT)
+        {
+            this.generateNewCafe()
+
+            this._canSpawnPlayer = true
+
+            const waiter1 = this.createPlayerWaiter()
+            waiter1.setAtTile(this.getTile(0, 5))
+            
+            const waiter2 = this.createPlayerWaiter()
+            waiter2.setAtTile(this.getTile(-1, 5))
+        }
+    }
+
+    public get type(): WorldType { return this._type }
+
+
+    public removePlayer(player: Player)
+    {
+        this._players.delete(player.id)
+
+        player.destroy()
+    }
+
+    public generateNewCafe()
+    {
+        this._mapSize.set(
+            Math.round(Math.random()*10+6),
+            Math.round(Math.random()*10+6)
+        )
+
+        console.log(`[World] Generated map ${this._mapSize.x} x ${this._mapSize.y}`)
+
+        const mapSize = this._mapSize
+        const sidewalkSize = World.SIDE_WALK_SIZE
         
         const tileItemFactory = this.getGame().tileItemFactory
 
@@ -49,8 +117,6 @@ export default class World
 
                 if(x == 0 && y == 0) continue
 
-                
-
                 const tile = this.addTile(x + 1, y - 1)
 
                 if(addWall != 0)
@@ -67,15 +133,11 @@ export default class World
                 } else {
                     this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), tile)
                 }
-
-               
             }
         }
 
-        this.testGenPlayers()
-
-        for (let x = -15; x < -12; x += 1) {
-            for (let y = 1; y < 9; y += 3) {
+        for (let x = -3; x < -1; x += 1) {
+            for (let y = 1; y < 6; y += 3) {
 
                 //if(Math.random() >= 0.3)
                     this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
@@ -84,97 +146,19 @@ export default class World
                 chair.setDirection(TileItemDirection.BACK_FLIPPED)
 
                 this.putTileItemInTile(chair, this.getTile(x, y+1)) 
-            }
-            
+            } 
         }
 
-        //this.putTileItemInTile(tileItemFactory.createTileItem('stove2'), this.getTile(-18, 2)) 
-
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-18, 4)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-18, 5)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-17, 4)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(-17, 5)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 1)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 2)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 3)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 4)) 
   
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-18, 8)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-18, 9)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-18, 10)) 
-
-        return
-
-        for(let x = -10; x < mapSize.x + 8; x++)
-        {
-            const y = -1
-
-            this.addTile(x, y)
-
-            this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
-        }
-
-        for(let y = 0; y < mapSize.y; y++)
-        {
-            const x = mapSize.x
-
-            this.addTile(x, y)
-
-            this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
-        }
-        
-
-        for(let y = 0; y < mapSize.y; y++)
-        {
-            for(let x = 0; x < mapSize.x; x++)
-            {
-                this.addTile(x, y)
-            }
-        }
-
-        
-        
-        for (let y = 1; y < mapSize.y; y += 1) {
-            for (let x = 0; x < mapSize.x-1; x += 1) {
-                this.putTileItemInTile(tileItemFactory.createTileItem('floor1'), this.getTile(x, y))
-            }
-        }
-
-        for (let x = 2; x < 6; x += 1) {
-            for (let y = 1; y < 9; y += 3) {
-
-                //if(Math.random() >= 0.3)
-                    this.putTileItemInTile(tileItemFactory.createTileItem('table1'), this.getTile(x, y)) 
-
-                const chair = tileItemFactory.createTileItem('chair1') as TileItemChair
-                chair.setDirection(TileItemDirection.BACK_FLIPPED)
-
-                this.putTileItemInTile(chair, this.getTile(x, y+1)) 
-            }
-            
-        }
-    
-        
-
-
- 
-        
-        /*
-        for (let y = 1; y < 15; y += 1) this.putTileItemInTile(tileItemFactory.createTileItem('wall1'), this.getTile(mapSize.x-1, y))
-        
-
-        for (let x = 0; x < 14; x += 1) 
-        {
-            const tileItem = tileItemFactory.createTileItem('wall1')
-
-            tileItem.setDirection(TileItemDirection.BACK_FLIPPED)
-
-            this.putTileItemInTile(tileItem, this.getTile(x, 0))
-        }
-        */
-
-        this.putTileItemInTile(tileItemFactory.createTileItem('window1'), this.getTile(13, 1))
-
-        this.testGenPlayers()
-
-        this.getAllTileItemsOfType(TileItemType.COUNTER)
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-5, 1)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-5, 2)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-5, 3)) 
     }
+
 
     public getAllTileItemsOfType(type: TileItemType)
     {
@@ -182,113 +166,46 @@ export default class World
         const tiles = this.getTiles()
 
         for (const tile of tiles) {
-            for (const tileItem of tile.getTileItems()) {
 
-                if(tileItem.getTileItemInfo().type == type)
-                {
-                    tileItems.push(tileItem as TileItemChair)
-                }
-            }
+            const items = tile.getTileItemsOfType(type)
+
+            items.map(i => tileItems.push(i))
         }
 
         return tileItems
     }
 
-    private async testGenPlayers()
-    {
-        for (let i = 0; i < 30; i++) 
-        {
-            await new Promise<void>(resolve => {
-                const player = this.createPlayer()
-
-                //player.setAtTile(this.getTile(-this.sidewalkSize, -2))
-                player.setAtTile(this.getTile(-19, 0))
-         
-   
-
-                const chairs = <TileItemChair[]>this.getAllTileItemsOfType(TileItemType.CHAIR) 
-
-                const emptyChairs: TileItemChair[] = []
-
-              
-                for (const chair of chairs)
-                {
-                    if(!chair.getIsReserved() && chair.hasTableInFront())
-                    {
-                        emptyChairs.push(chair)
-                    }
-                }
-
-                if(emptyChairs.length > 0)
-                {
-                    const chair = emptyChairs[Math.round(Math.random()*(emptyChairs.length-1))]
-
-                    chair.setReserved(true)
-
-                    //console.log("Going to chair", chair)
-
-                    const tile = chair.getTile()
-
-                    player.taskWalkToTile(tile)
-                    player.taskExecuteAction(() => {
-                        player.sitAtChair(chair)
-                        player.setAtTile(tile)
-
-                        setTimeout(() => {
-                            //player.setIsEating(true)
-
-                            //player.taskWalkToTile(this.getTile(0, 1))
-                        }, 3000);
-                    })
-                
-                    /*
-                    
-                    player.testWalkToTile(tile.x, tile.y, true, () => {
-                        player.sitAtChair(chair)
-
-                        setTimeout(() => {
-                            player.setIsEating(true)
-                        }, 3000);
-                    })
-                    */
-                    
-                } else {
-                    console.log("No empty chairs")
-
-                    setInterval(() => {
-
-                        const x = Math.round(Math.random()*-19), y = Math.round(Math.random()*19)
-
-                        console.log(x, y)
-
-                        if(!player.isWalking) player.testWalkToTile(x, y)
-                    }, 3000)
-                }
-
-                 
-                /*
-                setInterval(() => {
-
-                    if(!player._walking)
-                        player.testWalkToTile(Math.round(Math.random()*14), Math.round(Math.random()*14))
-                }, 2000)
-                */
-
-
-                
-
-                setTimeout(() => {
-                    resolve()
-                }, Math.random()*1000+2000);
-            })
-        }
-    }
-
-    public createPlayer(): Player
+    public createPlayer(id?: string): Player
     {
         const player = new Player(this)
+
+        if(id) player.setId(id)
+
         this._players.set(player.id, player)
-        player.setAtTile(this.getTile(0, 0))
+        
+        return player
+    }
+
+    public createPlayerClient(id?: string): PlayerClient
+    {
+        const player = new PlayerClient(this)
+
+        if(id) player.setId(id)
+
+        this._players.set(player.id, player)
+        
+        return player
+    }
+
+    public createPlayerWaiter(id?: string): PlayerWaiter
+    {
+        const player = new PlayerWaiter(this)
+        player.setAtTile(this.getTile(-5, 0))
+
+        if(id) player.setId(id)
+
+        this._players.set(player.id, player)
+
         return player
     }
 
@@ -389,10 +306,53 @@ export default class World
         return true
     }
 
+    public processPlayerClientSpawn()
+    {
+        if(!this._canSpawnPlayer) return
+
+        const now = new Date().getTime()
+
+        if(now - this._lastSpawnedPlayer >= this._playerSpawnTime)
+        {
+            this._lastSpawnedPlayer = now
+
+            this.spawnPlayerClient()
+        }
+    }
+
+    public findEmptyChairs()
+    {
+        const chairs = <TileItemChair[]>this.getAllTileItemsOfType(TileItemType.CHAIR) 
+        const emptyChairs: TileItemChair[] = []
+
+        for (const chair of chairs)
+        {
+            if(!chair.getIsReserved() && chair.hasTableInFront())
+                emptyChairs.push(chair)
+        }
+
+        return emptyChairs
+    }
+
+    public spawnPlayerClient()
+    {
+        console.log(`[World] Player created`)
+
+        const player = this.createPlayerClient()
+
+        
+        player.startClientBehaviour()
+    }
+
     public update(delta: number)
     {
+        if(this._paused) return
+
+        this.processPlayerClientSpawn()
+
+
         for (const tile of this.getTiles()) tile.update(delta)
-        for (const player of this._players.values()) player.update(delta)
+        for (const player of this.getPlayers()) player.update(delta)
     }
 
     public render(): void
@@ -404,7 +364,7 @@ export default class World
 
 
         for (const tile of this.getTiles()) tile.render()
-        for (const player of this._players.values()) player.render()
+        for (const player of this.getPlayers()) player.render()
     }
 
     public getTile(x: number, y: number): Tile
@@ -429,6 +389,21 @@ export default class World
     public getTiles(): Tile[]
     {
         return this._tiles.values()
+    }
+
+    public getPlayers(): Player[]
+    {
+        return this._players.values()
+    }
+
+    public getPlayer(id: string): Player
+    {
+        return this._players.get(id)
+    }
+
+    public hasPlayer(id: string): boolean
+    {
+        return this._players.has(id)
     }
 
     public static getCoordsTileItemOccupes(sizeX: number, sizeY: number, direction: TileItemDirection): Phaser.Math.Vector2[]

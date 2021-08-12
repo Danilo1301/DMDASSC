@@ -19,6 +19,11 @@ export default class TileItemChair extends TileItem
        return this._playerSitting != undefined
     }
 
+    public removePlayerFromChair()
+    {
+        this._playerSitting = undefined
+    }
+
     public setPlayerSitting(player: Player)
     {
         this._playerSitting = player
@@ -43,13 +48,12 @@ export default class TileItemChair extends TileItem
     {
         const tile = this.getTileInDirection(this.direction)
 
-        console.log(tile)
+        //console.log(tile)
 
         if(!tile) return
 
         for (const tileItem of tile.getTileItems()) {
-            if(tileItem.getTileItemInfo().type == TileItemType.TABLE) return tileItem as TileItemTable
-            
+            if(tileItem.getTileItemInfo().type == TileItemType.TABLE) return tileItem as TileItemTable 
         }
     }
 

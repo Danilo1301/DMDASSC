@@ -41,12 +41,7 @@ export default class TileItem
 
         this.events.on("pointerup", () => {
 
-            if(this._tileItemInfo.type == TileItemType.FLOOR)
-            {
-                const tile = this.getTile()
-
-                this.getScene().multiplayer.send("position", {x: tile.x, y: tile.y})
-            }
+            return
 
             if(this._tileItemInfo.type == TileItemType.STOVE) return
             if(this._tileItemInfo.type == TileItemType.WALL) return
@@ -67,6 +62,8 @@ export default class TileItem
             this._isTransparent = false
         })
     }
+
+    public get id(): string { return this._id }
 
     public setIsTransparent(transparent: boolean)
     {
@@ -154,6 +151,11 @@ export default class TileItem
         this._tileItemRender.render()
 
         this.renderDebugText()
+    }
+
+    public getWorld()
+    {
+        return this.getTile().getWorld()
     }
 
     public getDepth()

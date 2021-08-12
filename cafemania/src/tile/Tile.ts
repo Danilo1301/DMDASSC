@@ -2,6 +2,7 @@ import TileItem from "@cafemania/tileItem/TileItem"
 import World from "../world/World"
 import Phaser from 'phaser'
 import GameScene from "@cafemania/game/scene/GameScene";
+import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 
 export default class Tile
 {
@@ -143,7 +144,65 @@ export default class Tile
         return world.getTile(findX, findY)
     }
 
+    public getTileItemsOfType(type: TileItemType)
+    {
+        const tileItems: TileItem[] = []
+   
+        for (const tileItem of this.getTileItems()) {
+
+            if(tileItem.getTileItemInfo().type == type)
+            {
+                tileItems.push(tileItem)
+            }
+        }
+
+        return tileItems
+    }
+
+    public getSurroundingTiles()
+    {
+        const world = this.getWorld()
+        const tiles: Tile[] = []
+
+        const ocuppiedTiles = world.getOccupiedTilesMap()
+
+        for (let y = -1; y <= 1; y++)
+        {
+            for (let x = -1; x <= 1; x++)
+            {
+                const tile = this.getTileInOffset(x, y)
+
+                if(!tile) continue
+
+                if(ocuppiedTiles[`${tile.x}:${tile.y}`]) continue
+
+                tiles.push(tile)
+            }
+        }
+
+        return tiles
+    }
+
     //---
+
+    public static getClosestTile(tiles: Tile[], position: Phaser.Math.Vector2)
+    {
+        let closestTileN = 0
+        let closestDistance = Infinity
+
+        for (const tile of tiles)
+        {
+            const distance = Phaser.Math.Distance.BetweenPoints(tile.getCenterPosition(), position)
+
+            if(distance < closestDistance)
+            {
+                closestTileN = tiles.indexOf(tile)
+                closestDistance = distance
+            }
+        }
+
+        return tiles[closestTileN]
+    }
 
     public static getGridBounds(sizeX: number, sizeY: number)
     {

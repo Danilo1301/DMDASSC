@@ -23,9 +23,27 @@ export default class TileItemTable extends TileItem
 
     private _dishPlate?: DishPlate
 
+    private _eatingTimeElapsed: number = 0
+
+    private _connectedChair?: TileItemChair
+
+    private _eatTime: number = 0
+
+    private _isWaitingForWaiter: boolean = false
+
     constructor(tileItemInfo: TileItemInfo)
     {
         super(tileItemInfo)
+    }
+
+    public getIsWaitingForWaiter()
+    {
+        return this._isWaitingForWaiter
+    }
+    
+    public setIsWaitingForWaiter(value: boolean)
+    {
+        this._isWaitingForWaiter = value
     }
 
     public update(delta: number)
@@ -47,6 +65,15 @@ export default class TileItemTable extends TileItem
                 console.log("yes, dish", this._dishPlate)
             }
             
+            this._eatingTimeElapsed += delta
+
+            if(this._eatingTimeElapsed >= this._eatTime)
+            {
+                this.clearDish()
+                this.events.emit("finished_eating")
+
+                this.getConnectedChair()?.getPlayerSitting().exitCafe()
+            }
         } else {
             if(this._dishPlate)
             {
@@ -56,9 +83,31 @@ export default class TileItemTable extends TileItem
         }
     }
 
+    public getConnectedChair()
+    {
+        const world = this.getWorld()
+
+        const chairs = <TileItemChair[]> world.getAllTileItemsOfType(TileItemType.CHAIR)
+
+        for (const chair of chairs)
+        {
+            if(chair.getTableInFront() == this)
+            {
+                this._connectedChair = chair
+
+                return chair
+            }
+        }
+
+        return this._connectedChair
+    }
+
     public clearDish()
     {
         this._data.dish = null
+        this._eatingTimeElapsed = 0
+
+        this.getConnectedChair()
     }
 
     public getDish()
@@ -74,6 +123,11 @@ export default class TileItemTable extends TileItem
     public setDish(dish: Dish)
     {
         this._data.dish = dish
+        this._eatTime = Math.random()*5000+8000
+
+        const c = this.getConnectedChair()
+
+        console.log(c)
     }
 
     public serialize()

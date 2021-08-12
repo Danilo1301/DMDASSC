@@ -1,4 +1,5 @@
 import Game from "@cafemania/game/Game"
+import Network from "@cafemania/network/Network";
 import Three from "@cafemania/three/Three";
 import TileTextureFactory from "@cafemania/tile/TileTextureFactory";
 import GameScene from "./scene/GameScene";
@@ -7,6 +8,20 @@ import SceneManager from "./SceneManager";
 
 export default class GameClient extends Game
 {
+    private _network: Network
+
+    constructor()
+    {
+        super()
+
+        this._network = new Network(this)
+    }
+
+    public getNetwork()
+    {
+        return this._network
+    }
+
     public async start(): Promise<void>
     {
         this.events.on("ready", this.setupClient.bind(this))
@@ -16,6 +31,8 @@ export default class GameClient extends Game
 
     private async setupClient()
     {
+        this.createClientWorld()
+        
         this.startScene('GameScene', GameScene)
         this.startScene('HudScene', HudScene)
 

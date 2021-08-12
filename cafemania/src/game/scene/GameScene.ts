@@ -48,59 +48,60 @@ class MoveScene
     }
 }
 
+class WorldText
+{
+    public get deleted() {
+        return this._text == undefined
+    }
+
+    private _text?: Phaser.GameObjects.Text
+
+    private _distanceMoved: number = 0
+
+    constructor(scene: Phaser.Scene, text: string, position: Phaser.Math.Vector2, color?: string)
+    {
+        this._text = scene.add.text(position.x, position.y, text, {color: color || "black", fontStyle: "bold"})
+        this._text.setDepth(10000)
+    }
+
+    public update(delta: number)
+    {
+        if(!this._text) return
+
+        const add = (delta * 0.05)
+
+        if((this._distanceMoved += add) >= 100)
+        {
+            this._text.destroy()
+        } else {
+            this._text.setPosition(
+                this._text.x,
+                this._text.y - (delta * 0.05)
+            )
+        }
+
+        
+    }
+}
+
 export default class GameScene extends BaseScene
 {
     private static _instance: GameScene
 
     public static getScene() { return this._instance }
 
-    public multiplayer: TestMultiplayer
-    public localPlayer?: Player
-    
     public groundLayer!: Phaser.GameObjects.Layer
     public objectsLayer!: Phaser.GameObjects.Layer
 
     private _loaded: boolean = false
+
+    private _worldTexts: WorldText[] = []
 
     constructor()
     {
         super('GameScene')
 
         GameScene._instance = this
-
-        this.multiplayer = new TestMultiplayer("/api/cafemania")
-
-        this.multiplayer.onUpdatePlayer = (player: Player, data) => {
-
-            if(!player.getWorld().tileExists(data.x, data.y)) return
-
-            player.getTaskManager().clearTasks()
-            player.testWalkToTile(data.x, data.y)
-        }
-
-        this.multiplayer.onCreatePlayer = (data) => {
-            const player = this.getGame().getWorlds()[0].createPlayer()
-
-            try {
-                player.setAtTile(player.getWorld().getTile(data.x, data.y))
-            } catch (error) {
-                
-            }
-            
-
-            player.name = data.id
-
-            return player
-        }
-
-        setInterval(() => {
-            console.log("send")
-            //this.multiplayer.send("position", {x: Math.ceil(Math.random()*14), y: Math.ceil(Math.random()*15)})
-        }, 5000)
-
-        
-
-        //this.localPlayer = this.getGame().getWorlds()[0].createPlayer()
     }
 
     public preload(): void
@@ -163,11 +164,18 @@ export default class GameScene extends BaseScene
 
         this._loaded = true
 
-        this.drawWorldText("AOE================", new Phaser.Math.Vector2(0, 0))
+        this.drawWorldText("test", new Phaser.Math.Vector2(0, 0))
+
+        const newtork = this.getGame().getNetwork()
+        newtork.connect()
     }
 
     public update(time: number, delta: number): void
     {
+        this._worldTexts.map(worldText => worldText.update(delta))
+
+        if(this._worldTexts[0]?.deleted) this._worldTexts.splice(0, 1)
+
         if(!this._loaded) return
         
         const game = this.getGame()
@@ -181,9 +189,12 @@ export default class GameScene extends BaseScene
 
     public drawWorldText(text: string, position: Phaser.Math.Vector2, color?: string)
     {
-        const worldText = this.add.text(position.x, position.y, text, {color: color || "black", fontStyle: "bold"})
-        worldText.setDepth(10000)
-
+        const worldText = new WorldText(this, text, position, color)
+        
+        this._worldTexts.push(worldText)
+        
+        
+        /*
         let n = 0
 
         const interval = setInterval(() => {
@@ -198,5 +209,7 @@ export default class GameScene extends BaseScene
                 worldText.destroy()
             }
         }, 1)
+
+        */
     }
 }

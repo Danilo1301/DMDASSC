@@ -31,6 +31,8 @@ export default class TileItemCounter extends TileItem
         super(tileItemInfo)
 
         setInterval(() => {
+            return
+            
             if(!this.isEmpty && this._data.amount > 0)
             {
                 const chairs = <TileItemChair[]> this.getTile().getWorld().getAllTileItemsOfType(TileItemType.CHAIR)
@@ -54,8 +56,8 @@ export default class TileItemCounter extends TileItem
                             this._data.amount -= 1
 
                             setTimeout(() => {
-                                table.clearDish()
-                                player.setIsEating(false)
+                                //table.clearDish()
+                                //player.setIsEating(false)
                             }, 10000);
 
                             return

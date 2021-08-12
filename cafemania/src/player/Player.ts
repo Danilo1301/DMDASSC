@@ -8,172 +8,16 @@ import PlayerAnimations from "./PlayerAnimations";
 
 import { v4 as uuidv4 } from 'uuid';
 import TileItemChair from "@cafemania/tileItem/TileItemChair";
-
-
-abstract class Task
-{
-    public completed: boolean = false
-
-    public onStart() {}
-
-    protected completeTask()
-    {
-        this.completed = true
-    }
-}
-
-class TaskWalkToTile extends Task
-{
-    private player: Player
-    private tile: Tile
- 
-    constructor(player: Player, tile: Tile)
-    {
-        super()
-
-        this.player = player
-        this.tile = tile
-    }
-
-    public onStart()
-    {
-        const world = this.player.getWorld()
-        const pathFind = new PathFind()
-        const ocuppiedMap = world.getOccupiedTilesMap()
-
-        for (const tile of world.getTiles())
-        {
-            let canWalk = !ocuppiedMap[`${tile.x}:${tile.y}`]
-
-            if(tile.x == this.tile.x && tile.y == this.tile.y) canWalk = true
-
-            pathFind.add(tile.x, tile.y, canWalk)
-        }
-
-        //console.log(this.player.getAtTile())
-
-        const atX = this.player.getAtTile().x || 0
-        const atY = this.player.getAtTile().y || 0
-
-        //console.log(`${atX},${atY} to ${this.tile.x},${this.tile.y}`)
-
-        pathFind.setStart(atX, atY)
-        pathFind.setEnd(this.tile.x, this.tile.y)
-        pathFind.find(async (path) => {
-            if(path.length == 0) return
-
-            path.splice(0, 1)
-
-            const tasks: Task[] = []
-
-            for (const p of path)
-            {
-                const task = new TaskWalkToSingleTile(this.player, world.getTile(p.x, p.y), (p.x != this.tile.x && p.y != this.tile.y))
-
-                tasks.push(task)
-            } 
-
-            tasks.reverse().map(task => this.player.getTaskManager().addTaskAt(task, 1))
-        })
-
-        this.completeTask()
-    }
-}
-
-class TaskWalkToSingleTile extends Task
-{
-    private player: Player
-    private tile: Tile
-    private dontStopWalking: boolean
-
-    constructor(player: Player, tile: Tile, dontStopWalking: boolean)
-    {
-        super()
-
-        this.player = player
-        this.tile = tile
-        this.dontStopWalking = dontStopWalking
-    }
-
-    public onStart()
-    {
-        this.player.moveToTile(this.tile.x, this.tile.y, () => {
-
-            if(this.dontStopWalking) this.player.setIsWalking(true)
-
-            this.completeTask()
-        })
-    }
-}
-
-class TaskExecuteAction extends Task
-{
-    private action: () => void
-
-    constructor(action: () => void)
-    {
-        super()
-
-        this.action = action
-    }
-
-    public onStart()
-    {
-        this.action()
-        this.completeTask()
-    }
-}
-
-class TaskManager
-{
-    private _tasks: Task[] = []
-
-    private _executingTask = false
-
-    public addTask(task: Task)
-    {
-        this._tasks.push(task)
-    }
-
-    public addTaskAt(task: Task, index: number)
-    {
-        this._tasks.splice(index, 0, task)
-    }
-
-    public clearTasks()
-    {
-        this._tasks = []
-    }
-
-    public update(delta: number)
-    {
-        if(this._executingTask)
-        {
-            const task = this._tasks[0]
-
-            if(task.completed)
-            {
-                this._tasks.splice(0, 1)
-                this._executingTask = false
-            }
-        } 
-
-        if(this._tasks.length > 0 && !this._executingTask)
-        {
-            const task = this._tasks[0]
-            this._executingTask = true
-            
-            //console.log(task)
-
-            task.onStart()
-        }
-        
-    }
-}
-
+import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
+import PlayerClient from "./PlayerClient";
+import PlayerWaiter from "./PlayerWaiter";
+import TaskManager, { TaskExecuteAction } from "./TaskManager";
+import { TaskWalkToTile } from "./PlayerTasks";
 
 export default class Player
 {
+    public name?: string
+
     private _sprite?: Phaser.GameObjects.Sprite
 
     private _container?: Phaser.GameObjects.Container
@@ -181,6 +25,8 @@ export default class Player
     private _position = new Phaser.Math.Vector2(0, 0)
 
     private _targetPosition = new Phaser.Math.Vector2(0, 0)
+
+    private _targetTile?: Tile
 
     private _isEating: boolean = false
 
@@ -191,6 +37,7 @@ export default class Player
     private _depth: number = 0
 
     private _direction: Direction = Direction.East
+
     private _moveDirection = new Phaser.Math.Vector2(0, 0)
 
     private _debugText?: Phaser.GameObjects.BitmapText
@@ -207,7 +54,7 @@ export default class Player
 
     private _taskManager: TaskManager
 
-    public name?: string
+    private _finalTargetTile?: Tile
 
     constructor(world: World)
     {
@@ -215,7 +62,15 @@ export default class Player
         this._world = world
         this._animation = new PlayerAnimation(this)
         this._taskManager = new TaskManager()
+
+        if(world.tileExists(0, 0)) this.setAtTile(world.getTile(0, 0))
     }
+
+    protected _isWaiter: boolean = false
+
+    protected _isClient: boolean = false
+
+    protected _isCheff: boolean = false
 
     public get id(): string { return this._id }
 
@@ -227,6 +82,23 @@ export default class Player
 
     public get isEating() { return this._isEating }
 
+    public getPosition()
+    {
+        return this._position
+    }
+
+    public get isWaiter() {
+        return this._isWaiter
+    }
+
+    public get isClient() {
+        return this.isClient
+    }
+
+    public get isCheff() {
+        return this._isCheff
+    }
+    
     public getTaskManager()
     {
         return this._taskManager
@@ -255,20 +127,70 @@ export default class Player
     public setAtTile(tile: Tile)
     {
         this._atTile = tile
+
         const position = tile.getCenterPosition()
-        this._position.set(position.x, position.y)
+        this.setPosition(position.x, position.y)
+
+        if(!this.isSitting)
+        {
+            const chairs = <TileItemChair[]> tile.getTileItemsOfType(TileItemType.CHAIR)
+
+            if(chairs.length > 0) this.sitAtChair(chairs[0])
+        }
+    }
+
+    public setId(id: string)
+    {
+        this._id = id
+    }
+
+    public setPosition(x: any, y: any) 
+    {
+        this._position.set(x, y)
+    }
+
+    public setTargetPosition(x: any, y: any) 
+    {
+        this._targetPosition.set(x, y)
+    }
+
+    public exitCafe()
+    {
+        const world = this.getWorld()
+
+        this.stopSitting()
+        this.taskWalkToTile(this.getWorld().getTile(0, 0))
+        this.taskExecuteAction(() => {
+            world.removePlayer(this)
+        })
+    }
+
+    public stopSitting()
+    {
+        const chair = this._sittingAtChair
+
+        if(chair) {
+            chair.setReserved(false)
+            chair.removePlayerFromChair()
+        }
+
+        this._sittingAtChair = undefined
     }
 
     public sitAtChair(chair: TileItemChair)
     {
         this._sittingAtChair = chair
 
+        this.setAtTile(chair.getTile())
+
         chair.setPlayerSitting(this)
     }
 
-    public taskWalkToTile(tile: Tile)
+    public taskWalkToTile(tile: Tile, dontEnterTile?: boolean)
     {
-        this._taskManager.addTask(new TaskWalkToTile(this, tile))
+        this._finalTargetTile = tile
+
+        this._taskManager.addTask(new TaskWalkToTile(this, tile, dontEnterTile))
     }
 
     public taskExecuteAction(action: () => void)
@@ -276,7 +198,7 @@ export default class Player
         this._taskManager.addTask(new TaskExecuteAction(action))
     }
 
-    public testWalkToTile(x: number, y: number, walkToEnd?: boolean, callback?: () => void)
+    public _testWalkToTile(x: number, y: number, walkToEnd?: boolean, callback?: () => void)
     {
         const pathFind = new PathFind()
         const ocuppiedMap = this._world.getOccupiedTilesMap()
@@ -326,8 +248,12 @@ export default class Player
         const tile = this._world.getTile(x, y)
         const position = tile.getCenterPosition()
 
+        this._targetTile = tile
+
         this.moveToPosition(position, () => {
+
             this._atTile = tile
+            this._targetTile = undefined
             callback?.()
         })
     }
@@ -467,7 +393,9 @@ export default class Player
 
             //const d = (chair.getTileItemRender().getDepth() - chair.getDepth())
 
-            const d = chair.getTileItemRender().getDepth()
+            const tileItemRender = chair.getTileItemRender()
+
+            const d = tileItemRender ? tileItemRender.getDepth() : 0
 
             const depths = [
                 5,
@@ -479,6 +407,17 @@ export default class Player
             this._direction = directions[chair.direction]
 
             this._depth = d + depths[chair.direction]
+
+            if(this._sittingAtChair)
+            {
+                const isEating = this._sittingAtChair.getTableInFront()?.hasDish()
+
+                if(!this.isEating && isEating)
+                {
+                    this.setIsEating(true)
+                }
+            }
+
         } else {
             this._depth = this._position.y + Tile.SIZE.y/2
         }
@@ -597,4 +536,37 @@ export default class Player
             this._onStopWalking = undefined
         }
     }
+
+    public serialize()
+    {
+        var data: any = {
+            id: this.id,
+            position: {
+                x: this._position.x,
+                y: this._position.y
+            },
+            atTile: {
+                x: this._atTile?.x || 0,
+                y: this._atTile?.y || 0
+            }
+        }
+
+        if(this._finalTargetTile)
+        {
+            data.targetTile = {
+                x: this._finalTargetTile.x,
+                y: this._finalTargetTile.y
+            }
+        }
+
+        return data
+    }
+
+    public destroy()
+    {
+        this._sprite?.destroy()
+        this._container?.destroy()
+        this._debugText?.destroy()
+    }
 }
+

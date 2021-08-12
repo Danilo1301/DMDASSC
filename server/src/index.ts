@@ -66,15 +66,15 @@ console.log("Starting geckos...")
 import '@geckos.io/phaser-on-nodejs'
 global['phaserOnNodeFPS'] = 60
 
+
+/*
 console.log("Starting GameServer...")
-
-
 
 import GameServer from '@phaserGame/game/GameServer'
 
 var game = new GameServer(io.of("/api/phaserGame"))
 game.start()
-
+*/
 
 
 console.log("Starting CafemaniaServer...")

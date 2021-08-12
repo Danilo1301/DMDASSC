@@ -32,7 +32,6 @@ export default class TileItemStove extends TileItem
     {
         super(tileItemInfo)
 
-        console.log(this)
 
         this.events.on("pointerup", () => {
 
