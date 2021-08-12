@@ -84,7 +84,12 @@ export default class PlayerWaiter extends Player
                 Tile.getClosestTile(counter.getTile().getSurroundingTiles(), this.getPosition())
             )
 
+        
+
             let dish: Dish | undefined
+
+            this.taskPlayAnim('Eat', 1000)
+            this.taskPlayAnim('Idle', 0)
 
             this.taskExecuteAction(() => {
                 dish = counter.getOneDish()
@@ -97,9 +102,12 @@ export default class PlayerWaiter extends Player
                     
                     this.setIsBusy(false)
 
+                    table.setIsWaitingForWaiter(false)
+
                     return
                 }
 
+         
                 const chair = table.getConnectedChair()!
     
                 this.taskWalkToTile(
@@ -107,11 +115,11 @@ export default class PlayerWaiter extends Player
                 )
 
                 this.taskExecuteAction(() => {
-                    this.setIsBusy(false)
-
-                    table.setIsWaitingForWaiter(false)
 
                     table.setDish(counter.getDish())
+                    table.setIsWaitingForWaiter(false)
+
+                    this.setIsBusy(false)
                 })
             })
         }
@@ -123,7 +131,9 @@ export default class PlayerWaiter extends Player
     {
         if(this._isBusy) return
 
-        const tables = <TileItemTable[]> this.getWorld().getAllTileItemsOfType(TileItemType.TABLE)
+        let tables = <TileItemTable[]> this.getWorld().getAllTileItemsOfType(TileItemType.TABLE)
+
+        tables = Utils.shuffleArray(tables)
 
         for (const table of tables)
         {
@@ -131,7 +141,8 @@ export default class PlayerWaiter extends Player
             
             const hasPlayer = table.getConnectedChair()?.getPlayerSitting() != undefined
 
-            //check clear table
+
+
 
             if(!hasPlayer) continue
 

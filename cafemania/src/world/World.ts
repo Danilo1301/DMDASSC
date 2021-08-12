@@ -161,9 +161,9 @@ export default class World
         this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 3)) 
         this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 4)) 
   
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-8, 1)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-8, 2)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-8, 3)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-6, 1)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-6, 2)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-6, 3)) 
     }
 
 

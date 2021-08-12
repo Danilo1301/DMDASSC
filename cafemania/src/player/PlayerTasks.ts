@@ -62,9 +62,6 @@ export class TaskWalkToTile extends Task
 
             tasks.reverse().map(task => this.player.getTaskManager().addTaskAt(task, 1))
 
-            this.player.taskExecuteAction(() => {
-                //this.player.setAtTile(world.getTile(this.tile.x, this.tile.y))
-            })
         })
 
         this.completeTask()
@@ -94,5 +91,37 @@ export class TaskWalkToSingleTile extends Task
 
             this.completeTask()
         })
+    }
+}
+
+export class TaskPlayAnim extends Task
+{
+    private player: Player
+    private anim: string
+    private time: number
+
+    constructor(player: Player, anim: string, time: number)
+    {
+        super()
+
+        this.player = player
+        this.anim = anim
+        this.time = time
+    }
+
+    public onStart()
+    {
+        this.player.getAnimationManager().play(this.anim, false)
+
+        if(this.time <= 0)
+        {
+            this.completeTask()
+
+            return
+        }
+
+        setTimeout(() => {
+            this.completeTask()
+        }, this.time);
     }
 }

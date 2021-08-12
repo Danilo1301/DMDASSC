@@ -12,7 +12,7 @@ import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import PlayerClient from "./PlayerClient";
 import PlayerWaiter from "./PlayerWaiter";
 import TaskManager, { TaskExecuteAction } from "./TaskManager";
-import { TaskWalkToTile } from "./PlayerTasks";
+import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
 
 export default class Player
 {
@@ -82,6 +82,11 @@ export default class Player
 
     public get isEating() { return this._isEating }
 
+    public getAnimationManager()
+    {
+        return this._animation
+    }
+
     public getPosition()
     {
         return this._position
@@ -107,6 +112,8 @@ export default class Player
     public setIsWalking(value: boolean)
     {
         this._isWalking = value
+
+        this.getAnimationManager().play(value ? 'Walk' : 'Idle', true)
     }
 
     public getWorld()
@@ -184,6 +191,11 @@ export default class Player
         this._taskManager.addTask(new TaskWalkToTile(this, tile, dontEnterTile))
     }
 
+    public taskPlayAnim(anim: string, time: number)
+    {
+        this._taskManager.addTask(new TaskPlayAnim(this, anim, time))
+    }
+
     public taskExecuteAction(action: () => void)
     {
         this._taskManager.addTask(new TaskExecuteAction(action))
@@ -221,7 +233,7 @@ export default class Player
                         if(p.x == x && p.y == y) {
                             callback?.()
                         } else {
-                            this._isWalking = true
+                            this.setIsWalking(true)
                         }
 
                         //console.log("Thats the callback")
@@ -242,7 +254,6 @@ export default class Player
         this._targetTile = tile
 
         this.moveToPosition(position, () => {
-
             this._atTile = tile
             this._targetTile = undefined
             callback?.()
@@ -255,7 +266,7 @@ export default class Player
 
         this._onStopWalking = callback
         this._targetPosition = position
-        this._isWalking = true
+        this.setIsWalking(true)
 
         const dir = Phaser.Math.Angle.BetweenPoints(this._position, this._targetPosition)
 
@@ -293,7 +304,7 @@ export default class Player
         this._moveDirection.x = directions[closestDir].x
         this._moveDirection.y = directions[closestDir].y
         
-        console.log(directions[closestDir])
+        //console.log(directions[closestDir])
     }
 
     public getScene()
@@ -350,7 +361,7 @@ export default class Player
 
         this._sprite.setPosition(0, -25)
 
-        this._animation.play('Idle', true)
+        this.setIsWalking(false)
         
         //if(useDefaultTexture) this.createSprite('PlayerSpritesTexture' + this._id)
     }
@@ -414,25 +425,8 @@ export default class Player
             this._depth = this._position.y + Tile.SIZE.y/2
         }
 
-        if(this._isWalking)
-        {
-            this._animation.play("Walk")
-        } else {
-            if(this.isSitting)
-            {
-                if(this._isEating)
-                {
-                    this._animation.play("Eat")
-                } else {
-                    this._animation.play("Sit")
-                }
-                
-            } else {
-                this._animation.play("Idle")
-            }
-            
-        }
-
+        if(this.isSitting) this.getAnimationManager().play(this.isEating ? 'Eat' : 'Sit', false)
+        
         this._animation.update(delta)
     }
 
@@ -478,7 +472,7 @@ export default class Player
 
     private processMovement(delta: number)
     {
-        if(!this._isWalking) return
+        if(!this.isWalking) return
 
         const speed = 1.5
 
@@ -493,36 +487,7 @@ export default class Player
 
             //this._position.set(this._targetPosition.x, this._targetPosition.y)
 
-            this._isWalking = false
-            
-            //console.log(`[Player] Calling onStopWalking`)
-
-            this._onStopWalking?.()
-            this._onStopWalking = undefined
-        }
-
-        return
-
-        const moveDirection = this._moveDirection
-
-        const p = Tile.getPosition(moveDirection.x, moveDirection.y)
-        const tp = p.normalize()
-        //const speed = 1.5
-
-        this._position.x += tp.x * speed * delta * 0.05
-        this._position.y += tp.y * speed * delta * 0.05
-
-        console.log(delta)
-
-        if(Phaser.Math.Distance.BetweenPoints(this._position, this._targetPosition) < 10)
-        {
-            //console.log(`[Player] Reached target position`)
-
-            //this._position.set(this._targetPosition.x, this._targetPosition.y)
-
-            this._isWalking = false
-            
-            //console.log(`[Player] Calling onStopWalking`)
+            this.setIsWalking(false)
 
             this._onStopWalking?.()
             this._onStopWalking = undefined
