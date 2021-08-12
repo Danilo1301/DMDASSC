@@ -29,50 +29,6 @@ export default class TileItemCounter extends TileItem
     constructor(tileItemInfo: TileItemInfo)
     {
         super(tileItemInfo)
-
-        setInterval(() => {
-            return
-            
-            if(!this.isEmpty && this._data.amount > 0)
-            {
-                const chairs = <TileItemChair[]> this.getTile().getWorld().getAllTileItemsOfType(TileItemType.CHAIR)
-
-                for (const chair of chairs)
-                {
-                    if(chair.getIsOcuppied())
-                    {
-                        const table = chair.getTableInFront()!
-
-                        const player = chair.getPlayerSitting()
-
-                        if(!table.hasDish())
-                        {
-                            player.setIsEating(true)
-
-                            table.setDish(this.getDish())
-
-                            //GameScene.getScene().drawWorldText(`Dish sent to player`, this.getPosition())
-    
-                            this._data.amount -= 1
-
-                            setTimeout(() => {
-                                //table.clearDish()
-                                //player.setIsEating(false)
-                            }, 10000);
-
-                            return
-                        }
-
-                        
-
-                        //chair.rotate()
-                        
-                    }
-                }
-            }
-        }, 1000)
-
-        //GameScene.getScene().drawWorldText(`Counter`, this.getPosition())
     }
 
     public update(delta: number)
@@ -131,13 +87,18 @@ export default class TileItemCounter extends TileItem
 
     public addDish(dish: Dish)
     {
-        let amount = this._data.amount
-
         this._data.dish = dish
 
         this._data.amount += dish.servings
+    }
 
-        console.log(this._data)
+    public getOneDish(): Dish | undefined
+    {
+        if(this._data.amount <= 0) return
+
+        this._data.amount--
+
+        return this.getDish()
     }
 
     public serialize()

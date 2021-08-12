@@ -21,7 +21,8 @@ export default class PlayerClient extends Player
         {
             GameScene.getScene()?.drawWorldText("No empty chairs!", this.getPosition(), "red")
 
-            world.removePlayer(this)
+            this.exitCafe()
+            
             return
         }
 
@@ -30,31 +31,30 @@ export default class PlayerClient extends Player
 
         const tile = chair.getTile()
         
-        console.log("[Player] Walking to chair")
+        console.log("[Player] Walking to chair", chair.id)
 
         this.taskWalkToTile(tile)
 
         this.taskExecuteAction(() => {
             console.log("[Player] Sitting at chair")
 
-            this.sitAtChair(chair)
-
-            const table = chair.getTableInFront()
-
-            //table!.events.once("finished_eating", () => {
-                //this.taskWalkToTile(world.getTile(0, 0))
-            //})
+            this.setAtChair(chair)
         })
+    
+    }
 
-        console.log("[Player] Going to chair", chair.id)
+    public exitCafe()
+    {
+        const world = this.getWorld()
 
-        /*
-        player.taskExecuteAction(() => {
-            console.log("[Player] Sitting at chair")
+        if(this.isSitting) this.stopSitting()
 
-            player.sitAtChair(chair)
-            player.setAtTile(tile)
+        const exitTile = this.getWorld().getTile(0, 0)
+
+        if(this.getAtTile() != exitTile) this.taskWalkToTile(exitTile)
+
+        this.taskExecuteAction(() => {
+            world.removePlayer(this)
         })
-        */
     }
 }

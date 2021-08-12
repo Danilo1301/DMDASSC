@@ -81,9 +81,16 @@ export default class World
 
     public generateNewCafe()
     {
+        /*
         this._mapSize.set(
             Math.round(Math.random()*10+6),
             Math.round(Math.random()*10+6)
+        )
+        */
+
+        this._mapSize.set(
+            10,
+            7
         )
 
         console.log(`[World] Generated map ${this._mapSize.x} x ${this._mapSize.y}`)
@@ -136,7 +143,7 @@ export default class World
             }
         }
 
-        for (let x = -3; x < -1; x += 1) {
+        for (let x = -4; x < -1; x += 1) {
             for (let y = 1; y < 6; y += 3) {
 
                 //if(Math.random() >= 0.3)
@@ -154,9 +161,9 @@ export default class World
         this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 3)) 
         this.putTileItemInTile(tileItemFactory.createTileItem('stove1'), this.getTile(0, 4)) 
   
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-5, 1)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-5, 2)) 
-        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-5, 3)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-8, 1)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-8, 2)) 
+        this.putTileItemInTile(tileItemFactory.createTileItem('counter1'), this.getTile(-8, 3)) 
     }
 
 
@@ -327,7 +334,7 @@ export default class World
 
         for (const chair of chairs)
         {
-            if(!chair.getIsReserved() && chair.hasTableInFront())
+            if(!chair.isReserved && chair.hasTableInFront)
                 emptyChairs.push(chair)
         }
 

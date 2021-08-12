@@ -9,29 +9,29 @@ export default class TileItemChair extends TileItem
 
     private _reserved: boolean = false
 
-    public getIsReserved(): boolean
-    {
-       return this._reserved
-    }
-
-    public getIsOcuppied(): boolean
+    public get hasPlayerSitting(): boolean
     {
        return this._playerSitting != undefined
     }
 
-    public removePlayerFromChair()
+    public get isReserved(): boolean
     {
-        this._playerSitting = undefined
+       return this._reserved
     }
 
-    public setPlayerSitting(player: Player)
+    public get hasTableInFront()
+    {
+        return this.getTableInFront() != undefined
+    }
+
+    public setPlayerSitting(player: Player | undefined)
     {
         this._playerSitting = player
     }
 
     public getPlayerSitting()
     {
-        return this._playerSitting!
+        return this._playerSitting
     }
 
     public setReserved(value: boolean)
@@ -39,16 +39,9 @@ export default class TileItemChair extends TileItem
         this._reserved = value
     }
 
-    public hasTableInFront()
-    {
-        return this.getTableInFront() != undefined
-    }
-
     public getTableInFront()
     {
         const tile = this.getTileInDirection(this.direction)
-
-        //console.log(tile)
 
         if(!tile) return
 
@@ -56,5 +49,4 @@ export default class TileItemChair extends TileItem
             if(tileItem.getTileItemInfo().type == TileItemType.TABLE) return tileItem as TileItemTable 
         }
     }
-
 }

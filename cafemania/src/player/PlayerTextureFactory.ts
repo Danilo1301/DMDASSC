@@ -14,7 +14,9 @@ interface QueryItem
 
 interface PlayerTextureOptions
 {
-    default?: boolean
+    head?: string[]
+    body?: string[]
+    leg?: string[]
 }
 
 export default class PlayerTextureFactory
@@ -137,31 +139,23 @@ export default class PlayerTextureFactory
         }
         //
 
-        const headTextures: string[] = []
-        const bodyTextures: string[] = []
-        const legTextures: string[] = []
+        const options = queryItem.options
 
-        if(queryItem.options.default === true)
-        {
-            headTextures.push('1x1white')
-            bodyTextures.push('1x1white')
-            legTextures.push('1x1white')
-        } else {
-            headTextures.push('head')
-            bodyTextures.push('body2')
-            legTextures.push('head')
-        }
+        const headTextures: string[] = options.head || ['1x1white']
+        const bodyTextures: string[] = options.body || ['1x1white']
+        const legTextures: string[] = options.leg || ['1x1white']
+
 
         var t1 = performance.now()
 
             
         const head_texture = this.mixTextures(headTextures, 1024, 831)
 
-        await this.sleep(queryItem.options.default === true ? 0 : 100)
+        await this.sleep(0)
 
         const body_texture = this.mixTextures(bodyTextures, 1024, 1024)
 
-        await this.sleep(queryItem.options.default === true ? 0 : 100)
+        await this.sleep(0)
 
         const legs_texture = this.mixTextures(legTextures, 1024, 831)
 
@@ -265,7 +259,7 @@ export default class PlayerTextureFactory
 
                     
 
-                    await this.sleep(queryItem.options.default === true ? 0 : 0)
+                    await this.sleep(0)
                 }
             }
 

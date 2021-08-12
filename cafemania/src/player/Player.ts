@@ -126,16 +126,17 @@ export default class Player
 
     public setAtTile(tile: Tile)
     {
+        const position = tile.getCenterPosition()
+        
         this._atTile = tile
 
-        const position = tile.getCenterPosition()
         this.setPosition(position.x, position.y)
 
         if(!this.isSitting)
         {
             const chairs = <TileItemChair[]> tile.getTileItemsOfType(TileItemType.CHAIR)
-
-            if(chairs.length > 0) this.sitAtChair(chairs[0])
+    
+            if(chairs.length > 0) this.setAtChair(chairs[0])
         }
     }
 
@@ -154,37 +155,27 @@ export default class Player
         this._targetPosition.set(x, y)
     }
 
-    public exitCafe()
-    {
-        const world = this.getWorld()
-
-        this.stopSitting()
-        this.taskWalkToTile(this.getWorld().getTile(0, 0))
-        this.taskExecuteAction(() => {
-            world.removePlayer(this)
-        })
-    }
-
     public stopSitting()
     {
         const chair = this._sittingAtChair
 
         if(chair) {
             chair.setReserved(false)
-            chair.removePlayerFromChair()
+            chair.setPlayerSitting(undefined)
         }
 
         this._sittingAtChair = undefined
     }
 
-    public sitAtChair(chair: TileItemChair)
+    public setAtChair(chair: TileItemChair)
     {
         this._sittingAtChair = chair
 
-        this.setAtTile(chair.getTile())
-
         chair.setPlayerSitting(this)
+
+        this.setAtTile(chair.getTile())
     }
+
 
     public taskWalkToTile(tile: Tile, dontEnterTile?: boolean)
     {
@@ -324,7 +315,8 @@ export default class Player
         } 
         else
         {
-            textureName = "PlayerSpritesTextureNoTexture"
+            //PlayerSpriteTexture_NoTexture
+            textureName = this.isWaiter ? "PlayerSpriteTexture_TestWaiter" : 'PlayerSpriteTexture_TestClient'
         }
 
         if(this._sprite) this._sprite.destroy()
@@ -410,7 +402,7 @@ export default class Player
 
             if(this._sittingAtChair)
             {
-                const isEating = this._sittingAtChair.getTableInFront()?.hasDish()
+                const isEating = this._sittingAtChair.getTableInFront()?.hasDish
 
                 if(!this.isEating && isEating)
                 {

@@ -155,13 +155,14 @@ export default class GameScene extends BaseScene
 
     private async test()
     {
-        const textureName = 'PlayerSpritesTextureNoTexture'
-
+        const tag = 'PlayerSpriteTexture_'
+ 
         const PlayerTextureFactory = await import("../../player/PlayerTextureFactory")
-        await PlayerTextureFactory.default.create(textureName, {default: true})
 
-        console.log(textureName)
-
+        await PlayerTextureFactory.default.create(tag + 'NoTexture', {})
+        await PlayerTextureFactory.default.create(tag + 'TestClient', {head: ['head'], body: ['1x1white'], leg: ['1x1white']})
+        await PlayerTextureFactory.default.create(tag + 'TestWaiter', {head: ['head'], body: ['body2'], leg: ['1x1white']})
+        
         this._loaded = true
 
         this.drawWorldText("test", new Phaser.Math.Vector2(0, 0))

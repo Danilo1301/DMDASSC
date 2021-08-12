@@ -1,8 +1,10 @@
+import Dish from "@cafemania/dish/Dish";
 import GameScene from "@cafemania/game/scene/GameScene";
 import Tile from "@cafemania/tile/Tile";
 import TileItemCounter from "@cafemania/tileItem/TileItemCounter";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import TileItemTable from "@cafemania/tileItem/TileItemTable";
+import Utils from "@cafemania/utils/Utils";
 import World from "@cafemania/world/World";
 import Player from "./Player";
 
@@ -26,10 +28,15 @@ export default class PlayerWaiter extends Player
         this.processWaiterAI(delta)
     }
 
+    public setIsBusy(value: boolean)
+    {
+        this._isBusy = value
+
+        GameScene.getScene()?.drawWorldText(this._isBusy ? "Ocupado" : "Livre", this.getPosition(), this._isBusy ? "red" : "green")
+    }
+
     private processWaiterAI(delta: number)
     {
-        this.checkTables()
-
         const now = new Date().getTime()
 
         if(now - this._lastCheckedTables >= 1250)
@@ -42,12 +49,75 @@ export default class PlayerWaiter extends Player
         //console.log(delta)
     }
 
-    private getCountersNotEmpty()
+    private getAvaliableCounter(): TileItemCounter | undefined
     {
         const counters = <TileItemCounter[]> this.getWorld().getAllTileItemsOfType(TileItemType.COUNTER)
 
-        return counters.filter(counter => !counter.isEmpty)
+        const avaliableCounters = counters.filter(counter => !counter.isEmpty)
+
+        if(avaliableCounters.length == 0) return
+
+        return Utils.getRandomItemInArray(avaliableCounters)
     }
+
+    private checkDeliverDish(table: TileItemTable)
+    {
+        if(table.hasDish) return
+
+        if(!table.isWaitingForWaiter)
+        {
+            const counter = this.getAvaliableCounter()
+
+            if(!counter)
+            {
+                GameScene.getScene()?.drawWorldText("All counters are empty", this.getPosition(), "red")
+                return
+            }
+
+            table.setIsWaitingForWaiter(true)
+
+            this.setIsBusy(true)
+
+            GameScene.getScene()?.drawWorldText('get cloesest tile', this.getPosition())
+
+            this.taskWalkToTile(
+                Tile.getClosestTile(counter.getTile().getSurroundingTiles(), this.getPosition())
+            )
+
+            let dish: Dish | undefined
+
+            this.taskExecuteAction(() => {
+                dish = counter.getOneDish()
+
+                GameScene.getScene()?.drawWorldText('getting dish', this.getPosition())
+
+                if(!dish)
+                {
+                    GameScene.getScene()?.drawWorldText("we have a problem..", this.getPosition(), "red")
+                    
+                    this.setIsBusy(false)
+
+                    return
+                }
+
+                const chair = table.getConnectedChair()!
+    
+                this.taskWalkToTile(
+                    Tile.getClosestTile(chair.getTile().getSurroundingTiles(), this.getPosition())
+                )
+
+                this.taskExecuteAction(() => {
+                    this.setIsBusy(false)
+
+                    table.setIsWaitingForWaiter(false)
+
+                    table.setDish(counter.getDish())
+                })
+            })
+        }
+    }
+
+    
 
     private checkTables()
     {
@@ -57,64 +127,15 @@ export default class PlayerWaiter extends Player
 
         for (const table of tables)
         {
-            if(!table.hasDish() && table)
-            {
-                let hasPlayer = false
-
-                const chair = table.getConnectedChair()
-
-                if(chair?.getIsOcuppied())
-                {
-                    hasPlayer = true
-                }
-
-                if(hasPlayer)
-                {
-                    if(!table.getIsWaitingForWaiter())
-                    {
-                        table.setIsWaitingForWaiter(true)
-
+            if(this._isBusy) return
             
-                        const counters = this.getCountersNotEmpty()
+            const hasPlayer = table.getConnectedChair()?.getPlayerSitting() != undefined
 
-                        if(counters.length == 0)
-                        {
-                            GameScene.getScene()?.drawWorldText("All counters are empty", this.getPosition(), "red")
-                            return
-                        }
+            //check clear table
 
-                        this._isBusy = true
-                        
-                        this.taskWalkToTile(
-                            Tile.getClosestTile(counters[0].getTile().getSurroundingTiles(), this.getPosition())
-                        )
+            if(!hasPlayer) continue
 
-                        this.taskExecuteAction(() => {
-                            this.taskWalkToTile(
-                                Tile.getClosestTile(chair!.getTile().getSurroundingTiles(), this.getPosition())
-                            )
-
-                            this.taskExecuteAction(() => {
-                                this._isBusy = false
-
-                                table.setIsWaitingForWaiter(false)
-
-                                table.setDish(counters[0].getDish())
-                            })
-
-                            
-                        })
-
-                        
-                        
-                        return
-                    }
-
-                    
-                }
-            }
-
-            
+            this.checkDeliverDish(table)
         }
     }
 }

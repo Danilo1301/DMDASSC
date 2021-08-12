@@ -1,6 +1,7 @@
 import Dish from "@cafemania/dish/Dish"
 import DishPlate from "@cafemania/dish/DishPlate"
 import GameScene from "@cafemania/game/scene/GameScene"
+import PlayerClient from "@cafemania/player/PlayerClient"
 import TileItem from "./TileItem"
 import TileItemChair from "./TileItemChair"
 import TileItemInfo, { TileItemType } from "./TileItemInfo"
@@ -36,7 +37,7 @@ export default class TileItemTable extends TileItem
         super(tileItemInfo)
     }
 
-    public getIsWaitingForWaiter()
+    public get isWaitingForWaiter()
     {
         return this._isWaitingForWaiter
     }
@@ -50,7 +51,7 @@ export default class TileItemTable extends TileItem
     {
         super.update(delta)
 
-        if(this.hasDish())
+        if(this.hasDish)
         {
             if(!this._dishPlate)
             {
@@ -72,7 +73,8 @@ export default class TileItemTable extends TileItem
                 this.clearDish()
                 this.events.emit("finished_eating")
 
-                this.getConnectedChair()?.getPlayerSitting().exitCafe()
+                const player = this.getConnectedChair()?.getPlayerSitting()! as PlayerClient
+                player.exitCafe()
             }
         } else {
             if(this._dishPlate)
@@ -115,7 +117,7 @@ export default class TileItemTable extends TileItem
         return this._data.dish!
     }
 
-    public hasDish()
+    public get hasDish()
     {
         return this._data.dish != undefined
     }
