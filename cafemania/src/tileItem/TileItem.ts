@@ -1,8 +1,8 @@
-import GameScene from "@cafemania/game/scene/GameScene";
-import Tile from "@cafemania/tile/Tile";
-import TileItemInfo, { TileItemRotationType, TileItemType } from "./TileItemInfo";
-import TileItemRender from "./TileItemRender";
+import { TileItemInfo, TileItemType } from "./TileItemInfo"
 import { v4 as uuidv4 } from 'uuid';
+import { TileItemRender } from "./TileItemRender";
+import { Tile } from "@cafemania/tile/Tile";
+import { GameScene } from "@cafemania/scenes/GameScene";
 
 export enum TileItemDirection
 {
@@ -12,96 +12,56 @@ export enum TileItemDirection
     FRONT_FLIPPED,
 }
 
-export default class TileItem
+export class TileItem
 {
-    public events = new Phaser.Events.EventEmitter()
-
     private _tileItemInfo: TileItemInfo
-
-    private _tile!: Tile
 
     private _id: string
 
     private _tileItemRender?: TileItemRender
 
+    private _tile?: Tile
+
     private _direction: TileItemDirection = TileItemDirection.FRONT
-
-    private _currentAnim: number = 0
-
-    private _debugText?: Phaser.GameObjects.BitmapText
-    
-    private _isHovering: boolean = false
-    
-    private _isTransparent: boolean = false
 
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = uuidv4()
         this._tileItemInfo = tileItemInfo
-
-        this.events.on("pointerup", () => {
-
-            return
-
-            if(this._tileItemInfo.type == TileItemType.STOVE) return
-            if(this._tileItemInfo.type == TileItemType.WALL) return
-            if(this._tileItemInfo.type == TileItemType.FLOOR) return
-
-            this.rotate()
-        })
-
-        this.events.on("pointerover", () => {
-            this._isHovering = true
-
-            this._isTransparent = true
-        })
-
-        this.events.on("pointerout", () => {
-            this._isHovering = false
-
-            this._isTransparent = false
-        })
     }
 
-    public get id(): string { return this._id }
-
-    public setIsTransparent(transparent: boolean)
+    public get direction()
     {
-        this._isTransparent = transparent
+        return this._direction
     }
 
-    public getPosition()
+    public get id()
     {
-        return this.getTile().getCenterPosition()
+        return this._id
     }
 
-    public getTile(): Tile
+    public getTile()
     {
-        return this._tile
+        return this._tile!
     }
 
-    public isInAnyTile(): boolean
+    public setTile(tile: Tile)
     {
-        return this._tile != undefined
-    }
+        this._tile = tile
+    }   
 
-    public getTileItemInfo(): TileItemInfo
+    public getInfo()
     {
         return this._tileItemInfo
-    }
-
-    public get direction(): TileItemDirection { return this._direction }
-
-    public get isHovering(): boolean { return this._isHovering }
-
-    public getTileItemRender()
-    {
-        return this._tileItemRender!
     }
 
     public setDirection(direction: TileItemDirection)
     {
         this._direction = direction
+
+        const os = TileItemRender.valuesFromDirection(direction)
+
+        this._tileItemRender?.setRotation(os[0], os[1])
     }
 
     public update(delta: number)
@@ -109,214 +69,32 @@ export default class TileItem
         
     }
 
-    public render(): void
+    public render(delta: number)
     {
-        const scene = this.getScene()
+        this.renderTileItemRender()
+    }
+
+    private renderTileItemRender()
+    {
+        const scene = GameScene.Instance
+        const tile = this._tile
+
+        if(!tile) return
 
         if(!this._tileItemRender)
         {
-            const tileItemRender = this._tileItemRender = this.getGame().tileItemFactory.createTileItemRender(this._tileItemInfo.id)
-            tileItemRender.setTileItem(this)
+            this._tileItemRender = new TileItemRender(this.getInfo())
+            this._tileItemRender.setTileItem(this)
+            this.setDirection(this._direction)
 
-            const layer = this._tileItemInfo.type == TileItemType.FLOOR ? scene.groundLayer : scene.objectsLayer
+            let layer = scene.objectsLayer
 
-            tileItemRender.setSceneLayer(layer)
+            if(this.getInfo().type == TileItemType.FLOOR) layer = scene.groundLayer
 
-            setInterval(() => {
-                this._currentAnim++
-                if(this._currentAnim >= this._tileItemInfo.sprites) this._currentAnim = 0
-            }, 1000)
+            this._tileItemRender.getSprites().map(sprite => layer.add(sprite.image) )
+
+            const position = tile.getPosition()
+            this._tileItemRender.setPosition(new Phaser.Math.Vector2(position.x, position.y))
         }
-        
-        const position = this._tile.position
-        const isFlipped = this._direction == TileItemDirection.FRONT_FLIPPED || this._direction == TileItemDirection.BACK_FLIPPED
-        const isBack = this._direction == TileItemDirection.BACK || this._direction == TileItemDirection.BACK_FLIPPED
-        
-        this._tileItemRender.setFlipSprites(isFlipped)
-        this._tileItemRender.setSprite(this._currentAnim)
-        this._tileItemRender.setTransparent(this._isTransparent)
-        
-        if(this._tileItemInfo.layers > 1)
-            this._tileItemRender.setLayer(isBack ? 1 : 0)
-
-        const newRotationOffset = new Phaser.Math.Vector2(0, 0)
-        const offsetPos = TileItem.getOffsetByDirection(this._tileItemInfo.size.x, this._tileItemInfo.size.y, this._direction)
-        const newPos = Tile.getPosition(offsetPos.x, offsetPos.y)
-
-        newRotationOffset.x = newPos.x
-        newRotationOffset.y = newPos.y
-     
-        this._tileItemRender.setPosition(position.x + newRotationOffset.x, position.y + newRotationOffset.y)
-
-        this._tileItemRender.render()
-
-        this.renderDebugText()
-    }
-
-    public getWorld()
-    {
-        return this.getTile().getWorld()
-    }
-
-    public getDepth()
-    {
-        const isFlipped = this._direction == TileItemDirection.FRONT_FLIPPED || this._direction == TileItemDirection.BACK_FLIPPED
-        
-        return this._tile.position.y - ((isFlipped ? -1 : 1)*(this.getTile().y || 0))
-
-    }
-
-    private renderDebugText()
-    {
-        const scene = this.getScene()
-
-        if(this._isHovering)
-        {
-            if(!this._debugText)
-            {
-                this._debugText = scene.add.bitmapText(0, 0, 'gem', `TileItem`, 16).setOrigin(0.5);
-                this._debugText.setTint(0xffffff)
-                this._debugText.setDepth(10000)
-            }
-
-            this._debugText.setPosition(this.getTile().position.x, this.getTile().position.y)
-
-            this._debugText.setText(`${JSON.stringify(this.serialize())}\n${this.getDepth()}`)
-        } else {
-            if(this._debugText) {
-                this._debugText.destroy()
-                this._debugText = undefined
-            }
-
-        }
-
-        
-    }
-
-    public setTile(tile: Tile): void
-    {
-        this._tile = tile
-    }
-
-    protected getGame()
-    {
-        return this._tile.getWorld().getGame()
-    }
-
-    private getScene()
-    {
-        return GameScene.getScene()
-    }
-
-    public serialize()
-    {
-        return {
-            id: this._id,
-            tileItemInfo: this._tileItemInfo.id,
-            direction: this._direction
-        }
-    }
-
-    public rotate(): void
-    {
-        let n = 0;
-        let canRotate = false;
-        let rotateTo = this.direction + 1
-
-        console.log("Direction was " + this.direction)
-
-        while(!canRotate || n < 4)
-        {
-            if(this._tileItemInfo.rotationType == TileItemRotationType.SIDE_ONLY && rotateTo >= 2)
-                rotateTo += 2
-
-            let newDir: TileItemDirection = (rotateTo + n)%4
-  
-            const canBePlaced = this._tile.getWorld().canTileItemBePlaced(this, this._tile.x, this._tile.y, newDir)
-
-            if(canBePlaced)
-            {
-                rotateTo = newDir
-                canRotate = true
-                break
-            }
-
-            n++
-        }
-
-        if(canRotate)
-        {
-            this.setDirection(rotateTo)
-
-            console.log("Direction changed to " + this.direction)
-        } else {
-            console.warn("Cant rotate")
-        }
-    }
-
-    /*
-        Do   not       ask
-            me   how  I   made     this
-    */
-    public static getOffsetByDirection(sizeX: number, sizeY: number, direction: TileItemDirection)
-    {
-        if(direction == 1)
-        {
-            return {
-                x: (sizeX-1),
-                y: (sizeX-1)
-            }
-        }
-    
-        if(direction == 2)
-        {
-            return {
-                x: 0,
-                y: -(sizeY-1 - (sizeX-1))
-            }
-        }
-    
-        if(direction == 3)
-        {
-            return {
-                x: (sizeX-1) + ((sizeY-1) - (sizeX-1)),
-                y: (sizeX-1)
-            }
-        }
-    
-        return {
-            x: 0,
-            y: 0
-        }
-    }
-
-    public static directionToString(direction: TileItemDirection): string
-    {
-        switch(direction)
-        {
-            case TileItemDirection.FRONT: return `FRONT`
-            case TileItemDirection.FRONT_FLIPPED: return `FRONT_FLIPPED`
-            case TileItemDirection.BACK: return `BACK`
-            case TileItemDirection.BACK_FLIPPED: return `BACK_FLIPPED`
-        }
-    }
-
-    public getTileInDirection(direction: TileItemDirection)
-    {
-        TileItemDirection.FRONT
-        TileItemDirection.BACK_FLIPPED
-        TileItemDirection.BACK
-        TileItemDirection.FRONT_FLIPPED
-
-        const offset = [
-            {x: -1, y: 0},
-            {x: 0, y: -1},
-            {x: 1, y: 0},
-            {x: 0, y: 1},
-        ]
-
-        const thisOffset = offset[direction]
-
-        return this.getTile().getTileInOffset(thisOffset.x, thisOffset.y)
     }
 }

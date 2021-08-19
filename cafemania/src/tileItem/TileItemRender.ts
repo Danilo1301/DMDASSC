@@ -1,122 +1,62 @@
-import GameScene from "@cafemania/game/scene/GameScene"
-import Tile from "@cafemania/tile/Tile"
-import TileCollisionFactory from "../tile/TileCollisionFactory"
-import TileItem from "./TileItem"
-import TileItemInfo, { TileItemType } from "./TileItemInfo"
-import TileTextureFactory from "../tile/TileTextureFactory"
+import { Grid } from "@cafemania/grid/Grid";
+import { GameScene } from "@cafemania/scenes/GameScene";
+import { Tile } from "@cafemania/tile/Tile";
+import { TileTextureGenerator } from "@cafemania/tile/TileTextureGenerator";
+import { TileItem, TileItemDirection } from "./TileItem";
+import { TileItemInfo } from "./TileItemInfo";
 
-interface TileItemRenderSprite
+interface Sprite
 {
-    spriteLayer: number
+    image: Phaser.GameObjects.Image
     x: number
     y: number
-    container: Phaser.GameObjects.Container
-    sprite?: Phaser.GameObjects.Sprite
-    collision?: Phaser.GameObjects.Polygon
+    extraLayer: number
 }
 
-export default class TileItemRender
+export class TileItemRender
 {
-    public depth: number = 0
-
-    private _tileItem?: TileItem
-
-    private _currentSprite: number = 0
-    private _currentLayer: number = 0
+    public static valuesFromDirection(direction: TileItemDirection): boolean[]
+    {
+        return [
+            [false, false],
+            [true, false],
+            [false, true],
+            [true, true]
+        ][direction]
+    }
 
     private _tileItemInfo: TileItemInfo
 
-    private _flipSprites: boolean = false
-    private _transparent: boolean = false
+    private _sprites: {[extraLayer: string]: {[coord: string]: Sprite}} = {}
 
-    private _position: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0)
+    private _changeRotation: boolean = false
 
-    private _sprites: {[extraLayer: string]: {[coord: string]: TileItemRenderSprite}} = {}
+    private _flipCells: boolean = false
 
-    private _debugText?: Phaser.GameObjects.BitmapText
+    private _position = new Phaser.Math.Vector2()
+
+    private _layerX: number = 0
+    
+    private _layerY: number = 0
+
+    private _tileItem?: TileItem
 
     constructor(tileItemInfo: TileItemInfo)
     {
         this._tileItemInfo = tileItemInfo
 
         this.createSprites()
+        //this.testLayers()
     }
 
-    private createSprites()
+    private getInfo(): TileItemInfo
     {
-        const tileItemInfo = this._tileItemInfo
-
-        let canCreateCollision = tileItemInfo.type != TileItemType.FLOOR && tileItemInfo.type != TileItemType.WALL
-        canCreateCollision = true
-
-        const scene = this.getScene()
-        const textureName = tileItemInfo.texture
-        const size = tileItemInfo.size
-        const sprites = tileItemInfo.sprites
-        const layers = tileItemInfo.layers
-        const extraLayers = tileItemInfo.extraLayers
-
-        const textureKeys = TileTextureFactory.generateTextures(textureName, size, sprites, layers * (extraLayers+1));
-
-        const gridBounds = Tile.getGridBounds(size.x, size.y)
-
-        for (let spriteLayer = 0; spriteLayer < (extraLayers+1); spriteLayer++)
-        {
-            if(!this._sprites[spriteLayer]) this._sprites[spriteLayer] = {}
-
-            for (let y = 0; y < size.y; y++)
-            {
-                for (let x = 0; x < size.x; x++)
-                {
-                    const key = `${x}_${y}`
-                    const textureKey = textureKeys[key]
-
-                    const pos = Tile.getPosition(x, y)
-
-                    const tileItemRenderSprite: TileItemRenderSprite = this._sprites[spriteLayer][key] = {
-                        x: x,
-                        y: y,
-                        spriteLayer: spriteLayer,
-                        container: scene.add.container()
-                    }
-                    
-                    if(textureKey)
-                    {
-                        tileItemRenderSprite.sprite = scene.add.sprite(0, 0, textureKey, '0_0')
-     
-                        tileItemRenderSprite.sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST)
-
-                        tileItemRenderSprite.sprite.setOrigin(0.5, 1)
-                        tileItemRenderSprite.sprite.setPosition(
-                            0,
-                            -pos.y + (gridBounds.bottom + gridBounds.height) + 1
-                        )
-
-                        tileItemRenderSprite.container.add(tileItemRenderSprite.sprite)
-                    }
-
-                    scene.objectsLayer!.add(tileItemRenderSprite.container)
-
-                    if(spriteLayer == 0 && canCreateCollision)
-                    {
-                        this.createSpriteCollision(tileItemRenderSprite)
-                    }
-                }
-            }
-        }
-
-        //console.log(this._sprites)
-
-        
-        
-        
+        return this._tileItemInfo
     }
 
-    public render()
+    private getTileItem(): TileItem | undefined
     {
-        this.updateSprites()
-
-        //console.log(this._sprites)
+        return this._tileItem
     }
 
     public setTileItem(tileItem: TileItem): void
@@ -124,290 +64,174 @@ export default class TileItemRender
         this._tileItem = tileItem
     }
 
-    public hasTileItem(): boolean
+    public setPosition(position: Phaser.Math.Vector2): void
     {
-        return this._tileItem != undefined
+        this._position = position
+
+        this.updateSprites()
     }
 
-    public getTileItem(): TileItem
+    public setRotation(changeRotation: boolean, flipCells: boolean): void
     {
-        return this._tileItem!
+        this._changeRotation = changeRotation
+        this._flipCells = flipCells
+
+        this.updateSprites()
+
+        console.log("TileItemRender.setRotation")
     }
 
-    public setSceneLayer(layer: Phaser.GameObjects.Layer): void
+    public setLayer(layerX: number, layerY: number): void
     {
-        this.getAllSprites().map(sprite => {
-            layer.add( sprite.container )
+        const layers = this.getInfo().layers
 
-            if(sprite.collision) layer.add( sprite.collision )
-        })
-   
+        if(layerX >= layers.x || layerY >= layers.y) return
+
+        this._layerX = layerX
+        this._layerY = layerY
+
+        this.updateSprites()
     }
 
-    private getAllSprites(): TileItemRenderSprite[]
+    public getSprites(): Sprite[]
     {
-        const sprites: TileItemRenderSprite[] = []
+        const sprites: Sprite[] = []
 
-        for (const spriteLayerKey in this._sprites)
+        for (const extraLayer in this._sprites)
         {
-            const spriteLayer = this._sprites[spriteLayerKey]
-
-            for (const coord in spriteLayer)
+            for (const key in this._sprites[extraLayer])
             {
-                const tileItemRenderSprite = spriteLayer[coord]
+                const sprite = this._sprites[extraLayer][key]
 
-                sprites.push(tileItemRenderSprite)
+                sprites.push(sprite)
             }
         }
 
         return sprites
     }
 
-    private getScene()
+    private createSprites(): void
     {
-        return GameScene.getScene()
-    }
+        const tileItemInfo = this.getInfo()
+        const scene = GameScene.Instance
 
-    private createSpriteCollision(sprite: TileItemRenderSprite)
-    {
-        const tileItemInfo = this._tileItemInfo
-        const x = sprite.x
-        const y = sprite.y
-        const scene = this.getScene()
+        const sheetTextureKey = `${tileItemInfo.name}_sheet`
 
-        const color = 0xff0000
-        const alpha = 0
-
-        let points: Phaser.Math.Vector2[] = []
-        
-        const offsetX = [0, 0]
-        const offsetY = [0, 0]
-
-        if(y == 0) offsetX[0] = tileItemInfo.collision.x
-        if(y == tileItemInfo.size.y-1) offsetX[1] = tileItemInfo.collision.x
-
-        if(x == 0) offsetY[0] = tileItemInfo.collision.y
-        if(x == tileItemInfo.size.x-1) offsetY[1] = tileItemInfo.collision.y
-
-        if(tileItemInfo.collision.isWall)
+        if(!scene.textures.exists(sheetTextureKey))
         {
-            offsetY[0] -= tileItemInfo.collision.height
-            offsetY[1] += tileItemInfo.collision.height
-
-            const atFront = tileItemInfo.collision.wallAtFront === true
-
-            points = TileCollisionFactory.getWallCollisionPoints(atFront,
-                offsetX,
-                offsetY,
-                tileItemInfo.collision.wallSize || 0
-            )
-        } else {
-            points = TileCollisionFactory.getBlockCollisionPoints(
-                offsetX,
-                offsetY,
-                tileItemInfo.collision.height
+            TileTextureGenerator.create(
+                scene,
+                tileItemInfo.texture,
+                sheetTextureKey,
+                tileItemInfo.originPosition,
+                tileItemInfo.size,
+                new Phaser.Math.Vector2(tileItemInfo.layers.x, tileItemInfo.layers.y)
             )
         }
 
-        const collisionBox = sprite.collision = scene.add.polygon(0, 0, points, color, alpha)
-        collisionBox.setOrigin(0, 0)
+        const texture = scene.textures.get(sheetTextureKey)
+        const size = tileItemInfo.size
 
-        //sprite.container.add(collisionBox)
-
-        collisionBox.setPosition(
-            - Tile.SIZE.x/2, - Tile.SIZE.y/2
-        )
-
-        const self = this
-
-        collisionBox.setInteractive(
-            new Phaser.Geom.Polygon(points),
-            Phaser.Geom.Polygon.Contains
-        );
-
-        
-        collisionBox.on('pointerup', function (pointer) {
-            if(self._tileItem) self._tileItem.events.emit("pointerup")
-        });
-
-        collisionBox.on('pointerdown', function (pointer) {
-            if(self._tileItem) self._tileItem.events.emit("pointerdown")
-        });
-
-        collisionBox.on('pointerover', function (pointer) {
-            collisionBox.setFillStyle(0xff0000, 0.2)
-
-            if(self._tileItem) self._tileItem.events.emit("pointerover")
-        });
-
-        collisionBox.on('pointerout', function (pointer) {
-            collisionBox.setFillStyle(color, alpha)
-
-            if(self._tileItem) self._tileItem.events.emit("pointerout")
-
-        });
-    }
-
-    public setSprite(sprite: number) {
-        this._currentSprite = sprite
-    }
-
-    public setLayer(layer: number) {
-        this._currentLayer = layer
-    }
-
-    public getDepth()
-    {
-        //let depth = this._position.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))
-
-        const tileItem = this.getTileItem()
-
-        let depth = tileItem.getDepth()
-
-        //let depth = this.getTileItem().getDepth()
-        //let fy = (this._tileItem?.getTile().y || 0)
-
-        return depth
-    }
-
-    public updateSprites()
-    {
-        for (const spriteLayerKey in this._sprites) {
-            const spriteLayer = this._sprites[spriteLayerKey]
-
-            for (const coord in spriteLayer) {
-                const tileItemRenderSprite = spriteLayer[coord]
-
-                const pos = Tile.getPosition(tileItemRenderSprite.x, tileItemRenderSprite.y)
-
-                
-
-                const container = tileItemRenderSprite.container
-                container.setPosition(
-                    this._position.x + ((this._flipSprites ? -1 : 1) * pos.x),
-                    this._position.y + (pos.y)
-                )
-                container.setScale(this._flipSprites ? -1 : 1, 1)
-
-                //const depth = (container.y - ((this._flipSprites ? -1 : 1)*(this._tileItem?.getTile().y || 0))) - this.depth - (tileItemRenderSprite.spriteLayer * 5)
-
-                
-                const dl = tileItemRenderSprite.spriteLayer*5
-
-                const depth = this.getDepth() + pos.y - dl
-
-                //console.log(pos.y, coord)
-
-                if(this._tileItemInfo.name == "stove2")
-                {
-                    //var a: any = window["asd"].kekyou
-
-                }
-                
-                
-                //this._position.y - dl + (pos.y *(this._flipSprites ? -1 : 1))
-                    
-                /*
-
-                if(this.getTileItem().getTile().id == "2:2" && this.getTileItem().getTileItemInfo().name == "chair1")
-                {
-                    console.log(this.getTileItem().getTileItemInfo().name)
-
-                    console.log(coord, spriteLayerKey)
-
-                    console.log(depth, dl)
-                }
-
-                */
-
-
-
-
-                container.setDepth(depth)
-
-                
-                
-                const sprite = tileItemRenderSprite.sprite
-
-                if(sprite)
-                {
-                    const frame = {
-                        layer: this._currentLayer + (tileItemRenderSprite.spriteLayer * (this._tileItemInfo.extraLayers+1)),
-                        sprite: this._currentSprite
-                    }
-    
-                    
-                    sprite.setFrame(`${frame.layer}_${frame.sprite}`)
-                    sprite.setAlpha(this._transparent ? 0.5 : 1)
-                    
-                }
-
-
-                if(tileItemRenderSprite.collision)
-                {
-
-            
-                    tileItemRenderSprite.collision.setPosition(
-                        container.x - ((this._flipSprites ? -1 : 1) * Tile.SIZE.x/2),
-                        container.y - (Tile.SIZE.y/2)
-                    )
-
-        
-                    tileItemRenderSprite.collision.setDepth(depth + 100)
-                    tileItemRenderSprite.collision.setScale(container.scaleX, container.scaleY)
-
-                }
-                
-            }
-
-        }
-
-        if(this._tileItem)
+        for (let extraLayer = 0; extraLayer <= tileItemInfo.extraLayers; extraLayer++)
         {
-            if(this._tileItem.isHovering)
+            this._sprites[extraLayer] = {}
+
+            for (let y = 0; y < size.y; y++)
             {
-                if(!this._debugText)
+                for (let x = 0; x < size.x; x++)
                 {
-                    const text = this._debugText = this.getScene().add.bitmapText(0, 0, 'gem', `aoba`, 16).setOrigin(0.5);
-                    text.setTintFill(0x000000)
-                    text.setDepth(10000)
-                    text.setOrigin(0.5, -1)
-                }
+                    const key = `${this._layerX}:${this._layerY}:${x}:${y}`
 
-                const pos = this._tileItem.getTile().position
+                    if(!texture.has(key)) continue
 
-                this._debugText.setAlpha(1)
-                this._debugText.setPosition(pos.x, pos.y)
-                this._debugText.setText(`${this._tileItemInfo.name}\n${TileItem.directionToString(this.getTileItem().direction)}`)
-            } else {
-                if(this._debugText)
-                {
-                    this._debugText.destroy()
-                    this._debugText = undefined
+                    const image = scene.add.image(0, 0, texture.key)
+                    //image.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
+                    image.setOrigin(0, 1)
+                    image.setFrame(key)
+                    //image.setAlpha(1)
+                    image.setDepth(10)
+
+                    const sprite: Sprite = {
+                        image: image,
+                        x: x,
+                        y: y,
+                        extraLayer: extraLayer
+                    }
+
+                    this._sprites[extraLayer][key] = sprite
                 }
-                
             }
-
-            
         }
 
-        
-
-        
+        this.updateSprites()
     }
 
-    public setPosition(x: number, y: number)
+    private testLayers(): void
     {
-        this._position.set(x, y)
-    }
-    
-    public setFlipSprites(value: boolean)
-    {
-        this._flipSprites = value
+        let x = 0
+        let y = 0
+
+        setInterval(() =>
+        {
+            this.setLayer(x, y)
+
+            x++
+            if(x >= this.getInfo().layers.x)
+            {
+                x = 0
+                y++
+
+                if(y >= this.getInfo().layers.y / (this.getInfo().extraLayers+1)) y = 0
+            }
+        }, 1000)
     }
 
-    public setTransparent(value: boolean)
+    private updateSprites(): void
     {
-        this._transparent = value
+        const changeRotation = this._changeRotation
+        const flipCells = this._flipCells
+
+        const coords = Grid.getOffsetCoordsItemOcuppes(this._tileItemInfo.size, changeRotation, flipCells)
+        const sprites = this.getSprites()
+
+        for (const sprite of sprites)
+        {
+            const x = sprite.x
+            const y = sprite.y
+            const key = `${x}:${y}`
+
+            sprite.image.setPosition(0, -500)
+            
+            let cs = coords.filter(c => {
+                return c[0].x == (!changeRotation ? x : y) && c[0].y == (!changeRotation ? y : x)
+            })
+
+            if(!cs[0])
+            {
+                console.log(key, `wot`)
+                continue
+            }
+
+            let newCoord = cs[0][1]
+
+            const position = Tile.getTilePosition(newCoord.x, newCoord.y)
+
+            position.y += Tile.SIZE.y
+
+            position.x += this._position.x
+            position.y += this._position.y
+
+            const tileItemInfo = this.getInfo()
+            const framesPerLayer = tileItemInfo.layers.y / (tileItemInfo.extraLayers+1)
+            const layerY = this._layerY + (framesPerLayer * sprite.extraLayer)
+
+            
+            sprite.image.setPosition(position.x - Math.ceil(Tile.SIZE.x/2), position.y - Math.ceil(Tile.SIZE.y/2))
+            //sprite.image.setPosition(position.x, position.y)
+            sprite.image.setScale(!changeRotation ? 1 : -1, 1)
+            sprite.image.setOrigin(!changeRotation ? 0 : 1, 1)
+            sprite.image.setFrame(`${this._layerX}:${layerY}:${sprite.x}:${sprite.y}`)
+            sprite.image.setDepth(this._position.y + (sprite.extraLayer*5))
+        }
     }
 }

@@ -34,7 +34,7 @@ export enum TileItemRotationType
     SIDE_AND_BACK
 }
 
-export default interface TileItemInfo
+export interface TileItemInfo
 {
     id: string
     name: string
@@ -43,8 +43,8 @@ export default interface TileItemInfo
     type: TileItemType
     placeType: TileItemPlaceType
     size: Phaser.Math.Vector2
-    sprites: number
-    layers: number
+    layers: Phaser.Math.Vector2
     extraLayers: number
-    collision: TileItemInfoCollision 
+    collision: TileItemInfoCollision
+    originPosition: Phaser.Math.Vector2
 }

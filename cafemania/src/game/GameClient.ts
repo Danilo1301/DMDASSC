@@ -1,71 +1,50 @@
-import Game from "@cafemania/game/Game"
-import Network from "@cafemania/network/Network";
-import Three from "@cafemania/three/Three";
-import TileTextureFactory from "@cafemania/tile/TileTextureFactory";
-import GameScene from "./scene/GameScene";
-import HudScene from "./scene/HudScene";
-import SceneManager from "./SceneManager";
+import { Game } from '@cafemania/game/Game';
+import { SceneManager } from '@cafemania/sceneManager/SceneManager';
+import { MainScene } from '@cafemania/scenes/MainScene';
 
-export default class GameClient extends Game
+export class GameClient extends Game
 {
-    private _network: Network
-
     constructor()
     {
         super()
-
-        this._network = new Network(this)
-    }
-
-    public getNetwork()
-    {
-        return this._network
     }
 
     public async start(): Promise<void>
     {
-        this.events.on("ready", this.setupClient.bind(this))
+        await SceneManager.start(this)
 
-        await super.start()
+        SceneManager.startScene('MainScene', MainScene)
+
+        const world = this.createWorld()
+
+        this.setupResize()
     }
 
-    private async setupClient()
+    private setupResize(): void
     {
-        this.createClientWorld()
-        
-        this.startScene('GameScene', GameScene)
-        this.startScene('HudScene', HudScene)
+        const game = SceneManager.getPhaser()
+        const scaleManager = game.scale
 
         document.body.style.height = "100%"
-        
         //game.canvas.style.width = "100%"
         //game.canvas.style.height = "100%"
-
+     
         const test = () => {
+            //HudScene.getScene()?.events.emit("resize")
+
             const a = window.innerWidth / window.innerHeight
 
             if(a < 1)
             {
-                SceneManager.getGame().scale.setGameSize(600, 900)
+                scaleManager.setGameSize(600 * 1, 900 * 1)
             }
             else
             {
-                SceneManager.getGame().scale.setGameSize(900, 600)
+                scaleManager.setGameSize(900, 600)
             }
-
-            //SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)
-
-            /*
-            SceneManager.getGame().scale.setGameSize(window.innerWidth, window.innerHeight)
-            GameScene.getScene().scale.setGameSize( Math.round(700 * window.innerWidth/window.innerHeight), 730)
-            if(window.innerWidth/window.innerHeight < 1) GameScene.getScene().cameras.main.setZoom( parseFloat((window.innerWidth/window.innerHeight).toFixed(2)) )
-            */
         }
 
         window.addEventListener('resize', () => test())
         test()
-        
-        await Three.init()
-        await TileTextureFactory.init()
     }
 }

@@ -1,42 +1,27 @@
-import World, { WorldType } from "@cafemania/world/World"
-import Phaser from 'phaser'
-import SceneManager from "./SceneManager"
-import { TileItemFactory } from "../tileItem/TileItemFactory"
-import DishFactory from "@cafemania/dish/DishFactory"
-import Network from "@cafemania/network/Network"
+import Phaser from 'phaser';
+import { Logger } from '@cafemania/logger/Logger';
+import { TileItemFactory } from '@cafemania/tileItem/TileItemFactory';
+import World from '@cafemania/world/World';
 
-export default class Game
+export class Game
 {
-    public events = new Phaser.Events.EventEmitter()
-
-    public tileItemFactory: TileItemFactory
-    public dishFactory: DishFactory
-
     private _worlds = new Phaser.Structs.Map<string, World>([])
+
+    private _tileItemFactory: TileItemFactory
 
     constructor()
     {
-        this.tileItemFactory = new TileItemFactory(this)
-        this.dishFactory = new DishFactory(this)
+        this._tileItemFactory = new TileItemFactory(this)
     }
 
-    public async start(): Promise<void>
+    public start(): void
     {
-        await this.init()
+        Logger.print('Game started', 125)
     }
 
-    private async init(): Promise<void>
+    public getTileItemFactory(): TileItemFactory
     {
-        await SceneManager.createPhaserInstance()
-
-        console.log("resolved")
-
-        this.events.emit("ready")
-    }
-
-    public startScene(key: string, scene: typeof Phaser.Scene): Phaser.Scene
-    {
-        return SceneManager.getGame().scene.add(key, scene, true, {game: this}) as Phaser.Scene
+        return this._tileItemFactory
     }
 
     public getWorlds(): World[]
@@ -44,28 +29,13 @@ export default class Game
         return this._worlds.values()
     }
 
-    public createClientWorld(): World
-    {
-        return this.createWorld(WorldType.CLIENT)
-    }
-
-    public createServerWorld(): World
-    {
-        return this.createWorld(WorldType.SERVER)
-    }
-
-    public createWorld(type: WorldType): World
+    public createWorld(): World
     {
         const id = "World" + Math.random()
-        const world = new World(this, type)
+        const world = new World(this)
 
         this._worlds.set(id, world);
 
         return world
-    }
-
-    public getPhaser()
-    {
-        return SceneManager.getGame()
     }
 }
