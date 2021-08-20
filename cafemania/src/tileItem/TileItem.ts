@@ -28,6 +28,8 @@ export class TileItem
     
     private _layerIndex: number = 0
 
+    private _dontCreateSprites: boolean = false
+
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = uuidv4()
@@ -93,7 +95,6 @@ export class TileItem
 
     private renderTileItemRender()
     {
-        const scene = GameScene.Instance
         const tile = this._tile
 
         if(!tile) return
@@ -103,19 +104,25 @@ export class TileItem
             this._tileItemRender = new TileItemRender(this.getInfo())
             this._tileItemRender.setTileItem(this)
         
-            let layer = scene.objectsLayer
-
-            if(this.getInfo().type == TileItemType.FLOOR) layer = scene.groundLayer
-
-            this._tileItemRender.getSprites().map(sprite => layer.add(sprite.image) )
+            this.setTileItemRenderSpritesToLayers()
 
             this.updateSprites()
         }
     }
 
+    protected setTileItemRenderSpritesToLayers()
+    {
+        const scene = GameScene.Instance
+        let layer = scene.objectsLayer
+
+        if(this.getInfo().type == TileItemType.FLOOR) layer = scene.groundLayer
+
+        this.getTileItemRender()!.getSprites().map(sprite => layer.add(sprite.image) )
+    }
+
     protected updateSprites()
     {
-        console.log(`[TileItem : ${this.getInfo().name}] updateSprites`)
+        //console.log(`[TileItem : ${this.getInfo().name}] updateSprites`)
 
         const tileItemRender = this._tileItemRender
         const tile = this._tile
@@ -133,5 +140,10 @@ export class TileItem
                 tileItemRender.setPosition(new Phaser.Math.Vector2(position.x, position.y))
             }
         }
+    }
+
+    private destroySprites()
+    {
+
     }
 }

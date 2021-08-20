@@ -20,6 +20,7 @@ export class MainScene extends BaseScene
         this.load.setPath('/static/cafemania/assets/')
         this.load.image('tile1', 'tile1.png')
         this.load.image('1x1white', '1x1white.png')
+        this.load.image('wallMask', 'wallMask.png')
         this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
        
         this.loadTileItemInfo()

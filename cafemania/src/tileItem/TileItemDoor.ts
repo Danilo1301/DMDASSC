@@ -18,7 +18,7 @@ export class TileItemDoor extends TileItem
 
             this.setOpen(!this._isOpen)
             
-        }, 3000)
+        }, 1200)
     }
 
     public render(delta: number)

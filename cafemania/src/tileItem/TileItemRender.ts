@@ -78,7 +78,7 @@ export class TileItemRender
 
         this.updateSprites()
 
-        console.log("TileItemRender.setRotation")
+        //console.log("TileItemRender.setRotation")
     }
 
     public setLayer(layerX: number, layerY: number): void
@@ -147,7 +147,9 @@ export class TileItemRender
                     const image = scene.add.image(0, 0, texture.key)
                     //image.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
                     image.setOrigin(0, 1)
+
                     image.setFrame(key)
+
                     //image.setAlpha(1)
                     image.setDepth(10)
 
@@ -230,7 +232,11 @@ export class TileItemRender
             //sprite.image.setPosition(position.x, position.y)
             sprite.image.setScale(!changeRotation ? 1 : -1, 1)
             sprite.image.setOrigin(!changeRotation ? 0 : 1, 1)
-            sprite.image.setFrame(`${this._layerX}:${layerY}:${sprite.x}:${sprite.y}`)
+
+            const frameKey = `${this._layerX}:${layerY}:${sprite.x}:${sprite.y}`;
+
+            if(sprite.image.texture.has(frameKey)) sprite.image.setFrame(frameKey)
+
             sprite.image.setDepth(this._position.y + (sprite.extraLayer*5))
         }
     }

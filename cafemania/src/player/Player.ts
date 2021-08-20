@@ -137,10 +137,10 @@ export class Player
 
         if(!this._debugText)
         {
-            this._debugText = scene.add.text(0, 0, `Player`)
+            //this._debugText = scene.add.text(0, 0, `Player`)
         }
 
-        this._debugText?.setPosition(this._position.x, this._position.y)
+        //this._debugText?.setPosition(this._position.x, this._position.y)
 
 
         if(!this._container)
@@ -180,7 +180,7 @@ export class Player
 
         
         this._sprite = scene.add.sprite(0, 40, textureName)
-        this._sprite.setScale(1.1)
+        this._sprite.setScale(1.05)
         this._sprite.setOrigin(0.5, 1)
         this._sprite.setFrame(`Idle_0_0`)
 
