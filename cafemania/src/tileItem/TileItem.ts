@@ -24,6 +24,10 @@ export class TileItem
 
     private _direction: TileItemDirection = TileItemDirection.FRONT
 
+    private _animIndex: number = 0
+    
+    private _layerIndex: number = 0
+
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = uuidv4()
@@ -38,6 +42,21 @@ export class TileItem
     public get id()
     {
         return this._id
+    }
+
+    public setAnimIndex(value: number)
+    {
+        if(value != this._animIndex)
+        {
+            this._animIndex = value
+
+            this.updateSprites()
+        }
+    }
+
+    public getTileItemRender()
+    {
+        return this._tileItemRender
     }
 
     public getTile()
@@ -59,9 +78,7 @@ export class TileItem
     {
         this._direction = direction
 
-        const os = TileItemRender.valuesFromDirection(direction)
-
-        this._tileItemRender?.setRotation(os[0], os[1])
+        this.updateSprites()
     }
 
     public update(delta: number)
@@ -85,16 +102,36 @@ export class TileItem
         {
             this._tileItemRender = new TileItemRender(this.getInfo())
             this._tileItemRender.setTileItem(this)
-            this.setDirection(this._direction)
-
+        
             let layer = scene.objectsLayer
 
             if(this.getInfo().type == TileItemType.FLOOR) layer = scene.groundLayer
 
             this._tileItemRender.getSprites().map(sprite => layer.add(sprite.image) )
 
-            const position = tile.getPosition()
-            this._tileItemRender.setPosition(new Phaser.Math.Vector2(position.x, position.y))
+            this.updateSprites()
+        }
+    }
+
+    protected updateSprites()
+    {
+        console.log(`[TileItem : ${this.getInfo().name}] updateSprites`)
+
+        const tileItemRender = this._tileItemRender
+        const tile = this._tile
+
+        if(tileItemRender)
+        {
+            const os = TileItemRender.valuesFromDirection(this._direction)
+
+            tileItemRender.setRotation(os[0], os[1])
+            tileItemRender.setLayer(this._animIndex, this._layerIndex)
+
+            if(tile)
+            {
+                const position = tile.getPosition()
+                tileItemRender.setPosition(new Phaser.Math.Vector2(position.x, position.y))
+            }
         }
     }
 }

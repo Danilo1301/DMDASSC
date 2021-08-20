@@ -1,10 +1,13 @@
 import { Game } from "@cafemania/game/Game";
 import { Grid } from "@cafemania/grid/Grid";
+import { Player } from "@cafemania/player/Player";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileItem, TileItemDirection } from "@cafemania/tileItem/TileItem";
+import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import { TileItemRender } from "@cafemania/tileItem/TileItemRender";
+import { TileItemWall } from "@cafemania/tileItem/TileItemWall";
 import { WorldText } from "@cafemania/utils/WorldText";
 
 
@@ -14,16 +17,29 @@ export default class World
 
     private _tiles = new Phaser.Structs.Map<string, Tile>([])
 
+    private _players = new Phaser.Structs.Map<string, Player>([])
+
     private _grid: Grid
 
-    private _sideWalkSize: number = 30
-
+    private _sideWalkSize: number = 15
+    
+   
     constructor(game: Game)
     {
         this._game = game
         this._grid = new Grid()
 
         this.createTileMap(12, 12)
+    }
+
+    public getLeftSideWalkSpawn()
+    {
+        return this.getTile(-2, this._sideWalkSize-1)
+    }
+
+    public getRightSideWalkSpawn()
+    {
+        return this.getTile(this._sideWalkSize-1, -2)
     }
 
     public getGrid()
@@ -34,6 +50,7 @@ export default class World
     public update(delta: number)
     {
         this.getTiles().map(tile => tile.update(delta))
+        this.getPlayers().map(player => player.update(delta))
     }
 
     public render(delta: number): void
@@ -41,9 +58,16 @@ export default class World
         const scene = GameScene.Instance
 
         this.getTiles().map(tile => tile.render(delta))
+        this.getPlayers().map(player => player.render(delta))
+
     }
 
-    private getTiles()
+    public hasTile(x: number, y: number)
+    {
+        return this._tiles.has(`${x}:${y}`)
+    }
+
+    public getTiles()
     {
         return Array.from(this._tiles.values())
     }
@@ -54,7 +78,7 @@ export default class World
 
         grid.addCell(x, y)
 
-        const tile = new Tile(x, y)
+        const tile = new Tile(this, x, y)
 
         this._tiles.set(tile.id, tile)
 
@@ -137,7 +161,6 @@ export default class World
     {
         const tileItemFactory = this.getGame().getTileItemFactory()
         
-        
         for (let y = 0; y < sizeY; y++)
         {
             for (let x = 0; x < sizeX; x++)
@@ -210,27 +233,80 @@ export default class World
             }
         }
 
-        //const scene = GameScene.getScene()
+        this.putTestTileItem('floorDecoration2', 2, 5)
 
-        //var rt = scene.add.renderTexture(0, 0, 800, 800);
+        this.putTestTileItem('door1', 1, 0)
 
-        //scene.groundLayer.bat
+        const doorWall = this.getTile(1, -1).getTileItems()[0] as TileItemWall
 
-        /*
-        const floorDecoration1 = tileItemFactory.createTileItem('floorDecoration1')
-        this.putTileItemInTile(floorDecoration1, this.getTile(0, 0))
-        this.startRandomlyRotate(floorDecoration1, 700)
+        doorWall.setWallHole(true)
 
-        const floorDecoration2 = tileItemFactory.createTileItem('floorDecoration2')
-        this.putTileItemInTile(floorDecoration2, this.getTile(3, 6))
-        this.startRandomlyRotate(floorDecoration2, 450)
+        let i = 0
 
-        const floorDecoration3 = tileItemFactory.createTileItem('floorDecoration2')
-        this.putTileItemInTile(floorDecoration3, this.getTile(4, 7))
-        this.startRandomlyRotate(floorDecoration3, 450)
+        setInterval(() => {
+            if(i >= 20) return
 
-        this.putTileItemInTile(tileItemFactory.createTileItem('chair1'), this.getTile(3, 3))
-        */
+            this.createTestPlayer()
+
+            i++
+        }, 2000)
+
+        
+    }
+
+    private createTestPlayer()
+    {
+        const spawnTile = Math.random() > 0.5 ? this.getLeftSideWalkSpawn() : this.getRightSideWalkSpawn()
+        
+        const player = this.createPlayer(spawnTile.x, spawnTile.y)
+
+        player.taskWalkToTile(3, 3)
+    }
+
+    public getPlayers()
+    {
+        return this._players.values()
+    }
+
+    public createPlayer(tilex: number, tiley: number)
+    {
+        const player = new Player(this)
+
+        this._players.set(player.id, player)
+
+        player.setAtTile(tilex, tiley)
+
+        return player
+    }
+    
+
+    public getDoors(): TileItemDoor[]
+    {
+        return this.getAllTileItemsOfType(TileItemType.DOOR) as TileItemDoor[]
+    }
+
+    public getAllTileItemsOfType(type: TileItemType)
+    {
+        const tileItems: TileItem[] = []
+
+        this.getTiles().map(tile =>
+        {
+            tile.getTileItems().map(tileItem =>
+            {
+                if(tileItem.getInfo().type == type) tileItems.push(tileItem)
+            })
+        })
+
+        return tileItems
+    }
+
+    private putTestTileItem(id: string, x: number, y: number)
+    {
+        const tileItem = this.getGame().getTileItemFactory().createTileItem(id)
+
+        this.putTileItemInTile(tileItem, this.getTile(x, y))
+
+        return tileItem
     }
 
     public getGame()

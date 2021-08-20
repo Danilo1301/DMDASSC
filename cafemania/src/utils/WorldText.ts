@@ -2,7 +2,7 @@ export class WorldText
 {
     constructor(scene: Phaser.Scene, text: string, position: Phaser.Math.Vector2, color?: string)
     {
-        const textObj = scene.add.text(position.x, position.y, text, {color: color || "black", fontStyle: "bold", fontSize: '30px'})
+        const textObj = scene.add.text(position.x, position.y, text, {color: color || "black", fontStyle: "bold", fontSize: '20px'})
         textObj.setDepth(10000)
 
         let distanceMoved = 0

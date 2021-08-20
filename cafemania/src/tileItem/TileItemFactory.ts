@@ -1,7 +1,9 @@
 import { Game } from "@cafemania/game/Game"
 import { TileItemInfo, TileItemPlaceType, TileItemRotationType, TileItemType } from "@cafemania/tileItem/TileItemInfo"
 import { TileItem } from "./TileItem"
+import { TileItemDoor } from "./TileItemDoor"
 import { TileItemRender } from "./TileItemRender"
+import { TileItemWall } from "./TileItemWall"
 
 export class TileItemFactory
 {
@@ -73,6 +75,24 @@ export class TileItemFactory
         })
 
         this.addTileItemInfo({
+            id: 'floorDecoration2',
+            name: 'floorDecoration2',
+            texture: 'floorDecoration/floorDecoration2',
+            type: TileItemType.FLOOR_DECORATION,
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(2, 1),
+            layers: new Phaser.Math.Vector2(1, 1),
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 0
+            },
+            originPosition: new Phaser.Math.Vector2(84, 42)
+        })
+
+        this.addTileItemInfo({
             id: 'chair1',
             name: 'chair1',
             texture: 'chair/chair1',
@@ -107,6 +127,24 @@ export class TileItemFactory
             },
             originPosition: new Phaser.Math.Vector2(84, 252)
         })
+
+        this.addTileItemInfo({
+            id: 'door1',
+            name: 'door1',
+            texture: 'door/door1',
+            type: TileItemType.DOOR,
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1, 1),
+            layers: new Phaser.Math.Vector2(2, 1),
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 0
+            },
+            originPosition: new Phaser.Math.Vector2(84, 215)
+        })
     }
 
     public getTileItemInfoList()
@@ -121,7 +159,8 @@ export class TileItemFactory
 
         const tileItemInfo = this.getTileItemInfo(id)
 
-        //if(tileItemInfo.type == TileItemType.CHAIR) return new TileItemChair(tileItemInfo)
+        if(tileItemInfo.type == TileItemType.WALL) return new TileItemWall(tileItemInfo)
+        if(tileItemInfo.type == TileItemType.DOOR) return new TileItemDoor(tileItemInfo)
         //if(tileItemInfo.type == TileItemType.STOVE) return new TileItemStove(tileItemInfo)
         //if(tileItemInfo.type == TileItemType.COUNTER) return new TileItemCounter(tileItemInfo)
         //if(tileItemInfo.type == TileItemType.TABLE) return new TileItemTable(tileItemInfo)

@@ -1,5 +1,9 @@
 import { GameScene } from "@cafemania/scenes/GameScene"
 import { TileItem } from "@cafemania/tileItem/TileItem"
+import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor"
+import { TileItemType } from "@cafemania/tileItem/TileItemInfo"
+import World from "@cafemania/world/World"
+
 
 export class Tile
 {
@@ -45,8 +49,11 @@ export class Tile
 
     private _tileItems: TileItem[] = []
 
-    constructor(x: number, y: number)
+    private _world: World
+
+    constructor(world: World, x: number, y: number)
     {
+        this._world = world
         this._x = x
         this._y = y
 
@@ -70,16 +77,58 @@ export class Tile
         return `${this.x}:${this.y}`
     }
 
+    public getWorld()
+    {
+        return this._world
+    }
+
+    public hasDoor(): boolean
+    {
+        return this.getDoor() != undefined
+    }
+
+    public getDoor(): TileItemDoor
+    {
+        const doors = this.getTileItemsOfType(TileItemType.DOOR)
+
+        return doors[0] as TileItemDoor
+    }
+
+    public getTileInOffset(x: number, y: number) : Tile | undefined
+    {
+        const world = this.getWorld()
+        const findX = this.x + x
+        const findY = this.y + y
+
+        if(!world.hasTile(findX, findY)) return
+
+        return world.getTile(findX, findY)
+    }
+
+    public getTileItemsOfType(type: TileItemType)
+    {
+        const tileItems: TileItem[] = []
+
+        this.getTileItems().map(tileItem =>
+        {
+            if(tileItem.getInfo().type == type) tileItems.push(tileItem)
+        })
+
+        return tileItems
+    }
+
     public getPosition()
     {
-        return this._position
+        const position = this._position
+
+        return new Phaser.Math.Vector2(position.x, position.y) 
     }
 
     public getCenterPosition()
     {
         const position = this.getPosition()
 
-        return new Phaser.Math.Vector2(position.x + Tile.SIZE.x/2, position.y + Tile.SIZE.y/2)
+        return new Phaser.Math.Vector2(position.x, position.y)
     }
 
     public update(delta: number)
