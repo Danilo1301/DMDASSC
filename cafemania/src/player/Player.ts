@@ -2,6 +2,8 @@ import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import World from "@cafemania/world/World"
 import { v4 as uuidv4 } from 'uuid';
+import { PlayerAnimation } from "./PlayerAnimation";
+import { PlayerDirection } from "./PlayerDirection";
 import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
 import TaskManager, { TaskExecuteAction } from "./TaskManager";
 
@@ -30,15 +32,21 @@ export class Player
 
     private _speed: number = 1.6
 
+    private _direction: PlayerDirection = PlayerDirection.NORTH
+
+    private _animation: PlayerAnimation
 
     constructor(world: World)
     {
         this._world = world
         this._id = uuidv4()
 
+        this._animation = new PlayerAnimation(this)
         this._taskManager = new TaskManager()
 
         this._atTile = world.getTile(0, 0)
+
+        this._animation.play("Walk")
 
         window['player'] = this
 
@@ -52,6 +60,16 @@ export class Player
     public get id()
     {
         return this._id
+    }
+
+    public get direction()
+    {
+        return this._direction
+    }
+
+    public getSprite()
+    {
+        return this._sprite
     }
 
     public setAtTile(x: number, y: number)
@@ -92,6 +110,7 @@ export class Player
     public update(delta: number)
     {
         this._taskManager.update(delta)
+        this._animation.update(delta)
 
         if(this._targetTile)
         {

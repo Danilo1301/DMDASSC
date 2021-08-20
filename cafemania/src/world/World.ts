@@ -1,6 +1,7 @@
 import { Game } from "@cafemania/game/Game";
 import { Grid } from "@cafemania/grid/Grid";
 import { Player } from "@cafemania/player/Player";
+import { PlayerAnimation } from "@cafemania/player/PlayerAnimation";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileItem, TileItemDirection } from "@cafemania/tileItem/TileItem";
@@ -22,13 +23,13 @@ export default class World
     private _grid: Grid
 
     private _sideWalkSize: number = 15
-    
    
     constructor(game: Game)
     {
         this._game = game
         this._grid = new Grid()
 
+ 
         this.createTileMap(12, 12)
     }
 
@@ -250,6 +251,8 @@ export default class World
 
             i++
         }, 2000)
+
+        const player = this.createPlayer(0, 0)
 
         
     }
