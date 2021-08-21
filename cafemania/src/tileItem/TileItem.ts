@@ -1,16 +1,9 @@
-import { TileItemInfo, TileItemType } from "./TileItemInfo"
+import { TileItemInfo, TileItemPlaceType, TileItemType } from "./TileItemInfo"
 import { v4 as uuidv4 } from 'uuid';
 import { TileItemRender } from "./TileItemRender";
 import { Tile } from "@cafemania/tile/Tile";
 import { GameScene } from "@cafemania/scenes/GameScene";
-
-export enum TileItemDirection
-{
-    FRONT,
-    BACK_FLIPPED,
-    BACK,
-    FRONT_FLIPPED,
-}
+import { Direction } from "@cafemania/utils/Direction";
 
 export class TileItem
 {
@@ -22,13 +15,11 @@ export class TileItem
 
     private _tile?: Tile
 
-    private _direction: TileItemDirection = TileItemDirection.FRONT
+    private _direction: Direction = Direction.SOUTH
 
     private _animIndex: number = 0
     
     private _layerIndex: number = 0
-
-    private _dontCreateSprites: boolean = false
 
     constructor(tileItemInfo: TileItemInfo)
     {
@@ -76,9 +67,11 @@ export class TileItem
         return this._tileItemInfo
     }
 
-    public setDirection(direction: TileItemDirection)
+    public setDirection(direction: Direction)
     {
         this._direction = direction
+
+        this.getTile().getWorld().setTileItemDirection(this, direction)
 
         this.updateSprites()
     }
@@ -103,6 +96,9 @@ export class TileItem
         {
             this._tileItemRender = new TileItemRender(this.getInfo())
             this._tileItemRender.setTileItem(this)
+
+            if(this.getInfo().placeType == TileItemPlaceType.WALL || this.getInfo().type == TileItemType.DOOR)
+                this._tileItemRender.setDepth(-Tile.SIZE.y/3)
         
             this.setTileItemRenderSpritesToLayers()
 
@@ -131,8 +127,10 @@ export class TileItem
         {
             const os = TileItemRender.valuesFromDirection(this._direction)
 
+            const changeLayer = this.direction == Direction.NORTH || this.direction == Direction.WEST
+
             tileItemRender.setRotation(os[0], os[1])
-            tileItemRender.setLayer(this._animIndex, this._layerIndex)
+            tileItemRender.setLayer(this._animIndex, this._layerIndex + (changeLayer ? 1 : 0))
 
             if(tile)
             {

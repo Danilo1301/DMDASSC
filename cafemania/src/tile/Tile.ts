@@ -2,6 +2,7 @@ import { GameScene } from "@cafemania/scenes/GameScene"
 import { TileItem } from "@cafemania/tileItem/TileItem"
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor"
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo"
+import { Direction } from "@cafemania/utils/Direction"
 import World from "@cafemania/world/World"
 
 
@@ -37,6 +38,50 @@ export class Tile
         rect.bottom = tileAtBottom.y + (Tile.SIZE.y - 1)
 
         return rect
+    }
+
+    public static getOffsetFromDirection(direction: Direction)
+    {
+        interface IOption
+        {
+            x: number
+            y: number
+        }
+
+        const options = new Map<Direction, IOption>()
+
+        options.set(Direction.NORTH, {x: 0, y: -1})
+        options.set(Direction.SOUTH, {x: 0, y: 1})
+        options.set(Direction.EAST, {x: 1, y: 0})
+        options.set(Direction.WEST, {x: -1, y: 0})
+
+        options.set(Direction.SOUTH_EAST, {x: 1, y: 1})
+        options.set(Direction.NORTH_WEST, {x: -1, y: -1})
+        options.set(Direction.NORTH_EAST, {x: 1, y: -1})
+        options.set(Direction.SOUTH_WEST, {x: -1, y: 1})
+
+        return options.get(direction)!
+    }
+
+    public static getDirectionFromOffset(x: number, y: number)
+    {
+        const options = new Map<string, Direction>()
+
+        options.set(`0:-1`, Direction.NORTH)
+        options.set(`0:1`, Direction.SOUTH)
+        options.set(`1:0`, Direction.EAST)
+        options.set(`-1:0`, Direction.WEST)
+
+        options.set(`1:1`, Direction.SOUTH_EAST)
+        options.set(`-1:-1`, Direction.NORTH_WEST)
+        options.set(`1:-1`, Direction.NORTH_EAST)
+        options.set(`-1:1`, Direction.SOUTH_WEST)
+
+        const find = `${x}:${y}`
+
+        if(!options.has(find)) throw "Invalid offset"
+
+        return options.get(find)!
     }
 
     private _position = new Phaser.Math.Vector2()

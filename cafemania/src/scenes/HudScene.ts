@@ -1,23 +1,25 @@
 import { BaseScene } from '@cafemania/scenes/BaseScene';
 import { FPSCounter } from '@cafemania/utils/FPSCounter';
+import { NotificationBar } from '@cafemania/utils/NotificationBar';
 import { GameScene } from './GameScene';
 
 export class HudScene extends BaseScene
 {
-    private static Instance: HudScene
-
-    public static getScene()
-    {
-        return this.Instance
-    }
+    public static Instance: HudScene
 
     public events = new Phaser.Events.EventEmitter()
+
+    private _notification!: NotificationBar
 
     constructor()
     {
         super({})
 
         HudScene.Instance = this
+
+       
+
+        window['HudScene'] = this
     }
 
     public preload(): void
@@ -28,8 +30,15 @@ export class HudScene extends BaseScene
         this.load.image('button/fullscreen', 'button/fullscreen.png')
     }
 
+    public addNotification(text: string)
+    {
+        this._notification.addItem(text)
+    }
+
     public create(): void
     {
+        this._notification = new NotificationBar(this)
+
         FPSCounter.addToScene(this)
 
         this.createZoomButtons()

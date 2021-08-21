@@ -1,7 +1,7 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileCollisionFactory } from "@cafemania/tile/TileCollisionFactory";
-import { TileItem, TileItemDirection } from "./TileItem";
+import { TileItem } from "./TileItem";
 import { TileItemInfo } from "./TileItemInfo";
 
 export class TileItemDoor extends TileItem
@@ -16,7 +16,7 @@ export class TileItemDoor extends TileItem
 
         setInterval(() => {
 
-            this.setOpen(!this._isOpen)
+            this.setOpen(true)
             
         }, 1200)
     }

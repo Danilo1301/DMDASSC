@@ -3,12 +3,14 @@ import { Grid } from "@cafemania/grid/Grid";
 import { Player } from "@cafemania/player/Player";
 import { PlayerAnimation } from "@cafemania/player/PlayerAnimation";
 import { GameScene } from "@cafemania/scenes/GameScene";
+import { HudScene } from "@cafemania/scenes/HudScene";
 import { Tile } from "@cafemania/tile/Tile";
-import { TileItem, TileItemDirection } from "@cafemania/tileItem/TileItem";
+import { TileItem } from "@cafemania/tileItem/TileItem";
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import { TileItemRender } from "@cafemania/tileItem/TileItemRender";
 import { TileItemWall } from "@cafemania/tileItem/TileItemWall";
+import { Direction } from "@cafemania/utils/Direction";
 import { WorldText } from "@cafemania/utils/WorldText";
 
 
@@ -92,7 +94,7 @@ export default class World
         return this._tiles.get(`${x}:${y}`)
     }
 
-    public canTileItemBePlacedAtTile(tileItem: TileItem, tile: Tile, direction?: TileItemDirection)
+    public canTileItemBePlacedAtTile(tileItem: TileItem, tile: Tile, direction?: Direction)
     {
         if(direction === undefined) direction = tileItem.direction
 
@@ -125,7 +127,7 @@ export default class World
         })
     }
 
-    public setTileItemDirection(tileItem: TileItem, direction: TileItemDirection)
+    public setTileItemDirection(tileItem: TileItem, direction: Direction)
     {
         const tile = tileItem.getTile()
         const canBePlaced = this.canTileItemBePlacedAtTile(tileItem, tile, direction)
@@ -139,7 +141,7 @@ export default class World
         gridItem.setChangeRotation(o[0])
         gridItem.setFlipCells(o[1])
 
-        tileItem.setDirection(direction)
+        //if(tileItem.direction != direction) tileItem.setDirection(direction)
 
         return true
     }
@@ -172,14 +174,14 @@ export default class World
 
                 this.putTileItemInTile(floor, tile)
 
-                if(y % 4 == 2 && x >= 4)
+                if(y % 4 == 2 && x >= 6)
                 {
                     const chair = tileItemFactory.createTileItem('chair1')
 
                     this.putTileItemInTile(chair, tile)
                 }
 
-                if(y % 4 == 3 && x >= 4)
+                if(y % 4 == 3 && x >= 6)
                 {
                     const floorDecoration1 = tileItemFactory.createTileItem('floorDecoration1')
 
@@ -213,8 +215,8 @@ export default class World
                     const wall = tileItemFactory.createTileItem('wall1')
 
                     this.putTileItemInTile(wall, tile)
-
-                    if(x == -1) this.setTileItemDirection(wall, TileItemDirection.FRONT_FLIPPED)
+                    
+                    if(x == -1) wall.setDirection(Direction.EAST)
                 }
             }
         }
@@ -238,14 +240,22 @@ export default class World
 
         this.putTestTileItem('door1', 1, 0)
 
+        window['Tile'] = Tile
+
+
+    
         const doorWall = this.getTile(1, -1).getTileItems()[0] as TileItemWall
 
         doorWall.setWallHole(true)
 
         let i = 0
 
+        let max = 20
+
         setInterval(() => {
-            if(i >= 20) return
+            if(i >= max) return
+
+            HudScene.Instance?.addNotification(`Spawned Player (${max-1-i} left)`)
 
             this.createTestPlayer()
 
@@ -259,6 +269,8 @@ export default class World
 
     private createTestPlayer()
     {
+        
+
         const spawnTile = Math.random() > 0.5 ? this.getLeftSideWalkSpawn() : this.getRightSideWalkSpawn()
         
         const player = this.createPlayer(spawnTile.x, spawnTile.y)

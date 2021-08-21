@@ -1,7 +1,8 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileCollisionFactory } from "@cafemania/tile/TileCollisionFactory";
-import { TileItem, TileItemDirection } from "./TileItem";
+import { Direction } from "@cafemania/utils/Direction";
+import { TileItem } from "./TileItem";
 import { TileItemInfo, TileItemType } from "./TileItemInfo";
 
 export class TileItemWall extends TileItem
@@ -17,14 +18,10 @@ export class TileItemWall extends TileItem
         super(tileItemInfo)
     }
 
+    
     public getDoorInFront()
     {
-        const side = this.direction == TileItemDirection.FRONT_FLIPPED || this.direction == TileItemDirection.BACK_FLIPPED
-
-        const offset = {
-            x: side ? 1 : 0,
-            y: side ? 0 : 1
-        }
+        const offset = Tile.getOffsetFromDirection(this.direction)
 
         console.log(offset)
 
@@ -164,7 +161,7 @@ export class TileItemWall extends TileItem
         if(!wallMask) return
 
         const direction = this.direction
-        const flip = direction == TileItemDirection.FRONT_FLIPPED || direction == TileItemDirection.BACK_FLIPPED
+        const flip = direction == Direction.EAST || direction == Direction.WEST
         const position = this.getTile().getPosition()
 
         position.x -= Tile.SIZE.x/2 * (flip ? -1 : 1)

@@ -3,9 +3,9 @@ import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import Three from "@cafemania/three/Three";
 import { PlayerAnimation } from './PlayerAnimation';
-import { PlayerDirection } from './PlayerDirection';
 import { MainScene } from '@cafemania/scenes/MainScene';
 import { SpriteSheetOrganizer } from '@cafemania/utils/SpriteSheetOrganizer';
+import { Direction } from '@cafemania/utils/Direction';
 
 interface IPlayerTextureOptions
 {
@@ -75,7 +75,7 @@ export class PlayerTextureFactory
         })
     }
 
-    private static angleFromPlayerDirection(direction: PlayerDirection)
+    private static angleFromDirection(direction: Direction)
     {
         //0 east
         //-45 south east
@@ -152,7 +152,7 @@ export class PlayerTextureFactory
             {
                 console.log('[PlayerTextureFactory]', `Direction ${direction}`)
 
-                Three.setAngle(this.angleFromPlayerDirection(direction) || 0)
+                Three.setAngle(PlayerTextureFactory.angleFromDirection(direction) || 0)
 
                 for (let frame = 0; frame < anim.frames; frame++)
                 {

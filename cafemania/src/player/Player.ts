@@ -1,9 +1,9 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
+import { Direction } from "@cafemania/utils/Direction";
 import World from "@cafemania/world/World"
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerAnimation } from "./PlayerAnimation";
-import { PlayerDirection } from "./PlayerDirection";
 import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
 import TaskManager, { TaskExecuteAction } from "./TaskManager";
 
@@ -32,7 +32,7 @@ export class Player
 
     private _speed: number = 1.6
 
-    private _direction: PlayerDirection = PlayerDirection.NORTH
+    private _direction: Direction = Direction.NORTH
 
     private _animation: PlayerAnimation
 
@@ -46,7 +46,7 @@ export class Player
 
         this._atTile = world.getTile(0, 0)
 
-        this._animation.play("Walk")
+        this._animation.play("Idle")
 
         window['player'] = this
 
@@ -144,6 +144,8 @@ export class Player
 
                 this._targetTile = undefined
                 this._moveToTileCallback?.()
+
+                this._animation.play("Idle")
             }
         }
 
@@ -223,7 +225,13 @@ export class Player
 
         this._moveToTileCallback = callback
 
-        console.log(`${dir.x}, ${dir.y}`)
+
+        console.log(dir.x, dir.y)
+        const direction = Tile.getDirectionFromOffset(dir.x, dir.y)
+
+        this._direction = direction
+
+        this._animation.play("Walk")
     }
 
     public taskWalkToTile(x: number, y: number, dontEnterTile?: boolean)

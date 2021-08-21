@@ -2,7 +2,8 @@ import { Grid } from "@cafemania/grid/Grid";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileTextureGenerator } from "@cafemania/tile/TileTextureGenerator";
-import { TileItem, TileItemDirection } from "./TileItem";
+import { Direction } from "@cafemania/utils/Direction";
+import { TileItem } from "./TileItem";
 import { TileItemInfo } from "./TileItemInfo";
 
 interface Sprite
@@ -15,12 +16,12 @@ interface Sprite
 
 export class TileItemRender
 {
-    public static valuesFromDirection(direction: TileItemDirection): boolean[]
+    public static valuesFromDirection(direction: Direction): boolean[]
     {
         return [
+            [false, true],
             [false, false],
             [true, false],
-            [false, true],
             [true, true]
         ][direction]
     }
@@ -41,12 +42,19 @@ export class TileItemRender
 
     private _tileItem?: TileItem
 
+    private _depth: number = 0
+
     constructor(tileItemInfo: TileItemInfo)
     {
         this._tileItemInfo = tileItemInfo
 
         this.createSprites()
         //this.testLayers()
+    }
+
+    public setDepth(value: number)
+    {
+        this._depth = value
     }
 
     private getInfo(): TileItemInfo
@@ -151,7 +159,7 @@ export class TileItemRender
                     image.setFrame(key)
 
                     //image.setAlpha(1)
-                    image.setDepth(10)
+                    //image.setDepth(10)
 
                     const sprite: Sprite = {
                         image: image,
@@ -237,7 +245,7 @@ export class TileItemRender
 
             if(sprite.image.texture.has(frameKey)) sprite.image.setFrame(frameKey)
 
-            sprite.image.setDepth(this._position.y + (sprite.extraLayer*5))
+            sprite.image.setDepth((position.y - Tile.SIZE.y) + (sprite.extraLayer*5) + this._depth)
         }
     }
 }

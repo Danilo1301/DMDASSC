@@ -1,10 +1,10 @@
+import { Direction } from "@cafemania/utils/Direction";
 import { Player } from "./Player";
-import { PlayerDirection } from "./PlayerDirection";
 
 interface IPlayerAnim
 {
     name: string
-    directions: PlayerDirection[]
+    directions: Direction[]
     frames: number
     frameOrder: number[]
     frameRate: number
@@ -16,35 +16,35 @@ export class PlayerAnimation
     public static Animations: {[key: string]: IPlayerAnim} = {
         'Walk': {
             name: 'Walk', 
-            directions: [PlayerDirection.NORTH, PlayerDirection.SOUTH, PlayerDirection.NORTH_WEST, PlayerDirection.NORTH_EAST, PlayerDirection.SOUTH_EAST],
+            directions: [Direction.NORTH, Direction.SOUTH, Direction.NORTH_WEST, Direction.NORTH_EAST, Direction.SOUTH_EAST],
             frames: 3,
             frameOrder: [0, 1, 2, 1],
             frameRate: 4
         },
         'Idle': {
             name: 'Idle',
-            directions: [PlayerDirection.NORTH, PlayerDirection.SOUTH, PlayerDirection.NORTH_WEST, PlayerDirection.NORTH_EAST, PlayerDirection.SOUTH_EAST],
+            directions: [Direction.NORTH, Direction.SOUTH, Direction.NORTH_WEST, Direction.NORTH_EAST, Direction.SOUTH_EAST],
             frames: 3,
             frameOrder: [0, 1, 2, 1],
             frameRate: 2
         },
         'Sit': {
             name: 'Sit',
-            directions: [PlayerDirection.NORTH, PlayerDirection.SOUTH],
+            directions: [Direction.NORTH, Direction.SOUTH],
             frames: 1,
             frameOrder: [0],
             frameRate: 4
         },
         'Eat': {
             name: 'Eat',
-            directions: [PlayerDirection.NORTH, PlayerDirection.SOUTH, PlayerDirection.EAST, PlayerDirection.WEST],
+            directions: [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST],
             frames: 3,
             frameOrder: [0, 1, 2, 1],
             frameRate: 4
         }
     }
 
-    public static playerDirectionToAnimDir(direction: PlayerDirection)
+    public static directionToAnimDir(direction: Direction)
     {
         const d = {dir: 0, flipped: false}
 
@@ -75,7 +75,7 @@ export class PlayerAnimation
 
     private _player: Player
 
-    private _currentDirection: PlayerDirection
+    private _currentDirection: Direction
 
     private _currentAnim: string = ""
 
@@ -122,7 +122,7 @@ export class PlayerAnimation
 
             const frameN = anim.frameOrder[this._currentFrame]
 
-            const dir = PlayerAnimation.playerDirectionToAnimDir(playerDirection)
+            const dir = PlayerAnimation.directionToAnimDir(playerDirection)
 
             const frameKey = `${anim.name}_${dir.dir}_${frameN}`
 
