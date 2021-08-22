@@ -5,7 +5,7 @@ import { TileCollisionFactory } from "@cafemania/tile/TileCollisionFactory";
 import { TileTextureGenerator } from "@cafemania/tile/TileTextureGenerator";
 import { Direction } from "@cafemania/utils/Direction";
 import { TileItem } from "./TileItem";
-import { TileItemInfo, TileItemPlaceType } from "./TileItemInfo";
+import { TileItemInfo, TileItemPlaceType, TileItemType } from "./TileItemInfo";
 
 interface Sprite
 {
@@ -162,7 +162,11 @@ export class TileItemRender
                         //image.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
                     }
 
-                    if(extraLayer == 0) this.createCollisionForSprite(sprite)
+
+                    //change
+                    const canCreateCol = this._tileItemInfo.type == TileItemType.STOVE
+
+                    if(extraLayer == 0 && canCreateCol) this.createCollisionForSprite(sprite)
 
                     this._sprites[extraLayer][key] = sprite
 

@@ -35,11 +35,14 @@ export default class DishPlate
         const texture = scene.textures.get(dish.texture)
 
         
+        
 
         if(texture.getFrameNames().length == 0)
         {
             texture.add('1', 0, 0, 0, 138, 100)
         }
+
+        
 
         const sprite = this._sprite = scene.add.sprite(0, 0, dish.texture)
         sprite.setFrame('1')

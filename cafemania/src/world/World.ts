@@ -13,6 +13,8 @@ import { TileItemWall } from "@cafemania/tileItem/TileItemWall";
 import { Direction } from "@cafemania/utils/Direction";
 import { WorldText } from "@cafemania/utils/WorldText";
 import { Utils } from "@cafemania/utils/Utils";
+import { TileItemCounter } from "@cafemania/tileItem/TileItemCounter";
+import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
 
 
 export class World
@@ -264,7 +266,7 @@ export class World
         setInterval(() => {
             if(i >= max) return
 
-            HudScene.Instance?.addNotification(`Spawned Player (${max-1-i} left)`)
+            //HudScene.Instance?.addNotification(`Spawned Player (${max-1-i} left)`)
 
             this.createTestPlayer()
 
@@ -272,7 +274,7 @@ export class World
         }, 2000)
 
         const player = this.createPlayer(0, 0)
-
+        player.sitAtChair(this.getChairs()[0])
         
     }
 
@@ -319,6 +321,24 @@ export class World
         return this.getAllTileItemsOfType(TileItemType.DOOR) as TileItemDoor[]
     }
 
+    public getCounters(empty?: boolean): TileItemCounter[]
+    {
+        let counters = this.getAllTileItemsOfType(TileItemType.COUNTER) as TileItemCounter[]
+
+        if(empty) counters = counters.filter(counter => counter.isEmpty())
+
+        return counters
+    }
+
+    public getChairs(empty?: boolean): TileItemChair[]
+    {
+        let chairs = this.getAllTileItemsOfType(TileItemType.CHAIR) as TileItemChair[]
+
+        //if(empty) chairs = chairs.filter(chair => chair.isEmpty())
+
+        return chairs
+    }
+
     public getAllTileItemsOfType(type: TileItemType)
     {
         const tileItems: TileItem[] = []
@@ -358,7 +378,7 @@ export class World
  
             if(!result)
             {
-                new WorldText(GameScene.Instance, `Can't rotate!`, tileItem.getTile().getPosition(), 'red')
+                new WorldText(GameScene.Instance, `Can't rotate!`, tileItem.getTile().getPosition(), 0xff0000)
             }
             
             direction = Math.floor(Math.random()*4)

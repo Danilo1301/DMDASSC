@@ -37,7 +37,7 @@ export class PlayerAnimation
         },
         'Eat': {
             name: 'Eat',
-            directions: [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST],
+            directions: [Direction.NORTH, Direction.SOUTH],
             frames: 3,
             frameOrder: [0, 1, 2, 1],
             frameRate: 4
@@ -177,5 +177,10 @@ export class PlayerAnimation
         this._lastChangedFrame = 0
 
         //if(forceChange) this._oldAnim = ""
+    }
+
+    public getAnim()
+    {
+        return this._currentAnim
     }
 }

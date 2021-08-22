@@ -34,7 +34,7 @@ export class GameScene extends BaseScene
 
         this.setup()
 
-        this.drawWorldText("(0, 0)", new Phaser.Math.Vector2(0, 0), 'black')
+        this.drawWorldText("(0, 0)", new Phaser.Math.Vector2(0, 0))
 
         this.cameras.main.setScroll(-671, 40)
     }
@@ -71,8 +71,8 @@ export class GameScene extends BaseScene
         }
     }
 
-    public drawWorldText(text: string, position: Phaser.Math.Vector2, color?: string)
+    public drawWorldText(text: string, position: Phaser.Math.Vector2, tint?: number)
     {
-        new WorldText(this, text, position, color)
+        new WorldText(this, text, position, tint)
     }
 }

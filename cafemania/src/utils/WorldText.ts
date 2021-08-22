@@ -1,9 +1,10 @@
 export class WorldText
 {
-    constructor(scene: Phaser.Scene, text: string, position: Phaser.Math.Vector2, color?: string)
+    constructor(scene: Phaser.Scene, text: string, position: Phaser.Math.Vector2, tint?: number)
     {
-        const textObj = scene.add.text(position.x, position.y, text, {color: color || "black", fontStyle: "bold", fontSize: '20px'})
+        const textObj = scene.add.bitmapText(position.x, position.y, 'gem', text, 14)
         textObj.setDepth(10000)
+        textObj.setTint(tint || 0)
 
         let distanceMoved = 0
 

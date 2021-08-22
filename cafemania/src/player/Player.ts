@@ -6,6 +6,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { PlayerAnimation } from "./PlayerAnimation";
 import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
 import { TaskExecuteAction, PlayerTaskManager } from "./PlayerTaskManager";
+import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
+
+enum PlayerState
+{
+    IDLE,
+    WALKING,
+    SITTING,
+    EATING
+}
 
 export class Player
 {
@@ -15,9 +24,11 @@ export class Player
 
     private _position = new Phaser.Math.Vector2()
 
-    private _debugText?: Phaser.GameObjects.Text
+    private _debugText?: Phaser.GameObjects.BitmapText
 
     private _atTile: Tile
+
+    private _state: PlayerState = PlayerState.IDLE
 
     private _targetTile: Tile | undefined
     private _targetTileDistance: number = 0
@@ -38,6 +49,8 @@ export class Player
 
     private _depth: number = 0
 
+    private _sittingAtChair: TileItemChair | undefined
+
     constructor(world: World)
     {
         this._world = world
@@ -47,8 +60,6 @@ export class Player
         this._taskManager = new PlayerTaskManager()
 
         this._atTile = world.getTile(0, 0)
-
-        this._animation.play("Idle")
 
         window['player'] = this
     }
@@ -65,7 +76,7 @@ export class Player
 
     public isWalking()
     {
-        return this._targetTile != undefined
+        return this._state == PlayerState.WALKING
     }
 
     public getSprite()
@@ -108,10 +119,15 @@ export class Player
         return this._world
     }
 
+    public sitAtChair(chair: TileItemChair)
+    {
+        this._sittingAtChair = chair
+        this._state = PlayerState.SITTING
+    }
+
     public update(delta: number)
     {
         this._taskManager.update(delta)
-        this._animation.update(delta)
 
         if(this._targetTile)
         {
@@ -146,11 +162,33 @@ export class Player
                 this._targetTile = undefined
                 this._moveToTileCallback?.()
 
-                this._animation.play("Idle")
+                this._state = PlayerState.IDLE
             }
         }
 
+
+        this.handleSittingAtChair()
+    }
+
+    private handleSittingAtChair()
+    {
+        const chair = this._sittingAtChair
+
+        if(!chair) return
         
+        this.setPosition(chair.getPosition())
+
+        this._direction = chair.direction
+        
+        enum ChairRestPosDepth
+        {
+            IN_FRONT_OF_PLAYER = 1,
+            BEHIND_OF_PLAYER = 6
+        }
+
+        const isBehind = this.direction == Direction.SOUTH || this.direction == Direction.EAST
+
+        this._depth = isBehind ? ChairRestPosDepth.BEHIND_OF_PLAYER : ChairRestPosDepth.IN_FRONT_OF_PLAYER
     }
 
     public render(delta: number)
@@ -159,7 +197,7 @@ export class Player
 
         if(!this._debugText)
         {
-            //this._debugText = scene.add.text(0, 0, `Player`)
+            //this._debugText = scene.add.bitmapText(0, 0, 'gem', `Player`).setFontSize(14).setTint(0)
         }
 
         //this._debugText?.setPosition(this._position.x, this._position.y)
@@ -176,6 +214,23 @@ export class Player
 
         this._container?.setPosition(this._position.x, this._position.y)
         this._container?.setDepth(this._position.y + this._depth)
+
+        this._animation.update(delta)
+
+        switch (this._state)
+        {
+            case PlayerState.EATING:
+                this._animation.play('Eat')
+                break
+            case PlayerState.SITTING:
+                this._animation.play('Sit')
+                break
+            case PlayerState.WALKING:
+                this._animation.play('Walk')
+                break
+            default:
+                this._animation.play('Idle')
+        }
     }
 
     private async createSprite(textureName?: string)
@@ -193,6 +248,7 @@ export class Player
         else
         {
             textureName = 'PlayerSpriteTexture_NoTexture'
+            textureName = 'PlayerSpriteTexture_TestClient'
 
             //PlayerSpriteTexture_NoTexture
             //textureName = this.isWaiter ? "PlayerSpriteTexture_TestWaiter" : 'PlayerSpriteTexture_TestClient'
@@ -232,7 +288,7 @@ export class Player
 
         this._direction = direction
 
-        this._animation.play("Walk")
+        this._state = PlayerState.WALKING
     }
 
     public taskWalkToTile(x: number, y: number, dontEnterTile?: boolean)

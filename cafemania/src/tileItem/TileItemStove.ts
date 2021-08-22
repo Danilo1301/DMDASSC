@@ -2,6 +2,7 @@ import Dish from "@cafemania/dish/Dish";
 import DishPlate from "@cafemania/dish/DishPlate";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { TileItem } from "./TileItem";
+import { TileItemCounter } from "./TileItemCounter";
 import { TileItemInfo } from "./TileItemInfo";
 
 export class StoveData
@@ -49,12 +50,15 @@ export class TileItemStove extends TileItem
             {
                 GameScene.Instance?.drawWorldText(`Dish served`, this.getPosition())
 
-                this.clearDish()
+                const result = this.sendDishToCounter()
+                
+                if(!result) GameScene.Instance?.drawWorldText(`No empty counters`, this.getPosition())
+
 
                 return
             }
 
-            GameScene.Instance?.drawWorldText(`Already cooking`, this.getPosition(), "red")
+            GameScene.Instance?.drawWorldText(`Already cooking`, this.getPosition(), 0xff0000)
             return
         }
 
@@ -64,6 +68,34 @@ export class TileItemStove extends TileItem
         this.startCook(food)
 
         GameScene.Instance?.drawWorldText(`Started cooking '${food.name}'`, this.getPosition())
+    }
+
+
+    private getAvaliableCounters()
+    {
+        let counters = this.getWorld().getCounters()
+
+        counters = counters.filter(counter => {
+            if(counter.isEmpty()) return true
+
+            if(counter.getDish().id == this.getCookingDish().id) return true
+
+            return false
+        })
+
+        return counters
+    }
+
+    private sendDishToCounter()
+    {
+        const counters = this.getAvaliableCounters()
+
+        if(counters.length == 0) return false
+
+        counters[0].addDish(this.getCookingDish())
+        this.clearDish()
+
+        return true
     }
 
     public startCook(dish: Dish)
@@ -83,9 +115,10 @@ export class TileItemStove extends TileItem
         this._data.startedAt = -1
     }
 
+
     public isDishReady()
     {
-        const now = new Date().getTime()
+        const now = Date.now()
         const delta = now - this._data.startedAt
 
         return (delta >= this.getCookingDish().cookTime)
@@ -93,7 +126,7 @@ export class TileItemStove extends TileItem
 
     private onDishReady()
     {
-        GameScene.Instance?.drawWorldText(`Dish is ready`, this.getPosition(), 'green')
+        GameScene.Instance?.drawWorldText(`Dish is ready`, this.getPosition(), 0x00ff00)
     }
 
     public update(delta: number)
@@ -102,11 +135,13 @@ export class TileItemStove extends TileItem
 
         if(this.isCooking())
         {
-            if(this._prevDishReadyState != this.isDishReady())
+            const isReady = this.isDishReady()
+
+            if(this._prevDishReadyState != isReady)
             {
-                this._prevDishReadyState = this.isDishReady()
+                this._prevDishReadyState = isReady
     
-                if(this._prevDishReadyState) this.onDishReady()
+                if(isReady) this.onDishReady()
             }
         }
         
@@ -139,5 +174,16 @@ export class TileItemStove extends TileItem
         }
 
         
+    }
+
+    public serialize()
+    {
+        let json = super.serialize()
+
+        json = Object.assign(json, {
+            data: this._data.serialize()
+        })
+
+        return json
     }
 }

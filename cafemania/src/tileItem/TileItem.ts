@@ -20,13 +20,24 @@ export class TileItem
     private _direction: Direction = Direction.SOUTH
 
     private _animIndex: number = 0
-    
     private _layerIndex: number = 0
+
+    private _debugText?: Phaser.GameObjects.BitmapText
+    
+    private _isHovering: boolean = false
 
     constructor(tileItemInfo: TileItemInfo)
     {
         this._id = uuidv4()
         this._tileItemInfo = tileItemInfo
+
+        this.events.on("pointerover", () => {
+            this._isHovering = true
+        })
+
+        this.events.on("pointerout", () => {
+            this._isHovering = false
+        })
     }
 
     public get direction()
@@ -37,6 +48,11 @@ export class TileItem
     public get id()
     {
         return this._id
+    }
+
+    public getWorld()
+    {
+        return this.getTile().getWorld()
     }
 
     public getPosition()
@@ -96,6 +112,7 @@ export class TileItem
     public render(delta: number)
     {
         this.renderTileItemRender()
+        this.renderDebugText()
     }
 
     private renderTileItemRender()
@@ -114,6 +131,33 @@ export class TileItem
             this.setTileItemRenderSpritesToLayers()
 
             this.updateSprites()
+        }
+    }
+
+
+    private renderDebugText()
+    {
+        const scene = GameScene.Instance
+
+        if(this._isHovering)
+        {
+            if(!this._debugText)
+            {
+                this._debugText = scene.add.bitmapText(0, 0, 'gem', `TileItem`, 12).setOrigin(0.5);
+                this._debugText.setTint(0x000000)
+                this._debugText.setDepth(10000)
+            }
+
+            const position = this.getPosition()
+
+            this._debugText.setPosition(position.x, position.y)
+            this._debugText.setText(`${JSON.stringify(this.serialize())}}`)
+        } else {
+            if(this._debugText) {
+                this._debugText.destroy()
+                this._debugText = undefined
+            }
+
         }
     }
 
@@ -152,6 +196,15 @@ export class TileItem
                 const position = tile.getPosition()
                 tileItemRender.setPosition(new Phaser.Math.Vector2(position.x, position.y))
             }
+        }
+    }
+
+    public serialize()
+    {
+        return {
+            id: this._id,
+            tileItemInfo: this._tileItemInfo.id,
+            direction: this._direction
         }
     }
 

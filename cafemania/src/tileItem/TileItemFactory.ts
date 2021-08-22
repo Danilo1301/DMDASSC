@@ -118,7 +118,7 @@ export class TileItemFactory
             id: 'chair1',
             name: 'chair1',
             texture: 'chair/chair1',
-            type: TileItemType.FLOOR_DECORATION,
+            type: TileItemType.CHAIR,
             rotationType: TileItemRotationType.SIDE_AND_BACK,
             placeType: TileItemPlaceType.FLOOR,
             size: new Phaser.Math.Vector2(1, 1),

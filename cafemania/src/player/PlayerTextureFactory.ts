@@ -133,6 +133,30 @@ export class PlayerTextureFactory
 
         window['Three'] = Three
 
+        
+        //
+
+        let headTextures = queryItem.options.head || ['1x1white']
+        let bodyTextures = queryItem.options.body || ['1x1white']
+        let legTextures = queryItem.options.leg || ['1x1white']
+
+        const head_texture = this.mixTextures(headTextures, 1024, 831)
+        const body_texture = this.mixTextures(bodyTextures, 1024, 1024)
+        const legs_texture = this.mixTextures(legTextures, 1024, 831)
+
+        this._gltf!.scene.traverse(o => {
+
+            if(o instanceof THREE.SkinnedMesh)
+            {
+                if(o.material.name == "HeadMaterial") o.material.map = head_texture
+                if(o.material.name == "BodyMaterial") o.material.map = body_texture
+                if(o.material.name == "LegMaterial") o.material.map = legs_texture
+            }
+        })
+        //      
+
+
+
         this._canvas.clear()
 
         const frames: IFrame[] = []
@@ -213,6 +237,8 @@ export class PlayerTextureFactory
 
         canvas.refresh()
 
+        console.log(this._cachedTextures)
+
         console.log("Completed")
 
         queryItem.callback()
@@ -245,5 +271,27 @@ export class PlayerTextureFactory
             animMixer._actions[i].time=0;
         }
         animMixer.update(timeInSeconds)
+    }
+
+    public static mixTextures(textures: string[], width: number, height: number)
+    {
+        const textureManager = MainScene.Instance.textures
+        const canvasTexture = textureManager.createCanvas('tmp' + this._cachedTextures.length, width, height)
+
+        for (const t of textures) {
+            const texture = textureManager.get(t)
+
+            canvasTexture.context.drawImage(texture.getSourceImage() as HTMLImageElement , 0, 0, width, height)
+            
+        }
+
+        canvasTexture.refresh()
+
+        const texture = new THREE.CanvasTexture(canvasTexture.getCanvas());
+        texture.flipY = false;
+
+        this._cachedTextures.push(canvasTexture)
+
+        return texture
     }
 }

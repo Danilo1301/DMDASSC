@@ -45,6 +45,10 @@ export class MainScene extends BaseScene
         this.load.image('tile1', 'tile1.png')
         this.load.image('1x1white', '1x1white.png')
         this.load.image('wallMask', 'wallMask.png')
+
+        this.load.image('player/head', 'player/head.png')
+        this.load.image('player/body1', 'player/body1.png')
+        this.load.image('player/leg', 'player/leg.png')
         this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
        
         this.loadTileItemInfo()
@@ -79,12 +83,12 @@ export class MainScene extends BaseScene
 
     public async create(): Promise<void>
     {
-        const PTF = await import("../player/PlayerTextureFactory")
+        const PlayerTextureFactory = (await import("../player/PlayerTextureFactory")).PlayerTextureFactory
 
         const tag = 'PlayerSpriteTexture_'
 
-        await PTF.PlayerTextureFactory.create(tag + 'NoTexture', {})
-        //await PlayerTextureFactory.default.create(tag + 'TestClient', {head: ['head'], body: ['1x1white'], leg: ['1x1white']})
+        await PlayerTextureFactory.create(tag + 'NoTexture', {})
+        await PlayerTextureFactory.create(tag + 'TestClient', {head: ['player/head'], body: ['player/body1'], leg: ['player/leg']})
         //await PlayerTextureFactory.default.create(tag + 'TestWaiter', {head: ['head'], body: ['body2'], leg: ['1x1white']})
         
         SceneManager.startScene('GameScene', GameScene)
