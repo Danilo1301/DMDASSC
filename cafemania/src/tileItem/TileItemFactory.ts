@@ -1,8 +1,12 @@
 import { Game } from "@cafemania/game/Game"
 import { TileItemInfo, TileItemPlaceType, TileItemRotationType, TileItemType } from "@cafemania/tileItem/TileItemInfo"
 import { TileItem } from "./TileItem"
+import { TileItemChair } from "./TileItemChair"
+import { TileItemCounter } from "./TileItemCounter"
 import { TileItemDoor } from "./TileItemDoor"
 import { TileItemRender } from "./TileItemRender"
+import { TileItemStove } from "./TileItemStove"
+import { TileItemTable } from "./TileItemTable"
 import { TileItemWall } from "./TileItemWall"
 
 export class TileItemFactory
@@ -69,7 +73,7 @@ export class TileItemFactory
             collision: {
                 x: 0,
                 y: 0,
-                height: 0
+                height: 42
             },
             originPosition: new Phaser.Math.Vector2(84, 42)
         })
@@ -87,7 +91,25 @@ export class TileItemFactory
             collision: {
                 x: 0,
                 y: 0,
-                height: 0
+                height: 42
+            },
+            originPosition: new Phaser.Math.Vector2(84, 42)
+        })
+
+        this.addTileItemInfo({
+            id: 'table1',
+            name: 'table1',
+            texture: 'table/table1',
+            type: TileItemType.TABLE,
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1, 1),
+            layers: new Phaser.Math.Vector2(1, 1),
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 42
             },
             originPosition: new Phaser.Math.Vector2(84, 42)
         })
@@ -103,9 +125,9 @@ export class TileItemFactory
             layers: new Phaser.Math.Vector2(2, 4),
             extraLayers: 1,
             collision: {
-                x: 0,
-                y: 0,
-                height: 0
+                x: 28,
+                y: 25,
+                height: 80
             },
             originPosition: new Phaser.Math.Vector2(84, 97)
         })
@@ -123,7 +145,10 @@ export class TileItemFactory
             collision: {
                 x: 0,
                 y: 0,
-                height: 0
+                height: 0,
+                isWall: true,
+                wallAtFront: true,
+                wallSize: 0
             },
             originPosition: new Phaser.Math.Vector2(84, 252)
         })
@@ -140,10 +165,67 @@ export class TileItemFactory
             extraLayers: 0,
             collision: {
                 x: 0,
-                y: 0,
-                height: 0
+                y: 20,
+                height: -20,
+                isWall: true,
+                wallAtFront: false,
+                wallSize: 5
             },
             originPosition: new Phaser.Math.Vector2(84, 215)
+        })
+
+        this.addTileItemInfo({
+            id: 'stove1',
+            name: 'stove1',
+            texture: 'stove/stove1',
+            type: TileItemType.STOVE,
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1, 1),
+            layers: new Phaser.Math.Vector2(1, 1),
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 42
+            },
+            originPosition: new Phaser.Math.Vector2(84, 42)
+        })
+
+        this.addTileItemInfo({
+            id: 'counter1',
+            name: 'counter1',
+            texture: 'counter/counter1',
+            type: TileItemType.COUNTER,
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1, 1),
+            layers: new Phaser.Math.Vector2(1, 1),
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 42
+            },
+            originPosition: new Phaser.Math.Vector2(84, 42)
+        })
+
+        this.addTileItemInfo({
+            id: 'table1',
+            name: 'table1',
+            texture: 'table/table1',
+            type: TileItemType.TABLE,
+            rotationType: TileItemRotationType.SIDE_AND_BACK,
+            placeType: TileItemPlaceType.FLOOR,
+            size: new Phaser.Math.Vector2(1, 1),
+            layers: new Phaser.Math.Vector2(1, 1),
+            extraLayers: 0,
+            collision: {
+                x: 0,
+                y: 0,
+                height: 42
+            },
+            originPosition: new Phaser.Math.Vector2(84, 42)
         })
     }
 
@@ -153,19 +235,30 @@ export class TileItemFactory
     }
 
     
-    public createTileItem(id: string): TileItem
+    public createTileItem<T extends TileItem>(id: string): T
     {
         if(!this.hasTileItemInfo(id)) throw `Invalid TileItemInfo '${id}'`
 
         const tileItemInfo = this.getTileItemInfo(id)
 
-        if(tileItemInfo.type == TileItemType.WALL) return new TileItemWall(tileItemInfo)
-        if(tileItemInfo.type == TileItemType.DOOR) return new TileItemDoor(tileItemInfo)
-        //if(tileItemInfo.type == TileItemType.STOVE) return new TileItemStove(tileItemInfo)
-        //if(tileItemInfo.type == TileItemType.COUNTER) return new TileItemCounter(tileItemInfo)
-        //if(tileItemInfo.type == TileItemType.TABLE) return new TileItemTable(tileItemInfo)
+        const map = new Map<TileItemType, typeof TileItem>()
+        map.set(TileItemType.WALL, TileItemWall)
+        map.set(TileItemType.DOOR, TileItemDoor)
+        map.set(TileItemType.CHAIR, TileItemChair)
+        map.set(TileItemType.STOVE, TileItemStove)
+        map.set(TileItemType.COUNTER, TileItemCounter)
+        map.set(TileItemType.TABLE, TileItemTable)
 
-        return new TileItem(tileItemInfo)
+        const type = tileItemInfo.type
+
+        let tileItem: TileItem | undefined
+
+        if(map.has(type))
+            tileItem = new (map.get(type)!)(tileItemInfo)
+
+        if(!tileItem) tileItem = new TileItem(tileItemInfo)
+
+        return tileItem as T
     }
     
 
@@ -190,11 +283,9 @@ export class TileItemFactory
     public createTileItemRender(id: string): TileItemRender
     {
         if(!this.hasTileItemInfo(id)) throw `Invalid TileItemInfo '${id}'`
-
+        
         const tileItemInfo = this.getTileItemInfo(id)
-
         const tileItemRender = new TileItemRender(tileItemInfo)
-
         return tileItemRender
     }
 

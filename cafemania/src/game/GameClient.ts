@@ -35,13 +35,10 @@ export class GameClient extends Game
             const a = window.innerWidth / window.innerHeight
 
             if(a < 1)
-            {
                 scaleManager.setGameSize(600 * 1, 900 * 1)
-            }
             else
-            {
                 scaleManager.setGameSize(900, 600)
-            }
+            
         }
 
         window.addEventListener('resize', () => test())

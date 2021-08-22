@@ -1,11 +1,11 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { Direction } from "@cafemania/utils/Direction";
-import World from "@cafemania/world/World"
+import { World } from "@cafemania/world/World"
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerAnimation } from "./PlayerAnimation";
 import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
-import TaskManager, { TaskExecuteAction } from "./TaskManager";
+import { TaskExecuteAction, PlayerTaskManager } from "./PlayerTaskManager";
 
 export class Player
 {
@@ -28,7 +28,7 @@ export class Player
 
     private _sprite?: Phaser.GameObjects.Sprite
 
-    private _taskManager: TaskManager
+    private _taskManager: PlayerTaskManager
 
     private _speed: number = 1.6
 
@@ -36,25 +36,21 @@ export class Player
 
     private _animation: PlayerAnimation
 
+    private _depth: number = 0
+
     constructor(world: World)
     {
         this._world = world
         this._id = uuidv4()
 
         this._animation = new PlayerAnimation(this)
-        this._taskManager = new TaskManager()
+        this._taskManager = new PlayerTaskManager()
 
         this._atTile = world.getTile(0, 0)
 
         this._animation.play("Idle")
 
         window['player'] = this
-
-        /*
-        this.moveToTile(3, 3, () => {
-            GameScene.Instance.drawWorldText("end", this.getPosition())
-        })
-        */
     }
 
     public get id()
@@ -65,6 +61,11 @@ export class Player
     public get direction()
     {
         return this._direction
+    }
+
+    public isWalking()
+    {
+        return this._targetTile != undefined
     }
 
     public getSprite()
@@ -174,7 +175,7 @@ export class Player
         }
 
         this._container?.setPosition(this._position.x, this._position.y)
-        this._container?.setDepth(this._position.y)
+        this._container?.setDepth(this._position.y + this._depth)
     }
 
     private async createSprite(textureName?: string)
@@ -226,7 +227,7 @@ export class Player
         this._moveToTileCallback = callback
 
 
-        console.log(dir.x, dir.y)
+        //console.log(dir.x, dir.y)
         const direction = Tile.getDirectionFromOffset(dir.x, dir.y)
 
         this._direction = direction

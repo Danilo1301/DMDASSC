@@ -1,27 +1,34 @@
 import Phaser from 'phaser';
-import { Logger } from '@cafemania/logger/Logger';
 import { TileItemFactory } from '@cafemania/tileItem/TileItemFactory';
-import World from '@cafemania/world/World';
+import { World } from '@cafemania/world/World';
+import DishFactory from '@cafemania/dish/DishFactory';
 
 export class Game
 {
     private _worlds = new Phaser.Structs.Map<string, World>([])
 
     private _tileItemFactory: TileItemFactory
+    private _dishFactory: DishFactory
 
     constructor()
     {
         this._tileItemFactory = new TileItemFactory(this)
+        this._dishFactory = new DishFactory(this)
     }
 
     public start(): void
     {
-        Logger.print('Game started', 125)
+        console.log('Game started')
     }
 
     public getTileItemFactory(): TileItemFactory
     {
         return this._tileItemFactory
+    }
+
+    public getDishItemFactory(): DishFactory
+    {
+        return this._dishFactory
     }
 
     public getWorlds(): World[]

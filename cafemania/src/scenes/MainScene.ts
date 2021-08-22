@@ -48,6 +48,7 @@ export class MainScene extends BaseScene
         this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
        
         this.loadTileItemInfo()
+        this.loadDishes()
     }
 
     private loadTileItemInfo()
@@ -60,6 +61,19 @@ export class MainScene extends BaseScene
             const texture = tileItemInfo.texture
 
             this.load.image(texture, `tileItem/${texture}.png`)
+        }
+    }
+
+    private loadDishes()
+    {
+        const dishList = this.getGame().getDishItemFactory().getDishList()
+
+        for (const id in dishList)
+        {
+            const dish = dishList[id]
+            const texture = dish.texture
+
+            this.load.image(texture, `dish/${texture}.png`)
         }
     }
 

@@ -146,17 +146,17 @@ export class PlayerTextureFactory
         for (const animName in PlayerAnimation.Animations)
         {
             const anim = PlayerAnimation.Animations[animName]
-            console.log('[PlayerTextureFactory]', `Anim ${animName}`)
+            //console.log('[PlayerTextureFactory]', `Anim ${animName}`)
 
             for (const direction of anim.directions)
             {
-                console.log('[PlayerTextureFactory]', `Direction ${direction}`)
+                //console.log('[PlayerTextureFactory]', `Direction ${direction}`)
 
                 Three.setAngle(PlayerTextureFactory.angleFromDirection(direction) || 0)
 
                 for (let frame = 0; frame < anim.frames; frame++)
                 {
-                    console.log('[PlayerTextureFactory]', `Frame ${frame} (${pastFrames + frame} / ${totalAnimFrames})`)
+                    //console.log('[PlayerTextureFactory]', `Frame ${frame} (${pastFrames + frame} / ${totalAnimFrames})`)
 
                     this.setAnimFrame(pastFrames + frame, totalAnimFrames)
 
@@ -208,15 +208,10 @@ export class PlayerTextureFactory
             canvas.putData(frame.imageData, position.x, position.y)
             canvas.add(frame.frameKey, 0, position.x, position.y, frame.imageData.width, frame.imageData.height)
 
-            console.log(frame.frameKey)
+            //console.log(frame.frameKey)
         })
 
         canvas.refresh()
-
-        console.log(frames)
-        console.log(sheet)
-
-        console.log(canvas.key)
 
         console.log("Completed")
 

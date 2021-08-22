@@ -7,6 +7,8 @@ import { Direction } from "@cafemania/utils/Direction";
 
 export class TileItem
 {
+    public events = new Phaser.Events.EventEmitter()
+
     private _tileItemInfo: TileItemInfo
 
     private _id: string
@@ -35,6 +37,11 @@ export class TileItem
     public get id()
     {
         return this._id
+    }
+
+    public getPosition()
+    {
+        return this.getTile().getPosition()
     }
 
     public setAnimIndex(value: number)
@@ -69,11 +76,16 @@ export class TileItem
 
     public setDirection(direction: Direction)
     {
-        this._direction = direction
+        const result = this.getTile().getWorld().setTileItemDirection(this, direction)
 
-        this.getTile().getWorld().setTileItemDirection(this, direction)
+        if(result)
+        {
+            this._direction = direction
+        }
 
         this.updateSprites()
+
+        return result
     }
 
     public update(delta: number)
@@ -94,8 +106,7 @@ export class TileItem
 
         if(!this._tileItemRender)
         {
-            this._tileItemRender = new TileItemRender(this.getInfo())
-            this._tileItemRender.setTileItem(this)
+            this._tileItemRender = new TileItemRender(this.getInfo(), this)
 
             if(this.getInfo().placeType == TileItemPlaceType.WALL || this.getInfo().type == TileItemType.DOOR)
                 this._tileItemRender.setDepth(-Tile.SIZE.y/3)
@@ -113,7 +124,11 @@ export class TileItem
 
         if(this.getInfo().type == TileItemType.FLOOR) layer = scene.groundLayer
 
-        this.getTileItemRender()!.getSprites().map(sprite => layer.add(sprite.image) )
+        this.getTileItemRender()!.getSprites().map(sprite =>
+        {
+            if(sprite.image) layer.add(sprite.image)
+            if(sprite.collision) layer.add(sprite.collision)
+        })
     }
 
     protected updateSprites()

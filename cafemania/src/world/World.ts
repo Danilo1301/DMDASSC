@@ -12,9 +12,10 @@ import { TileItemRender } from "@cafemania/tileItem/TileItemRender";
 import { TileItemWall } from "@cafemania/tileItem/TileItemWall";
 import { Direction } from "@cafemania/utils/Direction";
 import { WorldText } from "@cafemania/utils/WorldText";
+import { Utils } from "@cafemania/utils/Utils";
 
 
-export default class World
+export class World
 {
     private _game: Game
 
@@ -89,6 +90,17 @@ export default class World
         //console.log(`Created tile ${tile.id}`)
     }
 
+    public getRandomWalkableTile(insideCafe?: boolean): Tile
+    {
+ 
+        let tiles = this.getTiles().filter(tile => tile.isWalkable())
+
+        if(insideCafe)
+            tiles = tiles.filter(tile => tile.x >= 0 && tile.y >= 0)
+
+        return Utils.shuffleArray(tiles)[0]
+    }
+
     public getTile(x: number, y: number)
     {
         return this._tiles.get(`${x}:${y}`)
@@ -134,14 +146,11 @@ export default class World
 
         if(!canBePlaced) return false
         
-        const grid = this.getGrid()
-        const gridItem = grid.getItem(tileItem.id)
+        const gridItem = this.getGrid().getItem(tileItem.id)
         const o = TileItemRender.valuesFromDirection(direction)
 
         gridItem.setChangeRotation(o[0])
         gridItem.setFlipCells(o[1])
-
-        //if(tileItem.direction != direction) tileItem.setDirection(direction)
 
         return true
     }
@@ -152,12 +161,13 @@ export default class World
 
         //if(!canBePlaced) return
 
-        const gridItem = this.getGrid().addItem(tileItem.id, tile.x, tile.y, tileItem.getInfo().size)
-        
         tile.addTileItem(tileItem)
 
-        if(tileItem.getInfo().type == TileItemType.FLOOR) gridItem.color = 0
-        if(tileItem.getInfo().type == TileItemType.WALL) gridItem.color = 0xcccccc
+        const gridItem = this.getGrid().addItem(tileItem.id, tile.x, tile.y, tileItem.getInfo().size)
+        const type = tileItem.getInfo().type
+
+        if(type == TileItemType.FLOOR) gridItem.color = 0
+        if(type == TileItemType.WALL) gridItem.color = 0xcccccc
     }
 
     private createTileMap(sizeX: number, sizeY: number)
@@ -171,38 +181,23 @@ export default class World
                 const tile = this.addTile(x, y)
 
                 const floor = tileItemFactory.createTileItem('floor1')
-
                 this.putTileItemInTile(floor, tile)
 
                 if(y % 4 == 2 && x >= 6)
                 {
                     const chair = tileItemFactory.createTileItem('chair1')
-
                     this.putTileItemInTile(chair, tile)
                 }
 
                 if(y % 4 == 3 && x >= 6)
                 {
-                    const floorDecoration1 = tileItemFactory.createTileItem('floorDecoration1')
-
+                    const floorDecoration1 = tileItemFactory.createTileItem('table1')
                     this.putTileItemInTile(floorDecoration1, tile)
                 }
-                    //this.startRandomlyRotate(chair, Math.random()*200+400)
-            
-                    //const floorDecoration1 = tileItemFactory.createTileItem('floorDecoration1')
-
-                    //this.putTileItemInTile(floorDecoration1, tile)
-
-                    //this.startRandomlyRotate(floorDecoration1, Math.random()*200+400)
-                
             }
         }
 
-        //const chair = tileItemFactory.createTileItem('chair1')
-       //this.putTileItemInTile(chair, this.getTile(0, 0))
-
-        //this.addTile(-1, 1)
-        //this.addTile(-1, 2)
+        
 
         for (let y = -1; y < sizeY; y++)
         {
@@ -212,7 +207,7 @@ export default class World
                 {
                     const tile = this.addTile(x, y)
 
-                    const wall = tileItemFactory.createTileItem('wall1')
+                    const wall = tileItemFactory.createTileItem<TileItemWall>('wall1')
 
                     this.putTileItemInTile(wall, tile)
                     
@@ -236,18 +231,32 @@ export default class World
             }
         }
 
-        this.putTestTileItem('floorDecoration2', 2, 5)
+        
+
+        //this.startRandomlyRotate(this.putTestTileItem('floorDecoration2', 2, 5), 1000)
+        //this.startRandomlyRotate(this.putTestTileItem('floorDecoration2', 3, 5), 1000)
+        //this.startRandomlyRotate(this.putTestTileItem('floorDecoration2', 2, 8), 1000)
+        
+ 
 
         this.putTestTileItem('door1', 1, 0)
+        ;(this.getTile(1, -1).getTileItems()[0] as TileItemWall).setWallHole(true)
+
+        this.putTestTileItem('door1', 0, 2).setDirection(Direction.EAST)
+        ;(this.getTile(-1, 2).getTileItems()[0] as TileItemWall).setWallHole(true)
 
         window['Tile'] = Tile
 
+        this.putTestTileItem('stove1', 0, 5).setDirection(Direction.EAST)
+        this.putTestTileItem('stove1', 0, 6)
+
+        this.putTestTileItem('counter1', 0, 8).setDirection(Direction.EAST)
+        this.putTestTileItem('counter1', 0, 9)
 
     
-        const doorWall = this.getTile(1, -1).getTileItems()[0] as TileItemWall
-
-        doorWall.setWallHole(true)
-
+        
+        
+      
         let i = 0
 
         let max = 20
@@ -275,7 +284,17 @@ export default class World
         
         const player = this.createPlayer(spawnTile.x, spawnTile.y)
 
-        player.taskWalkToTile(3, 3)
+        
+
+        setInterval(() => {
+            if(!player.isWalking())
+            {
+                const tile = this.getRandomWalkableTile()
+                player.taskWalkToTile(tile.x, tile.y)
+            }
+        }, 1000)
+
+     
     }
 
     public getPlayers()
@@ -335,15 +354,14 @@ export default class World
         
         setInterval(() => {
 
-            const result = this.setTileItemDirection(tileItem, direction)
+            const result = tileItem.setDirection(direction)
  
             if(!result)
             {
                 new WorldText(GameScene.Instance, `Can't rotate!`, tileItem.getTile().getPosition(), 'red')
             }
             
-            direction++
-            if(direction >= 4) direction = 0
+            direction = Math.floor(Math.random()*4)
 
         }, time)
     }

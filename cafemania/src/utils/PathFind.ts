@@ -22,8 +22,8 @@ export default class PathFind
 {
     private _nodes = new Map<string, Node>()
 
-    private _start = {x: 0, y: 0}
-    private _end = {x: 0, y: 0}
+    private _endNode!: Node
+    private _startNode!: Node
 
     private _openNodes: Node[] = []
     private _closedNodes: Node[] = []
@@ -37,21 +37,13 @@ export default class PathFind
         this._nodes.set(`${x}:${y}`, node)
     }
 
-    public setStart(x: number, y: number)
-    {
-        this._start.x = x
-        this._start.y = y
-    }
 
-    public setEnd(x: number, y: number)
-    {
-        this._end.x = x
-        this._end.y = y
-    }
-
-    public find(callback?: (path: Node[]) => void)
+    public find(startX: number, startY: number, endX: number, endY: number, callback?: (path: Node[]) => void)
     {
         this._callback = callback
+
+        this._startNode = this.getNode(startX, startY)
+        this._endNode = this.getNode(endX, endY)
 
         this._nodes.forEach(node => {
             
@@ -116,7 +108,7 @@ export default class PathFind
             
         })
 
-        this._openNodes.push(this.getNode(this._start.x, this._start.y))
+        this._openNodes.push(this._startNode)
 
         this.process()
     }
@@ -156,7 +148,7 @@ export default class PathFind
 
     private onFinish()
     {
-        const endNode = this.getNode(this._end.x, this._end.y)
+        const endNode = this._endNode
 
         const path: Node[] = []
 
@@ -190,7 +182,7 @@ export default class PathFind
 
         for (const openNode of this._openNodes)
         {
-            const startNode = this.getNode(this._start.x, this._start.y)
+            const startNode = this._startNode
 
             const dx = openNode.x - startNode.x;
             const dy = openNode.y - startNode.y;
@@ -214,7 +206,7 @@ export default class PathFind
             return
         }
 
-        if(node.x == this._end.x && node.y == this._end.y)
+        if(node == this._endNode)
         {
             this.onFinish()
             //console.log("We found goal")
@@ -223,13 +215,13 @@ export default class PathFind
 
         for (const neighbour of node.neighbours)
         {
-            const isStartNode = neighbour.x == this._start.x && neighbour.y == this._start.y
+            const isStartNode = neighbour == this._startNode
 
             if(!neighbour.cameFrom && !isStartNode)
                 neighbour.cameFrom = node
 
       
-            if(neighbour.x == this._end.x && neighbour.y == this._end.y)
+            if(neighbour == this._endNode)
             {
                 this.onFinish()
                 //console.log("We found goal in neightbour")

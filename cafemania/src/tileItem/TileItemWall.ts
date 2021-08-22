@@ -1,16 +1,13 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
-import { TileCollisionFactory } from "@cafemania/tile/TileCollisionFactory";
 import { Direction } from "@cafemania/utils/Direction";
 import { TileItem } from "./TileItem";
+import { TileItemDoor } from "./TileItemDoor";
 import { TileItemInfo, TileItemType } from "./TileItemInfo";
 
 export class TileItemWall extends TileItem
 {
-    private _wallMask?: Phaser.GameObjects.Graphics
-
     private _hasHole: boolean = false
-
     private _holeCreated: boolean = false
 
     constructor(tileItemInfo: TileItemInfo)
@@ -18,12 +15,9 @@ export class TileItemWall extends TileItem
         super(tileItemInfo)
     }
 
-    
-    public getDoorInFront()
+    public getDoorInFront(): TileItemDoor | undefined
     {
         const offset = Tile.getOffsetFromDirection(this.direction)
-
-        console.log(offset)
 
         const tile = this.getTile().getTileInOffset(offset.x, offset.y)
 
@@ -33,144 +27,65 @@ export class TileItemWall extends TileItem
         return tile.getDoor()
     }
 
-    public setWallHole(value: boolean)
+    public setWallHole(value: boolean): void
     {
         this._hasHole = value
     }
 
-    private getWallHoleKey()
-    {
-        return `${this.getInfo().name}_hole`
-    }
-
-    public render(delta: number)
+    public render(delta: number): void
     {
         super.render(delta)
 
-        const tileItemInfo = this.getInfo()
+        this.renderWallHole()
+    }
+
+    private renderWallHole(): void
+    {
         const tileItemRender = this.getTileItemRender()
         const scene = GameScene.Instance
 
         if(!tileItemRender) return
 
-        if(tileItemInfo.type == TileItemType.WALL)
+        const wallHoleKey = `${this.getInfo().name}_hole`
+
+        if(!scene.textures.exists(wallHoleKey))
         {
+            const sprite = this.getSpriteWithImage()
+            const image = sprite.image!
 
-            
-            const wallHoleKey = this.getWallHoleKey()
+            const canvas = image.texture.getSourceImage() as HTMLCanvasElement 
+            const wallHoleCanvas = scene.textures.createCanvas(wallHoleKey, canvas.width, canvas.height)
 
-            if(!scene.textures.exists(wallHoleKey))
-            {
-                const canvas = tileItemRender.getSprites()[0].image.texture.getSourceImage() as HTMLCanvasElement 
-                const wallHoleCanvas = scene.textures.createCanvas(wallHoleKey, canvas.width, canvas.height)
+            const imageData = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height)
+            const wallMask = scene.textures.get('wallMask').getSourceImage() as HTMLImageElement 
 
-                wallHoleCanvas.context.fillStyle = "red"
-                wallHoleCanvas.context.fillRect(0, 0, canvas.width, canvas.height)
-
-                const imageData = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height)
-
-                wallHoleCanvas.putData(imageData, 0, 0)
-
-                const wallMask = scene.textures.get('wallMask').getSourceImage() as HTMLImageElement 
-
-                wallHoleCanvas.context.globalCompositeOperation="destination-out";
-
-
-                wallHoleCanvas.context.drawImage(wallMask, 0, wallHoleCanvas.height - wallMask.height)
-
-                wallHoleCanvas.refresh()
-
-                console.log(wallHoleCanvas)
-            }
-
-            
+            wallHoleCanvas.putData(imageData, 0, 0)
+            wallHoleCanvas.context.globalCompositeOperation="destination-out";
+            wallHoleCanvas.context.drawImage(wallMask, 0, wallHoleCanvas.height - wallMask.height)
+            wallHoleCanvas.refresh()
         }
-
+      
         if(this._hasHole)
         {
             if(!this._holeCreated)
             {
                 this._holeCreated = true
 
-                tileItemRender.getSprites()[0].image.destroy()
+                const sprite = this.getSpriteWithImage()
+                const image = sprite.image!
 
-                const wallHoleKey = this.getWallHoleKey()
-
-                tileItemRender.getSprites()[0].image = scene.add.image(0, 0, wallHoleKey)
+                image.destroy()
+                sprite.image = scene.add.image(0, 0, wallHoleKey)
 
                 this.setTileItemRenderSpritesToLayers()
                 this.updateSprites()
-
-                console.log("yes")
             }
         }
-
-        //this.renderWallMask()
     }
 
-    private renderWallMask()
+    private getSpriteWithImage()
     {
-        /*
-        const tileItemRender = this.getTileItemRender()
-
-        if(!tileItemRender) return
-
-        const scene = GameScene.Instance
-
-        if(!this._canCreateWallMask && this._wallMask)
-        {
-            this._wallMask.destroy()
-            this._wallMask = undefined
-        }
-
-        return
-
-        if(!this._canCreateWallMask) return
-
-        
-        if(!this._wallMask)
-        {
-            const points = TileCollisionFactory.getWallCollisionPoints(true, [0, 0], [70, 0], 0)
-
-            const graphics = this._wallMask = scene.add.graphics()
-            graphics.fillStyle(0x000000)
-            graphics.fillPoints(points)
-
-            const mask = graphics.createGeometryMask()
-            mask.setInvertAlpha()
-
-            //const sprites = tileItemRender.getSprites()
-            //sprites.map(sprite => sprite.image.setMask(mask))
-
-            this.updateWallMask() 
-        }
-        */
-    }
-
-    protected updateSprites()
-    {
-        super.updateSprites()
-
-        this.updateWallMask() 
-    }
-
-    private updateWallMask()
-    {
-        const wallMask = this._wallMask
-
-        if(!wallMask) return
-
-        const direction = this.direction
-        const flip = direction == Direction.EAST || direction == Direction.WEST
-        const position = this.getTile().getPosition()
-
-        position.x -= Tile.SIZE.x/2 * (flip ? -1 : 1)
-        position.y -= Tile.SIZE.y/2
-
-        wallMask.setScale(flip ? -1 : 1, 1)
-
-        wallMask.setPosition(position.x, position.y)
-
-        console.log("update mask")
+        const sprites = this.getTileItemRender()!.getSprites().filter(sprite => sprite.image != undefined)
+        return sprites[0]
     }
 }

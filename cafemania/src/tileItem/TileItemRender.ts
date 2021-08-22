@@ -1,17 +1,19 @@
 import { Grid } from "@cafemania/grid/Grid";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
+import { TileCollisionFactory } from "@cafemania/tile/TileCollisionFactory";
 import { TileTextureGenerator } from "@cafemania/tile/TileTextureGenerator";
 import { Direction } from "@cafemania/utils/Direction";
 import { TileItem } from "./TileItem";
-import { TileItemInfo } from "./TileItemInfo";
+import { TileItemInfo, TileItemPlaceType } from "./TileItemInfo";
 
 interface Sprite
 {
-    image: Phaser.GameObjects.Image
     x: number
     y: number
     extraLayer: number
+    image?: Phaser.GameObjects.Image
+    collision?: Phaser.GameObjects.Polygon
 }
 
 export class TileItemRender
@@ -44,9 +46,10 @@ export class TileItemRender
 
     private _depth: number = 0
 
-    constructor(tileItemInfo: TileItemInfo)
+    constructor(tileItemInfo: TileItemInfo, tileItem?: TileItem)
     {
         this._tileItemInfo = tileItemInfo
+        this._tileItem = tileItem
 
         this.createSprites()
         //this.testLayers()
@@ -65,11 +68,6 @@ export class TileItemRender
     private getTileItem(): TileItem | undefined
     {
         return this._tileItem
-    }
-
-    public setTileItem(tileItem: TileItem): void
-    {
-        this._tileItem = tileItem
     }
 
     public setPosition(position: Phaser.Math.Vector2): void
@@ -150,25 +148,24 @@ export class TileItemRender
                 {
                     const key = `${this._layerX}:${this._layerY}:${x}:${y}`
 
-                    if(!texture.has(key)) continue
-
-                    const image = scene.add.image(0, 0, texture.key)
-                    //image.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
-                    image.setOrigin(0, 1)
-
-                    image.setFrame(key)
-
-                    //image.setAlpha(1)
-                    //image.setDepth(10)
-
                     const sprite: Sprite = {
-                        image: image,
                         x: x,
                         y: y,
                         extraLayer: extraLayer
                     }
 
+                    if(texture.has(key))
+                    {
+                        const image = sprite.image = scene.add.image(0, 0, texture.key)
+                        image.setOrigin(0, 1)
+                        image.setFrame(key)
+                        //image.texture.setFilter(Phaser.Textures.FilterMode.LINEAR)
+                    }
+
+                    if(extraLayer == 0) this.createCollisionForSprite(sprite)
+
                     this._sprites[extraLayer][key] = sprite
+
                 }
             }
         }
@@ -196,6 +193,87 @@ export class TileItemRender
         }, 1000)
     }
 
+    private createCollisionForSprite(sprite: Sprite)
+    {
+        const tileItemInfo = this._tileItemInfo
+        const x = sprite.x
+        const y = sprite.y
+        const scene = GameScene.Instance
+
+        const size = tileItemInfo.size
+        const offsetX = [0, 0]
+        const offsetY = [0, 0]
+        
+        if(x == 0) offsetX[0] = tileItemInfo.collision.x
+        if(x == size.x-1) offsetX[1] = tileItemInfo.collision.x
+
+        if(y == 0) offsetY[0] = tileItemInfo.collision.y
+        if(y == size.y-1) offsetY[1] = tileItemInfo.collision.y
+
+        let points: Phaser.Math.Vector2[] = []
+
+        if(tileItemInfo.collision.isWall)
+        {
+            offsetY[0] -= tileItemInfo.collision.height
+            offsetY[1] += tileItemInfo.collision.height
+
+            const atFront = tileItemInfo.collision.wallAtFront === true
+
+            points = TileCollisionFactory.getWallCollisionPoints(atFront,
+                offsetX,
+                offsetY,
+                tileItemInfo.collision.wallSize || 0
+            )
+        }
+        else
+        {
+            points = TileCollisionFactory.getBlockCollisionPoints(
+                offsetX,
+                offsetY,
+                tileItemInfo.collision.height
+            )
+        }
+
+        const collisionBox = sprite.collision = scene.add.polygon(0, 0, points, 0, 0)
+        collisionBox.setOrigin(0, 0)
+
+        collisionBox.setInteractive(
+            new Phaser.Geom.Polygon(points),
+            Phaser.Geom.Polygon.Contains
+        )
+
+        this.setupCollision(collisionBox)
+    }
+
+    private setupCollision(collision: Phaser.GameObjects.Polygon)
+    {
+        const color = 0xff0000
+        const alphaHover = 0.5
+        const alpha = 0
+
+        collision.setFillStyle(color, alpha)
+
+        const self = this
+
+        collision.on('pointerup', function (pointer) {
+            self._tileItem?.events.emit?.("pointerup")
+        });
+
+        collision.on('pointerdown', function (pointer) {
+            self._tileItem?.events.emit?.("pointerdown")
+        });
+
+        collision.on('pointerover', function (pointer) {
+            collision.setFillStyle(color, alphaHover)
+            self._tileItem?.events.emit?.("pointerover")
+        });
+
+        collision.on('pointerout', function (pointer) {
+            collision.setFillStyle(color, alpha)
+            self._tileItem?.events.emit?.("pointerout")
+        });
+    }
+
     private updateSprites(): void
     {
         const changeRotation = this._changeRotation
@@ -204,48 +282,105 @@ export class TileItemRender
         const coords = Grid.getOffsetCoordsItemOcuppes(this._tileItemInfo.size, changeRotation, flipCells)
         const sprites = this.getSprites()
 
+
         for (const sprite of sprites)
         {
+          
             const x = sprite.x
             const y = sprite.y
-            const key = `${x}:${y}`
+            //const key = `${x}:${y}`
 
-            sprite.image.setPosition(0, -500)
-            
             let cs = coords.filter(c => {
                 return c[0].x == (!changeRotation ? x : y) && c[0].y == (!changeRotation ? y : x)
             })
 
-            if(!cs[0])
-            {
-                console.log(key, `wot`)
-                continue
-            }
-
             let newCoord = cs[0][1]
 
+            
             const position = Tile.getTilePosition(newCoord.x, newCoord.y)
-
-            position.y += Tile.SIZE.y
 
             position.x += this._position.x
             position.y += this._position.y
 
+       
             const tileItemInfo = this.getInfo()
             const framesPerLayer = tileItemInfo.layers.y / (tileItemInfo.extraLayers+1)
             const layerY = this._layerY + (framesPerLayer * sprite.extraLayer)
-
-            
-            sprite.image.setPosition(position.x - Math.ceil(Tile.SIZE.x/2), position.y - Math.ceil(Tile.SIZE.y/2))
-            //sprite.image.setPosition(position.x, position.y)
-            sprite.image.setScale(!changeRotation ? 1 : -1, 1)
-            sprite.image.setOrigin(!changeRotation ? 0 : 1, 1)
-
             const frameKey = `${this._layerX}:${layerY}:${sprite.x}:${sprite.y}`;
+            const depth = (position.y) + (sprite.extraLayer*5) + this._depth
 
-            if(sprite.image.texture.has(frameKey)) sprite.image.setFrame(frameKey)
+            const image = sprite.image
+            if(image)
+            {
+                
+                //console.log(sprite)
+                
+                image.setPosition(
+                    position.x - Math.ceil(Tile.SIZE.x/2),
+                    position.y - Math.ceil(Tile.SIZE.y/2) + Tile.SIZE.y
+                )
+                image.setScale(!changeRotation ? 1 : -1, 1)
+                image.setOrigin(!changeRotation ? 0 : 1, 1)
+                image.setDepth(depth)
+                
 
-            sprite.image.setDepth((position.y - Tile.SIZE.y) + (sprite.extraLayer*5) + this._depth)
+                if(image.texture.has(frameKey)) image.setFrame(frameKey)
+            }
+
+            const collision = sprite.collision
+            if(collision)
+            {
+
+
+                //collision.setPosition(position.x - Math.ceil(Tile.SIZE.x/2), position.y - Math.ceil(Tile.SIZE.y/2) - Tile.SIZE.y)
+                const add = new Phaser.Math.Vector2(
+                    -Math.ceil(Tile.SIZE.x/2) - Tile.SIZE.x,
+                    -Math.ceil(Tile.SIZE.y/2)
+                )
+
+                const collisionPos = new Phaser.Math.Vector2(
+                    position.x - Math.ceil(Tile.SIZE.x/2),
+                    position.y - Math.ceil(Tile.SIZE.y/2)
+                )
+
+                if(changeRotation) collisionPos.x += Tile.SIZE.x
+
+                collision.setPosition(
+                    collisionPos.x,
+                    collisionPos.y
+                )
+
+                collision.setScale(!changeRotation ? 1 : -1, 1)
+                collision.setDepth(depth + 1000)
+            }
         }
     }
 }
+
+/*
+
+
+const position = Tile.getTilePosition(newCoord.x, newCoord.y)
+
+position.y += Tile.SIZE.y
+
+position.x += this._position.x
+position.y += this._position.y
+
+const tileItemInfo = this.getInfo()
+const framesPerLayer = tileItemInfo.layers.y / (tileItemInfo.extraLayers+1)
+const layerY = this._layerY + (framesPerLayer * sprite.extraLayer)
+
+
+sprite.image.setPosition(position.x - Math.ceil(Tile.SIZE.x/2), position.y - Math.ceil(Tile.SIZE.y/2))
+//sprite.image.setPosition(position.x, position.y)
+sprite.image.setScale(!changeRotation ? 1 : -1, 1)
+sprite.image.setOrigin(!changeRotation ? 0 : 1, 1)
+
+const frameKey = `${this._layerX}:${layerY}:${sprite.x}:${sprite.y}`;
+
+if(sprite.image.texture.has(frameKey)) sprite.image.setFrame(frameKey)
+
+sprite.image.setDepth((position.y - Tile.SIZE.y) + (sprite.extraLayer*5) + this._depth)
+
+*/

@@ -1,11 +1,9 @@
-import { SceneManager } from '@cafemania/sceneManager/SceneManager';
 import { BaseScene } from '@cafemania/scenes/BaseScene';
-import { Tile } from '@cafemania/tile/Tile';
-import { MoveScene, MPixelConfig } from '@cafemania/utils/MoveScene';
+import { MoveScene } from '@cafemania/utils/MoveScene';
 import { WorldText } from '@cafemania/utils/WorldText';
 import { ZoomManager } from '@cafemania/utils/ZoomManager';
 import { MapGridScene } from './MapGridScene';
-import { Test3Scene } from './Test3Scene';
+
 
 export class GameScene extends BaseScene
 {
@@ -19,7 +17,6 @@ export class GameScene extends BaseScene
     }
 
     public groundLayer!: Phaser.GameObjects.Layer
-
     public objectsLayer!: Phaser.GameObjects.Layer
 
     private _moveScene!: MoveScene
@@ -35,6 +32,15 @@ export class GameScene extends BaseScene
     {
         window['GameScene'] = this
 
+        this.setup()
+
+        this.drawWorldText("(0, 0)", new Phaser.Math.Vector2(0, 0), 'black')
+
+        this.cameras.main.setScroll(-671, 40)
+    }
+
+    private setup()
+    {
         this.groundLayer = this.add.layer()
         this.groundLayer.setDepth(0)
 
@@ -46,29 +52,7 @@ export class GameScene extends BaseScene
         this._moveScene = new MoveScene(this)
 
         this._zoom = new ZoomManager(this, this._moveScene)
-        this._zoom.setZoom(0)
-
-        this.drawWorldText("(0, 0)", new Phaser.Math.Vector2(0, 0), 'black')
-
-        ///this.test()
-    }
-
-    private test()
-    {
-        for (let y = 0; y < 30; y++)
-        {
-            for (let x = 0; x < 24; x++)
-            {
-                const position = Tile.getTilePosition(x, y)
-
-                this.add.image(position.x, position.y, 'floor/floor1')
-                const img = this.add.image(position.x, position.y, 'floorDecoration/floorDecoration1')
-                
-            }
-            
-        }
-        
-        //this.add.image(0, 0, 'floorDecoration/floorDecoration1')
+        this._zoom.setZoom(1)
     }
     
     public update(time: number, delta: number): void
@@ -80,7 +64,8 @@ export class GameScene extends BaseScene
 
         MapGridScene.grid = world.getGrid()
 
-        if(world) {
+        if(world)
+        {
             world.update(delta)
             world.render(delta)
         }

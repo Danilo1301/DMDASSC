@@ -1,9 +1,10 @@
 import { GameScene } from "@cafemania/scenes/GameScene"
 import { TileItem } from "@cafemania/tileItem/TileItem"
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor"
-import { TileItemType } from "@cafemania/tileItem/TileItemInfo"
+import { TileItemPlaceType, TileItemType } from "@cafemania/tileItem/TileItemInfo"
+import { TileItemWall } from "@cafemania/tileItem/TileItemWall"
 import { Direction } from "@cafemania/utils/Direction"
-import World from "@cafemania/world/World"
+import { World } from "@cafemania/world/World"
 
 
 export class Tile
@@ -125,6 +126,49 @@ export class Tile
     public getWorld()
     {
         return this._world
+    }
+
+    private getTileItemsThatOcuppesThisTile()
+    {
+        const items = this.getWorld().getGrid().getCell(this.x, this.y).ocuppiedByItems
+
+        return items.map(item =>
+        {
+            const cell = item.getOriginCell()
+            const tile = this.getWorld().getTile(cell.x, cell.y)
+
+            return tile.getTileItem(item.id)!
+        })
+    }
+
+    public isWalkable()
+    {
+        const tileItems = this.getTileItemsThatOcuppesThisTile()
+        
+        
+
+        for (const tileItem of tileItems)
+        {
+            if(tileItem.getInfo().type == TileItemType.WALL)
+            {
+                const wall = tileItem as TileItemWall
+
+                if(wall.getDoorInFront())
+                {
+                    return true
+                }
+            }
+
+            if(
+                tileItem.getInfo().placeType == TileItemPlaceType.FLOOR
+                && tileItem.getInfo().type != TileItemType.FLOOR
+                && tileItem.getInfo().type != TileItemType.DOOR
+            ) return false
+
+            
+        }
+        
+        return true
     }
 
     public hasDoor(): boolean

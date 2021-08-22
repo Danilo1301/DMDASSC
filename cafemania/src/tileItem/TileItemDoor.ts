@@ -16,7 +16,7 @@ export class TileItemDoor extends TileItem
 
         setInterval(() => {
 
-            this.setOpen(true)
+            this.setOpen(!this._isOpen)
             
         }, 1200)
     }

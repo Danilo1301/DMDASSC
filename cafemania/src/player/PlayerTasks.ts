@@ -7,7 +7,7 @@ import { TileItemWall } from "@cafemania/tileItem/TileItemWall"
 import PathFind from "@cafemania/utils/PathFind"
 import { Player } from "./Player"
 
-import { Task } from "./TaskManager"
+import { Task } from "./PlayerTaskManager"
 
 export class TaskWalkToTile extends Task
 {
@@ -28,9 +28,6 @@ export class TaskWalkToTile extends Task
 
     public onStart()
     {
-
-
-
         const world = this.player.getWorld()
         const pathFind = new PathFind()
 
@@ -51,50 +48,18 @@ export class TaskWalkToTile extends Task
 
         grid.getCells().map(cell =>
         {
-            let canWalk = true
-
             const tile = world.getTile(cell.x, cell.y)
 
-            let hasWallWithDoor = false
+            let isWalkable = tile.isWalkable()
+       
+            if(tile.x == this.tileX && tile.y == this.tileY) isWalkable = true
 
-            for (const item of cell.ocuppiedByItems)
-            {
-                const tileItem = world.getTile(item.getOriginCell().x, item.getOriginCell().y).getTileItem(item.id)!
-                
-                const result = checkTileItem(tile, tileItem)
-
-                if(result === false) canWalk = false
-
-                //
-
-                
-                if(tileItem.getInfo().type == TileItemType.WALL)
-                {
-                    const wall = tileItem as TileItemWall
-
-                    //console.log("itza wallru", wall.getDoorInFront())
-
-                    if(wall.getDoorInFront() != undefined) hasWallWithDoor = true
-                }
-
-            }
-
-            const isEndTile = (tile.x == this.tileX && tile.y == this.tileY)
-            const hasDoor = tile.hasDoor()
-
-            if(isEndTile) canWalk = true
-            if(hasDoor) canWalk = true
-
-            if(hasWallWithDoor) canWalk = true
-
-            pathFind.add(cell.x, cell.y, canWalk)
+            pathFind.add(cell.x, cell.y, isWalkable)
         })
 
         const atTile = this.player.getAtTile()
 
-        pathFind.setStart(atTile?.x || 0, atTile?.y || 0)
-        pathFind.setEnd(this.tileX, this.tileY)
-        pathFind.find(async (path) =>
+        pathFind.find(atTile.x, atTile.y, this.tileX, this.tileY, async (path) =>
         {
             if(path.length == 0) return
             path.splice(0, 1)
@@ -107,12 +72,14 @@ export class TaskWalkToTile extends Task
 
                 if(isEndTile && this.dontEnterTile) continue
        
-                const task = new TaskWalkToSingleTile(this.player, world.getTile(p.x, p.y), !isEndTile)
+                //const task = new TaskWalkToSingleTile(this.player, world.getTile(p.x, p.y), !isEndTile)
+                const task = new TaskWalkToSingleTile(this.player, world.getTile(p.x, p.y))
                 tasks.push(task)
             } 
 
             tasks.reverse().map(task => this.player.getTaskManager().addTaskAt(task, 1))
         })
+
 
         this.completeTask()
     }
@@ -122,15 +89,13 @@ export class TaskWalkToSingleTile extends Task
 {
     private player: Player
     private tile: Tile
-    private keepMoving: boolean
 
-    constructor(player: Player, tile: Tile, keepMoving: boolean)
+    constructor(player: Player, tile: Tile)
     {
         super()
 
         this.player = player
         this.tile = tile
-        this.keepMoving = keepMoving
     }
 
     public onStart()

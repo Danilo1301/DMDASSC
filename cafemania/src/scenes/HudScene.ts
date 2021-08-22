@@ -11,6 +11,7 @@ export class HudScene extends BaseScene
 
     private _notification!: NotificationBar
 
+
     constructor()
     {
         super({})
@@ -32,7 +33,7 @@ export class HudScene extends BaseScene
 
     public addNotification(text: string)
     {
-        this._notification.addItem(text)
+        this._notification?.addItem(text)
     }
 
     public create(): void
