@@ -4,7 +4,9 @@ class Node
     public y: number
     public canWalk: boolean
 
-    public fScore: number = 0
+    public gCost: number = 0
+    public hCost: number = 0
+    public fCost: number = 0
 
     public neighbours: Node[] = []
 
@@ -16,10 +18,18 @@ class Node
         this.y = y
         this.canWalk = canWalk
     }
+
+    public calculateFCost()
+    {
+        this.fCost = this.gCost + this.hCost
+    }
 }
 
 export default class PathFind
 {
+    private static MOVE_STRAIGHT_COST = 10
+    private static MOVE_DIAGONAL_COST = 14
+
     private _nodes = new Map<string, Node>()
 
     private _endNode!: Node
@@ -108,11 +118,30 @@ export default class PathFind
             
         })
 
+        //
+
+        this._nodes.forEach(node => {
+            node.gCost = Infinity
+            node.calculateFCost()
+        })
+
+        this._startNode.gCost = 0
+        this._startNode.hCost = this.calculateDistanceCost(this._startNode, this._endNode)
+
         this._openNodes.push(this._startNode)
 
         this.process()
     }
     
+    private calculateDistanceCost(a: Node, b: Node)
+    {
+        const xDistance = Math.abs(a.x - b.x)
+        const yDistance = Math.abs(a.y - b.y)
+        const remaining = Math.abs(xDistance - yDistance)
+
+        return PathFind.MOVE_DIAGONAL_COST * Math.min(xDistance, yDistance) + PathFind.MOVE_STRAIGHT_COST * remaining
+    }
+
     public findNodeNeighbours(node: Node): Node[]
     {
         const neighbours: Node[] = []
@@ -172,33 +201,29 @@ export default class PathFind
         //console.log(endNode, path)
     }
 
+    private getLowestFCostNode(nodes: Node[])
+    {
+        let lowestFCostNode = nodes[0]
+
+        for (const node of nodes)
+        {
+            if(node.fCost < lowestFCostNode.fCost)
+            {
+                lowestFCostNode = node
+            }
+        }
+
+        return lowestFCostNode
+    }
+
     private process()
     {
         //console.log(`${this._openNodes.length} open nodes`)
         //console.log(this)
 
-        let node: Node | undefined
-        let nodefs: number | undefined
+        let node: Node | undefined = this.getLowestFCostNode(this._openNodes)
 
-        for (const openNode of this._openNodes)
-        {
-            const startNode = this._startNode
-
-            const dx = openNode.x - startNode.x;
-            const dy = openNode.y - startNode.y;
-
-            openNode.fScore = Math.sqrt(dx*dx + dy*dy);
-
-            if(openNode.fScore < (nodefs || Infinity))
-            {
-                nodefs = openNode.fScore
-                node = openNode
-            }
-        }
         
-
-
-
         if(!node)
         {
             this.onFinish()

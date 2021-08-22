@@ -30,6 +30,7 @@ export class Player
 
     private _state: PlayerState = PlayerState.IDLE
 
+    private _finalTargetTile: Tile | undefined
     private _targetTile: Tile | undefined
     private _targetTileDistance: number = 0
     private _distanceMoved: number = 0
@@ -162,7 +163,14 @@ export class Player
                 this._targetTile = undefined
                 this._moveToTileCallback?.()
 
-                this._state = PlayerState.IDLE
+                if(this._atTile == this._finalTargetTile)
+                {
+                    this._finalTargetTile = undefined
+
+                    this._state = PlayerState.IDLE
+                }
+
+                
             }
         }
 
@@ -293,8 +301,8 @@ export class Player
 
     public taskWalkToTile(x: number, y: number, dontEnterTile?: boolean)
     {
-        //this._finalTargetTile = tile
-
+        this._finalTargetTile = this.getWorld().getTile(x, y)
+     
         this._taskManager.addTask(new TaskWalkToTile(this, x, y, dontEnterTile))
     }
 
