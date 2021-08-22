@@ -14,11 +14,11 @@ export class TileItemDoor extends TileItem
     {
         super(tileItemInfo)
 
-        setInterval(() => {
-
+        this.events.on("pointerup", () =>
+        {
             this.setOpen(!this._isOpen)
-            
-        }, 1200)
+        })
+
     }
 
     public render(delta: number)

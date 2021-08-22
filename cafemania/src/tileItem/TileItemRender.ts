@@ -164,7 +164,7 @@ export class TileItemRender
 
 
                     //change
-                    const canCreateCol = this._tileItemInfo.type == TileItemType.STOVE
+                    const canCreateCol = this._tileItemInfo.type == TileItemType.STOVE || this._tileItemInfo.type == TileItemType.DOOR
 
                     if(extraLayer == 0 && canCreateCol) this.createCollisionForSprite(sprite)
 
