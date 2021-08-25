@@ -81,18 +81,17 @@ export class WorldServer extends World
 
         this.setupWorldReceiveEvents()
     }
-    
-    private getSocket()
+
+    private getClient()
     {
-        const client = this._client
-
-        if(!client) return
-
-        return client.getSocket()
+        return this._client!
     }
+    
 
     private setupWorldSendEvents()
     {
+        console.log(`[WorldServer] Listening for World events`)
+
         const world = this
 
         world.events.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (client: PlayerClient) =>
@@ -101,7 +100,7 @@ export class WorldServer extends World
                 client: client.serialize()
             }
 
-            this.getSocket()?.emit(WorldEvent.PLAYER_CLIENT_SPAWNED, data)
+            this.getClient()?.send(WorldEvent.PLAYER_CLIENT_SPAWNED, data)
         })
 
         world.events.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (client: PlayerClient, chair?: TileItemChair) =>
@@ -111,7 +110,7 @@ export class WorldServer extends World
                 chairId: chair?.id
             }
 
-            this.getSocket()?.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, data)
+            this.getClient()?.send(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, data)
         })
 
         world.events.on(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, (waiter: PlayerWaiter, client: PlayerClient, counter: TileItemCounter) =>
@@ -122,27 +121,27 @@ export class WorldServer extends World
                 counterId: counter.id
             }
 
-            this.getSocket()?.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, data)
+            this.getClient()?.send(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, data)
         })
 
 
         world.events.on(WorldEvent.TILE_ITEM_UPDATED, (tileItem: TileItem) =>
         {
-            const client = this._client
-            
-            client?.addTileToUpdate(tileItem.getTile())
+            this.getClient()?.addTileToUpdate(tileItem.getTile())
 
             console.log(`[WorldServer] Tile item updated ${tileItem.constructor.name} : ${tileItem.id}`)
         })
         
     }
-
+    
     private setupWorldReceiveEvents()
     {
-        const socket = this.getSocket()!
+        console.log(`[WorldServer] Listening for Socket events`)
+
+        const client = this.getClient()!
         const world = this
 
-        socket.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (data: IPacketClientReachedDoorData) =>
+        client.events.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (data: IPacketClientReachedDoorData) =>
         {
             const player = world.findPlayer(data.clientId) as PlayerClient | undefined
 
@@ -151,7 +150,7 @@ export class WorldServer extends World
             player.warpToDoor()
         })
 
-        socket.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (data: IPacketClientReachedDoorData) =>
+        client.events.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (data: IPacketClientReachedDoorData) =>
         {
             const player = world.findPlayer(data.clientId) as PlayerClient | undefined
 
@@ -160,7 +159,7 @@ export class WorldServer extends World
             player.warpToChair()
         })
 
-        socket.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (data: IPacketWaiterFinishServeData) =>
+        client.events.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (data: IPacketWaiterFinishServeData) =>
         {
             const waiter = world.findPlayer(data.waiterId) as PlayerWaiter | undefined
 
@@ -169,7 +168,7 @@ export class WorldServer extends World
             waiter.finishServing()
         })
 
-        socket.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (data: IPacketStoveBeginCookData) =>
+        client.events.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (data: IPacketStoveBeginCookData) =>
         {
             const stove = world.findTileItem(data.stoveId) as TileItemStove | undefined
 
@@ -179,6 +178,9 @@ export class WorldServer extends World
 
             stove.startCook(dish)
         })
+     
+
+        
     }
 
     private setupWorld()

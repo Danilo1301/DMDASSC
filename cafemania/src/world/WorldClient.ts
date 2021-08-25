@@ -38,7 +38,7 @@ export class WorldClient extends World
                 clientId: client.id
             }
 
-            world.getNetwork().emit(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, data)
+            world.getNetwork().send(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, data)
         })
 
         world.events.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (client: PlayerClient) =>
@@ -49,7 +49,7 @@ export class WorldClient extends World
                 clientId: client.id
             }
 
-            world.getNetwork().emit(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, data)
+            world.getNetwork().send(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, data)
         })
         
         world.events.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (waiter: PlayerWaiter) =>
@@ -60,7 +60,7 @@ export class WorldClient extends World
                 waiterId: waiter.id
             }
 
-            world.getNetwork().emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, data)
+            world.getNetwork().send(WorldEvent.PLAYER_WAITER_FINISH_SERVE, data)
         })
 
         world.events.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (stove: TileItemStove, dish: Dish) =>
@@ -72,7 +72,7 @@ export class WorldClient extends World
                 dishId: dish.id
             }
 
-            world.getNetwork().emit(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, data)
+            world.getNetwork().send(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, data)
         })
 
         /*
@@ -104,11 +104,11 @@ export class WorldClient extends World
     private setupWorldReceiveEvents()
     {
         const world = this
-        const socket = world.getNetwork().getSocket()
+        const ev = world.getNetwork().events
 
-        socket.on("worldData", packet => world.onReceivePacketWorldData(packet))
+        ev.on("worldData", packet => world.onReceivePacketWorldData(packet))
 
-        socket.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (data: IPacketSpawnClientData) =>
+        ev.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (data: IPacketSpawnClientData) =>
         {
             HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_SPAWNED')
 
@@ -119,7 +119,7 @@ export class WorldClient extends World
 
 
 
-        socket.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (data: IPacketClientFindChairData) =>
+        ev.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (data: IPacketClientFindChairData) =>
         {
             HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_SIT_CHAIR_DATA')
 
@@ -140,7 +140,7 @@ export class WorldClient extends World
             client.setGoingToChair(chair)
         })
 
-        socket.on(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, (data: IPacketWaiterServeClientData) =>
+        ev.on(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, (data: IPacketWaiterServeClientData) =>
         {
             HudScene.Instance.addNotification('[receive] PLAYER_WAITER_SERVE_CLIENT')
 

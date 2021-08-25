@@ -91,7 +91,7 @@ export class MainScene extends BaseScene
 
             const world = this.getGame().createClientWorld()
 
-            network.emit("loaded")
+            network.send("loaded")
         })
         network.connect()
     }

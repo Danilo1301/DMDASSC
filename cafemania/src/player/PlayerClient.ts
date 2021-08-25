@@ -33,6 +33,8 @@ export class PlayerClient extends Player
         this._type = PlayerType.CLIENT
 
         this._waitForGameClient = world.type == WorldType.SERVER
+
+        this.log(`created`)
     }
 
     public isWorldServer()
@@ -130,18 +132,18 @@ export class PlayerClient extends Player
 
             this._findChairAttempts++
 
-            console.log(`attempt ${this._findChairAttempts}`)
+            ///console.log(`attempt ${this._findChairAttempts}`)
 
             //attempt
 
             const result = this.tryFindAvaliableChair()
 
             if(result) {
-                console.log("yes, we found!")
+                //console.log("yes, we found!")
 
                 this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair)
             } else {
-                console.log("no")
+                //console.log("no")
             }
             
 
@@ -150,7 +152,7 @@ export class PlayerClient extends Player
             {
                 this._isWaitingForChair = false
 
-                console.log(`no chairs`)
+                //console.log(`no chairs`)
 
                 this.exitCafe()
 
@@ -183,9 +185,6 @@ export class PlayerClient extends Player
         this.setAtTile(tile.x, tile.y)
 
         this._isWaitingForChair = true
-
-        
-        console.log("we warped")
     }
 
     public taskWalkToChair()
@@ -205,13 +204,11 @@ export class PlayerClient extends Player
 
         this.sitAtChair(chair)
         this.setIsWaitingForWaiter(true)
-        
-        console.log("warp to cahir")
     }
 
     public startClientBehavior()
     {
-        this.log(`startClientBehavior`)
+        //this.log(`startClientBehavior`)
 
         this._goingToDoor = this.getClosestDoor()
 
@@ -258,7 +255,7 @@ export class PlayerClient extends Player
 
     public tryFindAvaliableChair()
     {
-        this.log(`tryFindAvaliableChair`)
+        //this.log(`tryFindAvaliableChair`)
 
         const chairs = this.getWorld().getChairs(true)
 
@@ -292,7 +289,7 @@ export class PlayerClient extends Player
 
     public exitCafe()
     {
-        this.log(`exit cafe`)
+        //this.log(`exit cafe`)
 
         this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, this)
 

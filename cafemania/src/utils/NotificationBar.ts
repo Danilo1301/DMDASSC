@@ -9,6 +9,8 @@ class Item
 
     private _lifeTime: number = 0
 
+    public width: number = 240
+
     public get canDestroy()
     {
         return this._lifeTime >= 5000
@@ -18,15 +20,25 @@ class Item
     {
         const container = this._container = scene.add.container()
 
+        const w = this.width
+
         const textObj = this._text = scene.add.bitmapText(0, 0, 'gem', text, 11).setTint(0)
         textObj.setOrigin(0.5, 0.5)
-        textObj.setPosition(200/2, 25/2)
+        textObj.setPosition(w/2, 25/2)
 
         const graphics = this._graphics = scene.add.graphics()
         graphics.fillStyle(0xffffff)
-        graphics.fillRect(0, 0, 200, 25)
+        graphics.fillRect(0, 0, w, 25)
 
         container.add([graphics, textObj])
+
+        this.setVisible(false)
+    }
+
+    public setVisible(value: boolean)
+    {
+        this._text.setAlpha(value ? 1 : 0)
+        this._graphics.setAlpha(value ? 1 : 0)
     }
 
     public setPosition(position: Phaser.Math.Vector2, dontLerp?: boolean)
@@ -74,28 +86,28 @@ export class NotificationBar
     public addItem(text: string)
     {
         const item = new Item(this._scene, text)
-
         item.setPosition(new Phaser.Math.Vector2(this._scene.game.scale.gameSize.width, this._items.length * 30), true)
-
+        item.setVisible(true)
+        
         this._items.push(item)
+
+        
     }
 
     private update(time: number, delta: number)
     {
         const toDestroy = this._items.filter(item => item.canDestroy)
 
-        toDestroy.map(item => {
+        toDestroy.map(item =>
+        {
             this._items.splice(this._items.indexOf(item), 1)
             item.destroy()
         })
 
-        this._items.map((item, index) => {
-
-            item.setPosition(new Phaser.Math.Vector2(this._scene.game.scale.gameSize.width - 200, index * 30))
-
+        this._items.map((item, index) =>
+        {
+            item.setPosition(new Phaser.Math.Vector2(this._scene.game.scale.gameSize.width - item.width, index * 30))
             item.update(delta)
         })
-
-
     }
 }

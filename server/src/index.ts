@@ -45,7 +45,7 @@ server.listen(port, () => console.log(`Express web server started: http://localh
 //discord bot
 import { DiscordBot } from './bot'
 
-const discordBot = new DiscordBot();
+//const discordBot = new DiscordBot();
 
 /*
 import mouseGame from './mouseGame'

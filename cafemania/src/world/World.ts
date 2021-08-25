@@ -346,9 +346,12 @@ export class World
 
         this.addNewTileItem('door1', this.getTile(0, 1), Direction.EAST)
 
-        this.addNewTileItem('stove1', this.getTile(0, 4), Direction.EAST)
-        this.addNewTileItem('stove1', this.getTile(0, 5), Direction.EAST)
+        this.addNewTileItem('stove1', this.getTile(0, 2), Direction.EAST)
+        this.addNewTileItem('stove1', this.getTile(0, 3), Direction.EAST)
 
+        this.addNewTileItem('counter1', this.getTile(0, 4), Direction.EAST)
+        this.addNewTileItem('counter1', this.getTile(0, 5), Direction.EAST)
+        this.addNewTileItem('counter1', this.getTile(0, 6), Direction.EAST)
         this.addNewTileItem('counter1', this.getTile(0, 7), Direction.EAST)
         this.addNewTileItem('counter1', this.getTile(0, 8), Direction.EAST)
         

@@ -1,5 +1,5 @@
 import { GameServer } from "@cafemania/game/GameServer";
-import { IPacketWorldData } from "@cafemania/network/Packet";
+import { IPacketWorldData, Packet } from "@cafemania/network/Packet";
 import { Tile } from "@cafemania/tile/Tile";
 import { WorldServer } from "@cafemania/world/WorldServer";
 import { Socket } from "socket.io";
@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class Client
 {
+    public events = new Phaser.Events.EventEmitter()
+
     private _game: GameServer
 
     private _socket?: Socket
@@ -19,27 +21,38 @@ export class Client
 
     private _lastSentData: number = 0
 
+    private _lastSentPackets: number = 0
+    private _packets: Packet[] = []
+
     constructor(game: GameServer)
     {
         this._game = game
         this._id = uuidv4()
 
+        console.log(`[Client] Client created`)
+
+        console.log(`[Client] Creating world`)
         this._world = game.createServerWorld()
 
+        console.log(`[Client] Starting update timer`)
         this.startUpdateTimer()
     }
 
     public addTileToUpdate(tile: Tile)
     {
-        if(this._updateTiles.includes(tile)) return
+        //this._packets.push()
 
-        this._updateTiles.push(tile)
+        //if(this._updateTiles.includes(tile)) return
+
+        //this._updateTiles.push(tile)
     }
 
     public get id()
     {
         return this._id
     }
+
+    private _hasLoaded: boolean = false
 
     private startUpdateTimer()
     {
@@ -57,11 +70,34 @@ export class Client
                 this._world.update(delta)
             }
 
-            if(now - this._lastSentData >= 500)
-            {
-                this.sendData()
-            }
+            this.processSendPackets()
+            
         }, 0)
+    }
+
+    private processSendPackets()
+    {
+        if(!this.isConnected()) return
+
+        const now = Date.now()
+
+        if(now - this._lastSentPackets >= 500 && this._packets.length > 0)
+        {
+            this._lastSentPackets = now
+
+            this.getSocket().emit('packets', this._packets)
+
+            console.log(`[Client] Sent ${this._packets.length} packets ${this._packets.map(packet => packet.id).join(",") }`)
+
+            this._packets = []
+        }
+    }
+
+    public sendAllUpdatesQueued()
+    {
+        if(this._updateTiles.length == 0) return
+
+        this.sendData()
     }
 
     public isConnected()
@@ -74,18 +110,30 @@ export class Client
         return this._game
     }
 
-    public getSocket()
+    private getSocket()
     {
         return this._socket!
     }
 
+    /*
     public emit(key: string, packet)
     {
         if(!this.isConnected()) return
 
         this.getSocket().emit(key, packet)
     }
+    */
     
+    public send(id: string, data?: any)
+    {
+        const packet: Packet = {
+            id: id,
+            data: data
+        }
+
+        this._packets.push(packet)
+    }
+
     public sendFirstJoinWorldData()
     {
         this.sendData(true)
@@ -111,11 +159,11 @@ export class Client
         
         this._updateTiles = []
 
-        this.emit("worldData", data)
+        this.send("worldData", data)
 
         this._lastSentData = Date.now()
 
-        console.log(JSON.stringify(data))
+        console.log(`[Client] Sending data (${JSON.stringify(data).length} len)`)
     }
 
     public getWorld()
@@ -125,19 +173,46 @@ export class Client
 
     public setSocket(socket: Socket)
     {
+        if(this._socket)
+        {
+
+            console.warn("[Client] Already connected")
+            return
+        }
+
         this._socket = socket
 
+        
         socket.on("disconnect", () => this.onDisconnect())
-        socket.on("loaded", () => this.onReady())
+        socket.on("packets", (packets: Packet[]) =>
+        {
+            packets.map(packet => this.onReceivePacket(packet))
+        })
+
+        this.events.on('loaded', () => this.onLoaded())
 
         this.getWorld().setClient(this)
 
         this.onConnect()
     }
 
-
-    private onReady()
+    private onReceivePacket(packet: Packet)
     {
+        console.log(`[Client] Received packet '${packet.id}'`)
+
+        try {
+            this.events.emit(packet.id, packet.data)
+        } catch (error) {
+            console.log(`Error during process of packet '${packet.id}'\n\n`, error)
+        }
+        
+    }
+
+    private onLoaded()
+    {
+        if(this._hasLoaded) return
+        this._hasLoaded = true
+
         this.sendFirstJoinWorldData()
 
         this.getWorld().beginTestClients()
@@ -147,7 +222,7 @@ export class Client
 
     private onConnect()
     {
-        console.log(`Client ${this.id} connected`)
+        console.log(`[Client] Client ${this.id} connected`)
 
         this.getWorld().createDefaultWaiters()
     }

@@ -53,3 +53,9 @@ export interface IPacketTileItemIdData
 {
     tileitemId: string
 }
+
+export interface Packet
+{
+    id: string
+    data: any
+}

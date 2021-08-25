@@ -3,7 +3,7 @@ import { Game } from '@cafemania/game/Game';
 import { WorldServer } from '@cafemania/world/WorldServer';
 import socketio, { Socket } from 'socket.io';
 
-let client: Client;
+//let client: Client;
 
 export class GameServer extends Game
 {
@@ -13,7 +13,7 @@ export class GameServer extends Game
 
         io.on("connection", socket => this.onSocketConnect(socket))
 
-        client = new Client(this)
+        //client = new Client(this)
     }
 
     public async start(): Promise<void>
@@ -23,7 +23,9 @@ export class GameServer extends Game
 
     private onSocketConnect(socket: Socket)
     {
-        //const client = new Client()
+        console.log(`[GameServer] New socket connected`)
+
+        const client = new Client(this)
         client.setSocket(socket)
     }
 

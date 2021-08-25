@@ -37,8 +37,6 @@ export class TileItemStove extends TileItem
         {
             this.startCookingSomething()
         })
-
-        console.log(this)
     }
 
     public isCooking() { return this._data.cookingDish != undefined }

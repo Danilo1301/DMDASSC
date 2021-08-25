@@ -43,12 +43,12 @@ export class TileItemDoor extends TileItem
 
     public onAddedToTile(tile: Tile)
     {
-        console.log("Door added to tile")
+        //console.log("Door added to tile")
     }
 
     public onRemovedFromTile(tile: Tile)
     {
-        console.log("Door removed from tile")
+        //console.log("Door removed from tile")
     }
 
     public updateSprites()
