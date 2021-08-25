@@ -23,6 +23,8 @@ export class PlayerWaiter extends Player
 
     private _dishPlate?: DishPlate
 
+    private _hasGotDish: boolean = false
+
     public isWorldClient()
     {
         return this.getWorld().type == WorldType.CLIENT
@@ -112,16 +114,18 @@ export class PlayerWaiter extends Player
         this._servingCounter = counter
 
         
+        counter.addWaiterComing()
+
         if(this.isWorldServer())
         {
-            counter.removeOneDish()
+            //counter.removeOneDish()
 
             this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, this, client, counter)
 
             return
         }
 
-        counter.addWaiterComing()
+        
 
 
         this.taskWalkNearToTile(counter.getTile())
@@ -130,7 +134,7 @@ export class PlayerWaiter extends Player
 
             this._isCarryingDishPlate = true
 
-            counter.removeOneDish()
+            this.onGetDish()
         })
 
         this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTile())
@@ -150,6 +154,23 @@ export class PlayerWaiter extends Player
         })
     }
     
+    public onGetDish()
+    {
+        const counter = this._servingCounter!
+
+        this._hasGotDish = true
+
+        counter.removeWaiterComing()
+
+        counter.removeOneDish()
+        counter.setAsUpdated()
+
+        if(this.isWorldClient())
+        {
+            this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, this)
+        }
+    }
+
     public finishServing()
     {
         const client = this._servingPlayer!
@@ -164,9 +185,16 @@ export class PlayerWaiter extends Player
 
         if(this.isWorldServer())
         {
-            //counter.setAsUpdated()
+            //unlikely to happen
+            if(!this._hasGotDish)
+            {
+                counter.removeWaiterComing()
+                counter.removeOneDish()
+                counter.setAsUpdated()
+            }
         }
 
+        this._hasGotDish = false
         this._servingPlayer = undefined
         this._servingDish = undefined
         this._servingCounter = counter
@@ -227,157 +255,3 @@ export class PlayerWaiter extends Player
         this._dishPlate = undefined
     }
 }
-
-/*
-//make this protected
-    private isWorldClient()
-    {
-        return this.getWorld().type == WorldType.CLIENT
-    }
-
-    private isWorldServer()
-    {
-        return this.getWorld().type == WorldType.SERVER
-    }
-
-    public setCarryingDish(dish?: Dish)
-    {
-        this._carryingDish = dish
-    }
-
-    public setDisable(value: boolean)
-    {
-        this._disabled = value
-    }
-
-    public setIsBusy(value: boolean)
-    {
-        this._busy = value
-    }
-
-    public render(delta: number)
-    {
-        super.render(delta)
-
-        if(this._carryingDish)
-        {
-            if(!this._carryingDishPlate)
-            {
-                
-
-                this._carryingDishPlate = new DishPlate(this._carryingDish)
-                
-            }
-
-            const h = 20
-            const position = this.getPosition().add(new Phaser.Math.Vector2(0, -h))
-            
-
-            this._carryingDishPlate.setPosition(position.x, position.y) 
-            this._carryingDishPlate.setDepth(position.y + h)
-        }
-        else
-        {
-            if(this._carryingDishPlate)
-            {
-                this._carryingDishPlate.destroy()
-                this._carryingDishPlate = undefined
-            }
-        }
-    }
-
-    public update(delta: number)
-    {
-        super.update(delta)
-
-        if(this._disabled) return
-
-        if(this._busy) return
-        
-        const world = this.getWorld()
-
-        const players = this.getWorld().getPlayerClients()
-
-        for (const player of players)
-        {
-            if(player.isWaitingForWaiter())
-            {
-                const counter = this.getAnyAvaliableCounter()
-
-                if(counter)
-                {
-                    this.taskBeginServe(player, counter)
-                    
-                    this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_BEGIN_SERVE, this, player, counter)
-                }
-
-                return
-            }
-        }
-        
-    }
-    
-    public getAnyAvaliableCounter()
-    {
-        const counters = this.getWorld().getCounters().filter(counter => {
-            if(counter.isEmpty()) return false
-
-            const servings = counter.getDishAmount() - counter.getAmountOfWaitersComing()
-
-            if(servings <= 0) return false
-
-            return true
-        })
-
-        if(counters.length == 0) return
-
-        return Utils.shuffleArray(counters)[0]
-    }
-
-    public taskBeginServe(client: PlayerClient, counter: TileItemCounter)
-    {
-        client.setIsWaitingForWaiter(false)
-
-        this.setIsBusy(true)
-
-        const dish = counter.getDish()
-
-        counter.addWaiterComing()
-
-        this.taskWalkNearToTile(counter.getTile())
-
-        this.taskExecuteAction(() => {
-
-            this.setCarryingDish(dish)
-            counter.removeOneDish()
-
-        })
-
-        this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTile())
-
-        this.taskExecuteAction(() =>
-        {
-            this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, this)
-
-            this.setCarryingDish(undefined)
-
-            const table = client.getChairPlayerIsSitting().getTableInFront()
-
-            table!.setDish(dish)
-
-            this.setIsBusy(false)
-
-            counter.removeWaiterComing()
-        })
-
-
-        if(this.isWorldServer())
-        {
-            this.getTaskManager().clearTasks()
-
-            console.log(`Send to client `)
-
-            console.log("heh")
-        }
-    }
-*/

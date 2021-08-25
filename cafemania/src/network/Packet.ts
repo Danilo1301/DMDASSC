@@ -38,6 +38,11 @@ export interface IPacketWaiterServeClientData
     counterId: string
 }
 
+export interface IPacketWaiterReachCounterData
+{
+    waiterId: string
+}
+
 export interface IPacketWaiterFinishServeData
 {
     waiterId: string
@@ -58,4 +63,9 @@ export interface Packet
 {
     id: string
     data: any
+}
+
+export interface IPacketData_PlayerId
+{
+    playerId: string
 }

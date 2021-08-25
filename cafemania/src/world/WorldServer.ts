@@ -1,6 +1,6 @@
 import { Client } from "@cafemania/client/Client";
 import { GameServer } from "@cafemania/game/GameServer";
-import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterServeClientData } from "@cafemania/network/Packet";
+import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketData_PlayerId, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterReachCounterData, IPacketWaiterServeClientData } from "@cafemania/network/Packet";
 import { PlayerClient } from "@cafemania/player/PlayerClient";
 import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
 import { TileItem } from "@cafemania/tileItem/TileItem";
@@ -131,6 +131,15 @@ export class WorldServer extends World
 
             console.log(`[WorldServer] Tile item updated ${tileItem.constructor.name} : ${tileItem.id}`)
         })
+
+        world.events.on(WorldEvent.PLAYER_CLIENT_DESTROYED, (client: PlayerClient) =>
+        {
+            const data: IPacketData_PlayerId = {
+                playerId: client.id
+            }
+
+            this.getClient()?.send(WorldEvent.PLAYER_CLIENT_DESTROYED, data)
+        })
         
     }
     
@@ -138,41 +147,56 @@ export class WorldServer extends World
     {
         console.log(`[WorldServer] Listening for Socket events`)
 
-        const client = this.getClient()!
+        const clientEvents = this.getClient()!.events
         const world = this
 
-        client.events.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (data: IPacketClientReachedDoorData) =>
+        clientEvents.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (data: IPacketClientReachedDoorData) =>
         {
-            const player = world.findPlayer(data.clientId) as PlayerClient | undefined
+            const client = world.findPlayer(data.clientId) as PlayerClient | undefined
 
-            if(!player) throw `Player not found`
+            if(!client) throw `Client not found (PLAYER_CLIENT_REACHED_DOOR)`
 
-            player.warpToDoor()
+            client.warpToDoor()
         })
 
-        client.events.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (data: IPacketClientReachedDoorData) =>
+        clientEvents.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (data: IPacketClientReachedDoorData) =>
         {
-            const player = world.findPlayer(data.clientId) as PlayerClient | undefined
+            //error is here
+            console.log(-1)
+            console.log(data)
 
-            if(!player) throw `Player not found`
+            const client = world.findPlayer(data.clientId) as PlayerClient | undefined
 
-            player.warpToChair()
+            if(!client) throw `\n\nClient not found (PLAYER_CLIENT_REACHED_CHAIR)\n\n`
+
+            client.warpToChair()
         })
 
-        client.events.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (data: IPacketWaiterFinishServeData) =>
+        clientEvents.on(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, (data: IPacketWaiterReachCounterData) =>
+        {
+            //
+            const waiter = world.findPlayer(data.waiterId) as PlayerWaiter | undefined
+
+            if(!waiter) throw `Waiter not found (PLAYER_WAITER_REACHED_COUNTER)`
+
+            waiter.onGetDish()
+        })
+
+
+        clientEvents.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (data: IPacketWaiterFinishServeData) =>
         {
             const waiter = world.findPlayer(data.waiterId) as PlayerWaiter | undefined
 
-            if(!waiter) throw `Waiter not found`
+            if(!waiter) throw `Waiter not found (PLAYER_WAITER_FINISH_SERVE)`
 
             waiter.finishServing()
         })
 
-        client.events.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (data: IPacketStoveBeginCookData) =>
+        clientEvents.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (data: IPacketStoveBeginCookData) =>
         {
             const stove = world.findTileItem(data.stoveId) as TileItemStove | undefined
 
-            if(!stove) throw `Waiter not found`
+            if(!stove) throw `Waiter not found (TILE_ITEM_STOVE_BEGIN_COOK)`
 
             const dish = world.getGame().getDishItemFactory().getDish(data.dishId)
 

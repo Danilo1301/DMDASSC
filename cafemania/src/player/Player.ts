@@ -1,7 +1,7 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { Direction } from "@cafemania/utils/Direction";
-import { World } from "@cafemania/world/World"
+import { World, WorldEvent } from "@cafemania/world/World"
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerAnimation } from "./PlayerAnimation";
 import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
@@ -84,6 +84,11 @@ export class Player
         this._atTile = world.getTile(0, 0)
 
         window['player'] = this
+    }
+
+    public onCreate()
+    {
+        this.log(`created`)
     }
 
     public get id()
@@ -238,7 +243,7 @@ export class Player
                 this._targetTile = undefined
                 this._moveToTileCallback?.()
 
-                console.log(`[Player] Is at ${this._atTile.x},${this._atTile.y}`)
+                //console.log(`[Player] Is at ${this._atTile.x},${this._atTile.y}`)
 
                 if(this._atTile == this._finalTargetTile)
                 {

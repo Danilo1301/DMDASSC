@@ -1,6 +1,6 @@
 import Dish from "@cafemania/dish/Dish";
 import { GameClient } from "@cafemania/game/GameClient";
-import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterServeClientData, IPacketWorldData } from "@cafemania/network/Packet";
+import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketData_PlayerId, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterReachCounterData, IPacketWaiterServeClientData, IPacketWorldData } from "@cafemania/network/Packet";
 import { PlayerClient } from "@cafemania/player/PlayerClient";
 import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
 import { HudScene } from "@cafemania/scenes/HudScene";
@@ -52,6 +52,17 @@ export class WorldClient extends World
             world.getNetwork().send(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, data)
         })
         
+        world.events.on(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, (waiter: PlayerWaiter) =>
+        {
+            HudScene.Instance.addNotification('[send] PLAYER_WAITER_REACHED_COUNTER')
+
+            const data: IPacketWaiterReachCounterData = {
+                waiterId: waiter.id
+            }
+
+            world.getNetwork().send(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, data)
+        })
+
         world.events.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (waiter: PlayerWaiter) =>
         {
             HudScene.Instance.addNotification('[send] PLAYER_WAITER_FINISH_SERVE')
@@ -75,57 +86,31 @@ export class WorldClient extends World
             world.getNetwork().send(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, data)
         })
 
-        /*
-
-        world.events.on(WorldEvent.PLAYER_CLIENT_ARRIVED_DOOR, (player: PlayerClient) =>
-        {
-
-            HudScene.Instance.addNotification('> PLAYER_CLIENT_ARRIVED_DOOR')
-
-            world.getNetwork().emit(WorldEvent.PLAYER_CLIENT_ARRIVED_DOOR, player.id)
-        })
-
-        world.events.on(WorldEvent.PLAYER_CLIENT_SAT_ON_CHAIR, (player: PlayerClient) =>
-        {
-
-            HudScene.Instance.addNotification('> PLAYER_CLIENT_SAT_ON_CHAIR')
-
-            world.getNetwork().emit(WorldEvent.PLAYER_CLIENT_SAT_ON_CHAIR, player.id)
-        })
-
-        world.events.on(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, (waiter: PlayerWaiter) =>
-        {
-            world.getNetwork().emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, waiter.id)
-        })
-
-        */
+        
     }
 
     private setupWorldReceiveEvents()
     {
         const world = this
-        const ev = world.getNetwork().events
+        const networkEvent = world.getNetwork().events
 
-        ev.on("worldData", packet => world.onReceivePacketWorldData(packet))
+        networkEvent.on("worldData", packet => world.onReceivePacketWorldData(packet))
 
-        ev.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (data: IPacketSpawnClientData) =>
+        networkEvent.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (data: IPacketSpawnClientData) =>
         {
             HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_SPAWNED')
 
-            const player = world.createPlayerClient(data.client.x, data.client.y)
-            world.changePlayerId(player, data.client.id)
+            const player = world.createPlayerClient(data.client.x, data.client.y, data.client.id)
             player.startClientBehavior()
         })
 
-
-
-        ev.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (data: IPacketClientFindChairData) =>
+        networkEvent.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (data: IPacketClientFindChairData) =>
         {
             HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_SIT_CHAIR_DATA')
 
             const client = world.findPlayer(data.clientId) as PlayerClient | undefined
 
-            if(!client) throw `Client not found`
+            if(!client) throw `Client not found (PLAYER_CLIENT_SIT_CHAIR_DATA)`
 
             if(!data.chairId)
             {
@@ -135,79 +120,42 @@ export class WorldClient extends World
 
             const chair = world.findTileItem(data.chairId) as TileItemChair | undefined
 
-            if(!chair) throw `Chair not found`
+            if(!chair) throw `Chair not found (PLAYER_CLIENT_SIT_CHAIR_DATA)`
 
             client.setGoingToChair(chair)
         })
 
-        ev.on(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, (data: IPacketWaiterServeClientData) =>
+        networkEvent.on(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, (data: IPacketWaiterServeClientData) =>
         {
             HudScene.Instance.addNotification('[receive] PLAYER_WAITER_SERVE_CLIENT')
 
             const waiter = world.findPlayer(data.waiterId) as PlayerWaiter | undefined
 
-            if(!waiter) throw `Waiter not found`
+            if(!waiter) throw `Waiter not found (PLAYER_WAITER_SERVE_CLIENT)`
 
             const client = world.findPlayer(data.clientId) as PlayerClient | undefined
 
-            if(!client) throw `Client not found`
+            if(!client) throw `Client not found (PLAYER_WAITER_SERVE_CLIENT)`
 
             const counter = world.findTileItem(data.counterId) as TileItemCounter | undefined
 
-            if(!counter) throw `Counter not found`
-
-            console.log(waiter)
+            if(!counter) throw `Counter not found (PLAYER_WAITER_SERVE_CLIENT)`
 
             waiter.taskServeClient(client, counter)
-
-            console.log("")
         })
-        
 
-        /*
-        socket.on("playerclient_spawned", (data: IPacketPlayerData) =>
+        networkEvent.on(WorldEvent.PLAYER_CLIENT_DESTROYED, (data: IPacketData_PlayerId) =>
         {
-            HudScene.Instance.addNotification('< PLAYER_CLIENT_SPAWNED')
+            const client = world.findPlayer(data.playerId) as PlayerClient | undefined
 
-            const player = world.createPlayerClient(data.x, data.y)
-            world.changePlayerId(player, data.id)
+            if(!client) throw `Client not found (PLAYER_CLIENT_DESTROYED)`
 
+            if(client.isExitingCafe()) return console.log(`Can't destroy; is exiting cafe`)
+            if(client.hasStartedEating()) return console.log("Can't destroy; has started eating")
+
+            client.destroy()
         })
-
-        socket.on(WorldEvent.PLAYER_CLIENT_GO_TO_CHAIR, (data: IPacketPlayerGoToChairData) =>
-        {
-            HudScene.Instance.addNotification(`< PLAYER_CLIENT_GO_TO_CHAIR`)
-
-            const players = world.getPlayers().filter(player => player.id == data.playerId)
-
-            if(players.length == 0) return
-
-            const tileItem = world.findTileItem(data.chairId)
-
-            if(!tileItem) return
-
-            const player = players[0] as PlayerClient
-            
-            player.taskSitAtChair(tileItem as TileItemChair)
-        })
-
-        socket.on(WorldEvent.PLAYER_WAITER_BEGIN_SERVE, (data: IPacketWaiterBeginServe) =>
-        {
-            HudScene.Instance.addNotification(`< PLAYER_WAITER_BEGIN_SERVE`)
-
-            const waiter = world.findPlayer(data.waiterId)
-            const client = world.findPlayer(data.clientId)
-            const counter = world.findTileItem(data.counterId)
-
-            console.log(waiter, client, counter, data)
-
-            if(!waiter || !client || !counter) return
-
-            (waiter as PlayerWaiter).taskBeginServe(client as PlayerClient, counter as TileItemCounter)
-
-            console.log(`waiter serve client`)
-        })
-        */
+    
     }
 
     public getGame()
@@ -217,8 +165,6 @@ export class WorldClient extends World
 
     private onReceivePacketWorldData(data: IPacketWorldData)
     {
-        console.log('onReceivePacketWorldData')
-
         const world = this
 
         if(data.tiles)
@@ -252,7 +198,7 @@ export class WorldClient extends World
         {
             if(world.findPlayer(data.cheff.id) == undefined)
             {
-                world.createPlayerCheff(data.cheff.x, data.cheff.y)
+                world.createPlayerCheff(data.cheff.x, data.cheff.y, data.cheff.id)
             }
         }
         
@@ -266,8 +212,7 @@ export class WorldClient extends World
             {
                 if(world.findPlayer(waiterData.id) == undefined)
                 {
-                    const waiter = world.createPlayerWaiter(waiterData.x, waiterData.y)
-                    world.changePlayerId(waiter, waiterData.id)
+                    const waiter = world.createPlayerWaiter(waiterData.x, waiterData.y, waiterData.id)
                 }
             }
         }

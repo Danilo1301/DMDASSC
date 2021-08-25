@@ -33,7 +33,8 @@ export default class Network
 
         this.events.on("DISPLAY_MESSAGE", (data: string) =>
         {
-            HudScene.Instance.addNotification(`[server error] ${data}`, 0, 0xffb0ab)
+            console.log("DISPLAY_MESSAGE", data)
+            HudScene.Instance.addNotification(data, 0, 0xffb0ab)
         })
     }
 
@@ -45,6 +46,7 @@ export default class Network
             this.events.emit(packet.id, packet.data)
         } catch (error) {
             HudScene.Instance.addNotification(`[local error] ${error}`, 0, 0xffb0ab)
+            console.error(error)
         }
         
     }

@@ -22,15 +22,18 @@ import { PlayerCheff } from "@cafemania/player/PlayerCheff";
 export enum WorldEvent
 {
     PLAYER_CLIENT_SPAWNED = "PLAYER_CLIENT_SPAWNED",
+    PLAYER_CLIENT_DESTROYED = "PLAYER_CLIENT_DESTROYED",
     PLAYER_CLIENT_SIT_CHAIR_DATA = "PLAYER_CLIENT_SIT_CHAIR_DATA", //change to find chair
     PLAYER_CLIENT_REACHED_DOOR = "PLAYER_CLIENT_REACHED_DOOR",
     PLAYER_CLIENT_REACHED_CHAIR = "PLAYER_CLIENT_REACHED_CHAIR",
     PLAYER_WAITER_SERVE_CLIENT = "PLAYER_WAITER_SERVE_CLIENT",
     PLAYER_WAITER_FINISH_SERVE = "PLAYER_WAITER_FINISH_SERVE",
+    PLAYER_WAITER_REACHED_COUNTER = "PLAYER_WAITER_REACHED_COUNTER",
 
     PLAYER_CLIENT_EXITED_CAFE = "PLAYER_CLIENT_EXITED_CAFE",
     TILE_ITEM_UPDATED = "TILE_ITEM_UPDATED",
-    TILE_ITEM_STOVE_BEGIN_COOK = "TILE_ITEM_STOVE_BEGIN_COOK"
+    TILE_ITEM_STOVE_BEGIN_COOK = "TILE_ITEM_STOVE_BEGIN_COOK",
+    
 
     //PLAYER_CLIENT_ARRIVED_DOOR = "PLAYER_CLIENT_ARRIVED_DOOR",
     //PLAYER_CLIENT_GO_TO_CHAIR = "PLAYER_CLIENT_GO_TO_CHAIR",
@@ -140,15 +143,6 @@ export class World
     public findPlayer(id: string): Player | undefined
     {
         return this._players.get(id)
-    }
-
-    public changePlayerId(player: Player, id: string)
-    {
-        this._players.delete(player.id)
-
-        player.setId(id)
-
-        this._players.set(player.id, player)
     }
 
     private updateSpawnPlayerClient()
@@ -450,7 +444,7 @@ export class World
         player.destroy()
     }
 
-    public createPlayer(tileX: number, tileY: number)
+    public createPlayer(tileX: number, tileY: number, id?: string)
     {
         return this.setupPlayer(new Player(this), tileX, tileY)
     }
@@ -466,32 +460,35 @@ export class World
         player.startClientBehavior()
     }
 
-    public createPlayerClient(tileX: number, tileY: number)
+    public createPlayerClient(tileX: number, tileY: number, id?: string)
     {
-        const player = this.setupPlayer(new PlayerClient(this), tileX, tileY) as PlayerClient
+        const player = this.setupPlayer(new PlayerClient(this), tileX, tileY, id) as PlayerClient
 
         return player
     }
 
-    public createPlayerWaiter(tileX: number, tileY: number)
+    public createPlayerWaiter(tileX: number, tileY: number, id?: string)
     {
-        const player = this.setupPlayer(new PlayerWaiter(this), tileX, tileY) as PlayerWaiter
+        const player = this.setupPlayer(new PlayerWaiter(this), tileX, tileY, id) as PlayerWaiter
 
         return player
         
     }
 
-    public createPlayerCheff(tileX: number, tileY: number)
+    public createPlayerCheff(tileX: number, tileY: number, id?: string)
     {
-        const player = this.setupPlayer(new PlayerCheff(this), tileX, tileY) as PlayerCheff
+        const player = this.setupPlayer(new PlayerCheff(this), tileX, tileY, id) as PlayerCheff
         return player
     }
     
-    private setupPlayer(player: Player, tileX, tileY)
+    private setupPlayer(player: Player, tileX, tileY, id?: string)
     {
+        if(id != undefined) player.setId(id)
+
         this._players.set(player.id, player)
 
         player.setAtTile(tileX, tileY)
+        player.onCreate()
 
         return player
     }
