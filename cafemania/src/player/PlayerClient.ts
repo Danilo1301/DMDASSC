@@ -148,9 +148,11 @@ export class PlayerClient extends Player
             {
                 this.log("no more attempts")
 
-                this.exitCafe()
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, undefined) //tells client to exit cafe
+
+                //DONT CHANGE THE ORDER AGAIN!!
                 
+                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, undefined) //tells client to exit cafe
+                this.exitCafe()
                 return
             }
           

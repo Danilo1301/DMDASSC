@@ -20,7 +20,7 @@ class Item
     constructor(scene: Phaser.Scene, textContent: string, textColor?: number, backgroundColor?: number)
     {
         const maxWidth = this.width
-        const minHeight = 25
+        const minHeight = 20
 
         const container = this._container = scene.add.container()
         const graphics = this._graphics = scene.add.graphics()
@@ -41,8 +41,9 @@ class Item
         text.setPosition(maxWidth/2, height/2)
         text.setOrigin(0.5)
         
-        graphics.fillStyle(backgroundColor || 0xffffff)
+        graphics.fillStyle(backgroundColor || 0xffffff, 0.5)
         graphics.fillRect(0, 0, maxWidth, height)
+        
 
         //container.setPosition(position.x, position.y)
 
@@ -100,12 +101,30 @@ export class NotificationBar
     public addItem(text: string, textColor?: number, backgroundColor?: number)
     {
         const item = new Item(this._scene, text, textColor, backgroundColor)
-        item.setPosition(new Phaser.Math.Vector2(this._scene.game.scale.gameSize.width, this._items.length * 30), true)
-        item.setVisible(true)
-        
+
         this._items.push(item)
 
-        
+        item.setPosition(new Phaser.Math.Vector2(this.getX(), this.getHeight(item)), true)
+        item.setVisible(true)
+    }
+
+    private getX()
+    {
+        return this._scene.game.scale.gameSize.width
+    }
+
+    private getHeight(item: Item)
+    {
+        let h = 0
+
+        for (const it of this._items)
+        {
+            if(it == item) break
+            
+            h += item.height + 3
+        }
+
+        return h
     }
 
     private update(time: number, delta: number)
@@ -118,14 +137,12 @@ export class NotificationBar
             item.destroy()
         })
 
-        const y = 
-
+   
         this._items.map((item, index) =>
         {
-            
-
-            item.setPosition(new Phaser.Math.Vector2(this._scene.game.scale.gameSize.width - item.width, index * 30))
+            item.setPosition(new Phaser.Math.Vector2(this.getX() - item.width, this.getHeight(item)))
             item.update(delta)
+
         })
     }
 }
