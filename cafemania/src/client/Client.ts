@@ -1,7 +1,6 @@
 import { GameServer } from "@cafemania/game/GameServer";
-import { IPacketSpawnClientData, IPacketWorldData } from "@cafemania/network/Packet";
-import { PlayerClient } from "@cafemania/player/PlayerClient";
-import { WorldEvent } from "@cafemania/world/World";
+import { IPacketWorldData } from "@cafemania/network/Packet";
+import { Tile } from "@cafemania/tile/Tile";
 import { WorldServer } from "@cafemania/world/WorldServer";
 import { Socket } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
@@ -16,6 +15,10 @@ export class Client
 
     private _world: WorldServer
 
+    private _updateTiles: Tile[] = []
+
+    private _lastSentData: number = 0
+
     constructor(game: GameServer)
     {
         this._game = game
@@ -24,6 +27,13 @@ export class Client
         this._world = game.createServerWorld()
 
         this.startUpdateTimer()
+    }
+
+    public addTileToUpdate(tile: Tile)
+    {
+        if(this._updateTiles.includes(tile)) return
+
+        this._updateTiles.push(tile)
     }
 
     public get id()
@@ -45,6 +55,11 @@ export class Client
                 last = now
 
                 this._world.update(delta)
+            }
+
+            if(now - this._lastSentData >= 500)
+            {
+                this.sendData()
             }
         }, 0)
     }
@@ -70,22 +85,37 @@ export class Client
 
         this.getSocket().emit(key, packet)
     }
+    
+    public sendFirstJoinWorldData()
+    {
+        this.sendData(true)
+    }
 
-    public sendWorldData()
+    private sendData(sendAll?: boolean)
     {
         const world = this.getWorld()
-        const tiles = world.getTiles().filter(tile => !tile.isSideWalk()).map(tile => tile.serialize())
 
-        const waiters = world.getPlayerWaiters().map(waiter => waiter.serialize())
+        const tiles = sendAll ? world.getTiles() : this._updateTiles
 
-        const data: IPacketWorldData = {
-            tiles: tiles,
-            waiters: waiters,
-            sideWalkSize: world.getSideWalkSize()
+        const data: IPacketWorldData =
+        {
+            tiles: tiles.map(tile => tile.serialize())
         }
+
+        if(sendAll)
+        {
+            data.cheff = world.getPlayerCheff().serialize()
+            data.waiters = world.getPlayerWaiters().map(waiter => waiter.serialize())
+            data.sideWalkSize = world.getSideWalkSize()
+        }
+        
+        this._updateTiles = []
 
         this.emit("worldData", data)
 
+        this._lastSentData = Date.now()
+
+        console.log(JSON.stringify(data))
     }
 
     public getWorld()
@@ -108,7 +138,7 @@ export class Client
 
     private onReady()
     {
-        this.sendWorldData()
+        this.sendFirstJoinWorldData()
 
         this.getWorld().beginTestClients()
 
@@ -118,10 +148,15 @@ export class Client
     private onConnect()
     {
         console.log(`Client ${this.id} connected`)
+
+        this.getWorld().createDefaultWaiters()
     }
 
     private onDisconnect()
     {
         this._socket = undefined
+
+        this.getWorld().removeAllPlayers()
+        this.getWorld().resetChairsAndTables()
     }
 }

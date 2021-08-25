@@ -54,7 +54,7 @@ export class TileItemCounter extends TileItem
 
     public removeOneDish()
     {
-        this._data.amount--
+        this.addDishAmount(-1)
 
         if(this._data.amount == 0) this._data.dish = undefined
     }
@@ -67,6 +67,11 @@ export class TileItemCounter extends TileItem
         //GameScene.Instance?.drawWorldText(`set dish`, this.getPosition())
     }
 
+    public addDishAmount(amount: number)
+    {
+        this._data.amount += amount
+    }
+
     public addDish(dish: Dish)
     {
         if(this.isEmpty())
@@ -75,7 +80,7 @@ export class TileItemCounter extends TileItem
             return
         }
 
-        this._data.amount += dish.servings
+        this.addDishAmount(dish.servings)
     }
 
     public isEmpty()
@@ -135,6 +140,6 @@ export class TileItemCounter extends TileItem
     public setData(data: CounterData)
     {
         this._data.dish = data.dish
-        this._data.amount = data.amount
+        this._data.amount = data.amount + this._waitersComing
     }
 }

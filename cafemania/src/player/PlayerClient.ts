@@ -29,7 +29,7 @@ export class PlayerClient extends Player
     {
         super(world)
 
-        this._spriteTexture = 'PlayerSpriteTexture_TestWaiter'
+        this._spriteTexture = 'PlayerSpriteTexture_TestClient'
         this._type = PlayerType.CLIENT
 
         this._waitForGameClient = world.type == WorldType.SERVER
@@ -113,7 +113,7 @@ export class PlayerClient extends Player
         {
             this._eatingTimeElapsed += delta
 
-            if(this._eatingTimeElapsed >= 3000)
+            if(this._eatingTimeElapsed >= 11000)
             {
                 this.onFinishEating()
             }

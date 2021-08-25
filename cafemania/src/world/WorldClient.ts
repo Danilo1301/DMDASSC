@@ -1,10 +1,12 @@
+import Dish from "@cafemania/dish/Dish";
 import { GameClient } from "@cafemania/game/GameClient";
-import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketSpawnClientData, IPacketWaiterFinishServeData, IPacketWaiterServeClientData, IPacketWorldData } from "@cafemania/network/Packet";
+import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterServeClientData, IPacketWorldData } from "@cafemania/network/Packet";
 import { PlayerClient } from "@cafemania/player/PlayerClient";
 import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
 import { HudScene } from "@cafemania/scenes/HudScene";
 import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
 import { TileItemCounter } from "@cafemania/tileItem/TileItemCounter";
+import { TileItemStove } from "@cafemania/tileItem/TileItemStove";
 import { World, WorldEvent, WorldType } from "./World";
 
 export class WorldClient extends World
@@ -59,6 +61,18 @@ export class WorldClient extends World
             }
 
             world.getNetwork().emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, data)
+        })
+
+        world.events.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (stove: TileItemStove, dish: Dish) =>
+        {
+            HudScene.Instance.addNotification('[send] TILE_ITEM_STOVE_BEGIN_COOK')
+
+            const data: IPacketStoveBeginCookData = {
+                stoveId: stove.id,
+                dishId: dish.id
+            }
+
+            world.getNetwork().emit(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, data)
         })
 
         /*
@@ -224,13 +238,27 @@ export class WorldClient extends World
                 {
                     if(!tileItemIds.includes(tileItemData.id))
                     {
-                        const tileItem = world.addNewTileItem(tileItemData.tileItemInfo, tile, tileItemData.direction, tileItemData.id)
-
-                        if(tileItemData.data) tileItem.setData(tileItemData.data)
+                        world.addNewTileItem(tileItemData.tileItemInfo, tile, tileItemData.direction, tileItemData.id)
                     }
+
+                    const tileItem = tile.getTileItem(tileItemData.id)!
+
+                    if(tileItemData.data) tileItem.setData(tileItemData.data)
                 }
             }
         }
+
+        if(data.cheff)
+        {
+            if(world.findPlayer(data.cheff.id) == undefined)
+            {
+                world.createPlayerCheff(data.cheff.x, data.cheff.y)
+            }
+        }
+        
+
+
+
 
         if(data.waiters)
         {

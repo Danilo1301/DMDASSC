@@ -6,7 +6,8 @@ export interface IPacketWorldData
 {
     tiles?: TileSerializedData[]
     waiters?: PlayerSerializedData[]
-    sideWalkSize: number
+    cheff?: PlayerSerializedData
+    sideWalkSize?: number
 }
 
 export interface IPacketSpawnClientData
@@ -40,5 +41,15 @@ export interface IPacketWaiterServeClientData
 export interface IPacketWaiterFinishServeData
 {
     waiterId: string
+}
 
+export interface IPacketStoveBeginCookData
+{
+    stoveId: string
+    dishId: string
+}
+
+export interface IPacketTileItemIdData
+{
+    tileitemId: string
 }

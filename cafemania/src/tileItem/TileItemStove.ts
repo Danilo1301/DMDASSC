@@ -1,6 +1,7 @@
 import Dish from "@cafemania/dish/Dish";
 import DishPlate from "@cafemania/dish/DishPlate";
 import { GameScene } from "@cafemania/scenes/GameScene";
+import { WorldEvent } from "@cafemania/world/World";
 import { TileItem } from "./TileItem";
 import { TileItemCounter } from "./TileItemCounter";
 import { TileItemInfo } from "./TileItemInfo";
@@ -44,6 +45,7 @@ export class TileItemStove extends TileItem
 
     public startCookingSomething()
     {
+        
         if(this.isCooking())
         {
             if(this.isDishReady())
@@ -92,7 +94,11 @@ export class TileItemStove extends TileItem
 
         if(counters.length == 0) return false
 
-        counters[0].addDish(this.getCookingDish())
+        const counter = counters[0]
+        counter.addDish(this.getCookingDish())
+        counter.setAsUpdated()
+
+        
         this.clearDish()
 
         return true
@@ -102,6 +108,9 @@ export class TileItemStove extends TileItem
     {
         this._data.cookingDish = dish.id
         this._data.startedAt = new Date().getTime()
+
+        this.getWorld().events.emit(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, this, dish)
+        this.setAsUpdated()
     }
 
     public getCookingDish()
@@ -127,6 +136,8 @@ export class TileItemStove extends TileItem
     private onDishReady()
     {
         GameScene.Instance?.drawWorldText(`Dish is ready`, this.getPosition(), 0x00ff00)
+
+        this.sendDishToCounter()
     }
 
     public update(delta: number)

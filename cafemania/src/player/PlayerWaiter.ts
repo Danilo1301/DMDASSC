@@ -15,9 +15,11 @@ export class PlayerWaiter extends Player
 
     private _servingPlayer?: PlayerClient
     private _servingDish?: Dish
+    private _servingCounter?: TileItemCounter
 
     private _checkClientsTime: number = 0
 
+    private _isCarryingDishPlate: boolean = false
 
     private _dishPlate?: DishPlate
 
@@ -64,7 +66,7 @@ export class PlayerWaiter extends Player
     {
         const dish = this._servingDish
 
-        if(dish)
+        if(dish && this._isCarryingDishPlate)
         {
             if(!this._dishPlate)
             {
@@ -79,8 +81,7 @@ export class PlayerWaiter extends Player
         } else {
             if(this._dishPlate)
             {
-                this._dishPlate.destroy()
-                this._dishPlate = undefined
+                this.destroyDishPlate()
             }
         }
     }
@@ -103,13 +104,14 @@ export class PlayerWaiter extends Player
     {
         this._isBusy = true
 
-        this.log("serving client...")
+        this.log("serving client")
         const dish = counter.getDish()
 
         this._servingPlayer = client
         this._servingDish = dish
+        this._servingCounter = counter
 
-
+        
         if(this.isWorldServer())
         {
             counter.removeOneDish()
@@ -121,9 +123,13 @@ export class PlayerWaiter extends Player
 
         counter.addWaiterComing()
 
+
         this.taskWalkNearToTile(counter.getTile())
         this.taskExecuteAction(() => {
             //this.setCarryingDish(dish)
+
+            this._isCarryingDishPlate = true
+
             counter.removeOneDish()
         })
 
@@ -132,9 +138,15 @@ export class PlayerWaiter extends Player
         {
             //this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, this)
 
+            counter.removeWaiterComing()
+
             this.finishServing()
 
-            counter.removeWaiterComing()
+            this.destroyDishPlate()
+
+            this._isCarryingDishPlate = false
+
+            
         })
     }
     
@@ -142,6 +154,7 @@ export class PlayerWaiter extends Player
     {
         const client = this._servingPlayer!
         const dish = this._servingDish!
+        const counter = this._servingCounter!
 
         const table = client.getChairPlayerIsSitting().getTableInFront()
 
@@ -149,15 +162,23 @@ export class PlayerWaiter extends Player
 
         this._isBusy = false
 
+        if(this.isWorldServer())
+        {
+            //counter.setAsUpdated()
+        }
+
         this._servingPlayer = undefined
         this._servingDish = undefined
+        this._servingCounter = counter
         
         if(this.isWorldClient())
         {
             this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, this)
         }
 
-        console.log("finished serving")
+        
+
+        this.log("finished serving")
     }
 
     private getRandomPlayerWaitingForWaiter()
@@ -191,6 +212,19 @@ export class PlayerWaiter extends Player
         if(counters.length == 0) return
 
         return Utils.shuffleArray(counters)[0]
+    }
+
+    public destroy()
+    {
+        super.destroy()
+
+        this.destroyDishPlate()
+    }
+
+    private destroyDishPlate()
+    {
+        this._dishPlate?.destroy()
+        this._dishPlate = undefined
     }
 }
 

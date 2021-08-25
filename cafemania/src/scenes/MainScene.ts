@@ -109,6 +109,7 @@ export class MainScene extends BaseScene
         await PlayerTextureFactory.create(tag + 'NoTexture', {})
         await PlayerTextureFactory.create(tag + 'TestClient', {head: ['player/head'], body: ['player/body1'], leg: ['player/leg']})
         await PlayerTextureFactory.create(tag + 'TestWaiter', {head: ['player/head'], leg: ['player/leg']})
+        await PlayerTextureFactory.create(tag + 'TestCheff', {head: ['player/head']})
        
         
         

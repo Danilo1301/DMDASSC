@@ -1,10 +1,12 @@
 import { Client } from "@cafemania/client/Client";
 import { GameServer } from "@cafemania/game/GameServer";
-import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketSpawnClientData, IPacketWaiterFinishServeData, IPacketWaiterServeClientData } from "@cafemania/network/Packet";
+import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterServeClientData } from "@cafemania/network/Packet";
 import { PlayerClient } from "@cafemania/player/PlayerClient";
 import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
+import { TileItem } from "@cafemania/tileItem/TileItem";
 import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
 import { TileItemCounter } from "@cafemania/tileItem/TileItemCounter";
+import { TileItemStove } from "@cafemania/tileItem/TileItemStove";
 import { World, WorldEvent, WorldType } from "./World";
 
 export class WorldServer extends World
@@ -79,7 +81,7 @@ export class WorldServer extends World
 
         this.setupWorldReceiveEvents()
     }
-
+    
     private getSocket()
     {
         const client = this._client
@@ -122,6 +124,16 @@ export class WorldServer extends World
 
             this.getSocket()?.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, data)
         })
+
+
+        world.events.on(WorldEvent.TILE_ITEM_UPDATED, (tileItem: TileItem) =>
+        {
+            const client = this._client
+            
+            client?.addTileToUpdate(tileItem.getTile())
+
+            console.log(`[WorldServer] Tile item updated ${tileItem.constructor.name} : ${tileItem.id}`)
+        })
         
     }
 
@@ -156,16 +168,27 @@ export class WorldServer extends World
 
             waiter.finishServing()
         })
+
+        socket.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (data: IPacketStoveBeginCookData) =>
+        {
+            const stove = world.findTileItem(data.stoveId) as TileItemStove | undefined
+
+            if(!stove) throw `Waiter not found`
+
+            const dish = world.getGame().getDishItemFactory().getDish(data.dishId)
+
+            stove.startCook(dish)
+        })
     }
 
     private setupWorld()
     {
-        this.createTileMap(7, 10)
-        this.createPlayerWaiter(2, 6)
-        this.createPlayerWaiter(2, 8)
+        this.createDefaultMap(7, 10)
+     
+        
         this.setPlayerClientSpawnEnabled(false)
 
-        this.getCounters()[0].setDish(this.getGame().getDishItemFactory().getDish('dish1'), 100)
+        this.getCounters()[0].setDish(this.getGame().getDishItemFactory().getDish('dish1'), 4)
     }
 
     public beginTestClients()

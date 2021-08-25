@@ -4,6 +4,7 @@ import { TileItemRender } from "./TileItemRender";
 import { Tile } from "@cafemania/tile/Tile";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Direction } from "@cafemania/utils/Direction";
+import { WorldEvent } from "@cafemania/world/World";
 
 export interface TileItemSerializedData
 {
@@ -227,6 +228,11 @@ export class TileItem
         }
 
         return json
+    }
+
+    public setAsUpdated()
+    {
+        this.getWorld().events.emit(WorldEvent.TILE_ITEM_UPDATED, this)
     }
 
     public setData(data: any) {}

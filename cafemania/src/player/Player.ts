@@ -57,7 +57,7 @@ export class Player
 
     private _taskManager: PlayerTaskManager
 
-    private _speed: number = 1.6
+    private _speed: number = 1.8
 
     private _direction: Direction = Direction.NORTH
 
@@ -194,6 +194,7 @@ export class Player
 
     public liftUpFromChair()
     {
+        this._sittingAtChair?.setIsReserved(false)
         this._sittingAtChair?.setPlayerSitting(undefined)
         this._sittingAtChair = undefined
 
@@ -394,16 +395,18 @@ export class Player
 
         this._destroyed = true
 
+        if(this.isSitting())
+        {
+            this.liftUpFromChair()
+        }
+
+
         this.getWorld().removePlayer(this)
 
         this._container?.destroy()
         this._sprite?.destroy()
 
-        if(this._sittingAtChair)
-        {
-            this._sittingAtChair.setPlayerSitting(undefined)
-            this._sittingAtChair = undefined
-        }
+        
 
         this.log(`destroyed`)
     }
