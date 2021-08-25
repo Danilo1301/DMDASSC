@@ -1,9 +1,7 @@
 import { Game } from "@cafemania/game/Game";
 import { Grid } from "@cafemania/grid/Grid";
-import { Player } from "@cafemania/player/Player";
-import { PlayerAnimation } from "@cafemania/player/PlayerAnimation";
+import { Player, PlayerType } from "@cafemania/player/Player";
 import { GameScene } from "@cafemania/scenes/GameScene";
-import { HudScene } from "@cafemania/scenes/HudScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileItem } from "@cafemania/tileItem/TileItem";
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
@@ -15,13 +13,47 @@ import { WorldText } from "@cafemania/utils/WorldText";
 import { Utils } from "@cafemania/utils/Utils";
 import { TileItemCounter } from "@cafemania/tileItem/TileItemCounter";
 import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
+import { PlayerClient } from "@cafemania/player/PlayerClient";
+import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
+import { v4 as uuidv4 } from 'uuid';
 
+export enum WorldEvent
+{
+    PLAYER_CLIENT_SPAWNED = "PLAYER_CLIENT_SPAWNED",
+    PLAYER_CLIENT_SIT_CHAIR_DATA = "PLAYER_CLIENT_SIT_CHAIR_DATA", //change to find chair
+    PLAYER_CLIENT_REACHED_DOOR = "PLAYER_CLIENT_REACHED_DOOR",
+    PLAYER_CLIENT_REACHED_CHAIR = "PLAYER_CLIENT_REACHED_CHAIR",
+    PLAYER_WAITER_SERVE_CLIENT = "PLAYER_WAITER_SERVE_CLIENT",
+    PLAYER_WAITER_FINISH_SERVE = "PLAYER_WAITER_FINISH_SERVE",
+
+    PLAYER_CLIENT_EXITED_CAFE = "PLAYER_CLIENT_EXITED_CAFE"
+
+    //PLAYER_CLIENT_ARRIVED_DOOR = "PLAYER_CLIENT_ARRIVED_DOOR",
+    //PLAYER_CLIENT_GO_TO_CHAIR = "PLAYER_CLIENT_GO_TO_CHAIR",
+    //PLAYER_CLIENT_SAT_ON_CHAIR = "PLAYER_CLIENT_SAT_ON_CHAIR",
+    //PLAYER_WAITER_BEGIN_SERVE = "PLAYER_WAITER_BEGIN_SERVE",
+    //PLAYER_WAITER_FINISHED_SERVE = "PLAYER_WAITER_FINISHED_SERVE"
+}
+
+export enum WorldType
+{
+    DEFAULT,
+    CLIENT,
+    SERVER
+}
 
 export class World
 {
+    public events = new Phaser.Events.EventEmitter()
+    
     private _game: Game
 
+    private _id: string
+
     private _tiles = new Phaser.Structs.Map<string, Tile>([])
+    private _sideWalkTiles = new Phaser.Structs.Map<string, Tile>([])
+
+    private _tileItems = new Phaser.Structs.Map<string, TileItem>([])
 
     private _players = new Phaser.Structs.Map<string, Player>([])
 
@@ -29,23 +61,48 @@ export class World
 
     private _sideWalkSize: number = 15
    
+    private _canSpawnPlayer: boolean = false
+    private _lastSpawnedPlayer: number = 0
+    private _spawnedPlayersAmount: number = 0
+    private _maxSpawnPlayers: number = 4
+
+    protected _type: WorldType = WorldType.DEFAULT
+
     constructor(game: Game)
     {
         this._game = game
+        this._id = uuidv4()
         this._grid = new Grid()
 
- 
-        this.createTileMap(12, 12)
+        this.events.on(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, () =>
+        {
+            this._spawnedPlayersAmount--
+        })
+    }
+
+    public get type()
+    {
+        return this._type
+    }
+
+    public get id()
+    {
+        return this._id
+    }
+
+    public getSideWalkSize()
+    {
+        return this._sideWalkSize
     }
 
     public getLeftSideWalkSpawn()
     {
-        return this.getTile(-2, this._sideWalkSize-1)
+        return this.getTile(-2, this.getSideWalkSize()-1)
     }
 
     public getRightSideWalkSpawn()
     {
-        return this.getTile(this._sideWalkSize-1, -2)
+        return this.getTile(this.getSideWalkSize()-1, -2)
     }
 
     public getGrid()
@@ -53,10 +110,13 @@ export class World
         return this._grid
     }
 
+
     public update(delta: number)
     {
         this.getTiles().map(tile => tile.update(delta))
         this.getPlayers().map(player => player.update(delta))
+
+        if(this._canSpawnPlayer) this.updateSpawnPlayerClient()
     }
 
     public render(delta: number): void
@@ -68,6 +128,38 @@ export class World
 
     }
 
+    public findTileItem(id: string): TileItem | undefined
+    {
+        return this._tileItems.get(id)
+    }
+
+    public findPlayer(id: string): Player | undefined
+    {
+        return this._players.get(id)
+    }
+
+    public changePlayerId(player: Player, id: string)
+    {
+        this._players.delete(player.id)
+
+        player.setId(id)
+
+        this._players.set(player.id, player)
+    }
+
+    private updateSpawnPlayerClient()
+    {
+        const now = new Date().getTime()
+
+        if(now - this._lastSpawnedPlayer >= 3000 && this._spawnedPlayersAmount < this._maxSpawnPlayers)
+        {
+            this._lastSpawnedPlayer = now
+            this._spawnedPlayersAmount++
+
+            this.spawnPlayerClient()
+        }
+    }
+    
     public hasTile(x: number, y: number)
     {
         return this._tiles.has(`${x}:${y}`)
@@ -78,7 +170,7 @@ export class World
         return Array.from(this._tiles.values())
     }
 
-    private addTile(x: number, y: number)
+    public addTile(x: number, y: number)
     {
         const grid = this._grid
 
@@ -90,6 +182,15 @@ export class World
 
         return tile
         //console.log(`Created tile ${tile.id}`)
+    }
+
+    public addSideWalkTile(x: number, y: number)
+    {
+        const tile = this.addTile(x, y)
+
+        this._sideWalkTiles.set(tile.id, tile)
+
+        return tile
     }
 
     public getRandomWalkableTile(insideCafe?: boolean): Tile
@@ -165,6 +266,8 @@ export class World
 
         tile.addTileItem(tileItem)
 
+        if(!this._tileItems.has(tileItem.id)) this._tileItems.set(tileItem.id, tileItem)
+
         const gridItem = this.getGrid().addItem(tileItem.id, tile.x, tile.y, tileItem.getInfo().size)
         const type = tileItem.getInfo().type
 
@@ -172,34 +275,54 @@ export class World
         if(type == TileItemType.WALL) gridItem.color = 0xcccccc
     }
 
-    private createTileMap(sizeX: number, sizeY: number)
+    public setPlayerClientSpawnEnabled(value: boolean)
     {
+        this._canSpawnPlayer = value
+    }
+
+    public resetSpawnedClientsCounter()
+    {
+        this._spawnedPlayersAmount = 0
+    }
+
+    public isTileInSideWalk(tile: Tile)
+    {
+        return this._sideWalkTiles.has(tile.id)
+    }
+
+    public generateSideWalks(size?: number)
+    {
+        if(size != undefined) this._sideWalkSize = size
+
+        for (let y = -2; y < this.getSideWalkSize(); y++)
+        {
+            for (let x = -2; x < this.getSideWalkSize(); x++)
+            {
+                if((x == -2 || y == -2))
+                {
+                    if(this.hasTile(x, y)) continue
+
+                    const tile = this.addSideWalkTile(x, y)
+                    this.addNewTileItem('test_floor1', tile)
+                }
+            }
+        }
+    }
+
+    public createTileMap(sizeX: number, sizeY: number)
+    {
+        this._sideWalkSize = Math.max(sizeX, sizeY) + 3
+
         const tileItemFactory = this.getGame().getTileItemFactory()
-        
+
         for (let y = 0; y < sizeY; y++)
         {
             for (let x = 0; x < sizeX; x++)
             {
                 const tile = this.addTile(x, y)
-
-                const floor = tileItemFactory.createTileItem('floor1')
-                this.putTileItemInTile(floor, tile)
-
-                if(y % 4 == 2 && x >= 6)
-                {
-                    const chair = tileItemFactory.createTileItem('chair1')
-                    this.putTileItemInTile(chair, tile)
-                }
-
-                if(y % 4 == 3 && x >= 6)
-                {
-                    const floorDecoration1 = tileItemFactory.createTileItem('table1')
-                    this.putTileItemInTile(floorDecoration1, tile)
-                }
+                this.addNewTileItem('floor1', tile)
             }
         }
-
-        
 
         for (let y = -1; y < sizeY; y++)
         {
@@ -208,113 +331,120 @@ export class World
                 if((x == -1 || y == -1) && !(x == -1 && y == -1))
                 {
                     const tile = this.addTile(x, y)
-
-                    const wall = tileItemFactory.createTileItem<TileItemWall>('wall1')
-
-                    this.putTileItemInTile(wall, tile)
-                    
-                    if(x == -1) wall.setDirection(Direction.EAST)
+                    const direction = x == -1 ? Direction.EAST : undefined
+                    const wall = this.addNewTileItem('wall1', tile, direction)
                 }
             }
         }
 
-        for (let y = -2; y < this._sideWalkSize; y++)
+        this.generateSideWalks()
+
+        this.addNewTileItem('door1', this.getTile(0, 1), Direction.EAST)
+
+        this.addNewTileItem('stove1', this.getTile(0, 4), Direction.EAST)
+        this.addNewTileItem('stove1', this.getTile(0, 5), Direction.EAST)
+
+        this.addNewTileItem('counter1', this.getTile(0, 7), Direction.EAST)
+        this.addNewTileItem('counter1', this.getTile(0, 8), Direction.EAST)
+        
+
+
+        for (let y = 0; y < sizeY-1; y++)
         {
-            for (let x = -2; x < this._sideWalkSize; x++)
+            for (let x = 0; x < sizeX; x++)
             {
-                if((x == -2 || y == -2))
+                const tile = this.getTile(x, y)
+
+                if(y % 3 == 1 && x >= 4)
                 {
-                    const tile = this.addTile(x, y)
+                    const chair = tileItemFactory.createTileItem('chair1')
+                    this.putTileItemInTile(chair, tile)
+                    chair.setDirection(Direction.NORTH)
+                }
 
-                    const floor = tileItemFactory.createTileItem('test_floor1')
-
-                    this.putTileItemInTile(floor, tile)
+                if(y % 3 == 0 && x >= 4)
+                {
+                    const floorDecoration1 = tileItemFactory.createTileItem('table1')
+                    this.putTileItemInTile(floorDecoration1, tile)
                 }
             }
         }
-
-        
-
-        //this.startRandomlyRotate(this.putTestTileItem('floorDecoration2', 2, 5), 1000)
-        //this.startRandomlyRotate(this.putTestTileItem('floorDecoration2', 3, 5), 1000)
-        //this.startRandomlyRotate(this.putTestTileItem('floorDecoration2', 2, 8), 1000)
-        
- 
-
-        this.putTestTileItem('door1', 1, 0)
-        ;(this.getTile(1, -1).getTileItems()[0] as TileItemWall).setWallHole(true)
-
-        this.putTestTileItem('door1', 0, 2).setDirection(Direction.EAST)
-        ;(this.getTile(-1, 2).getTileItems()[0] as TileItemWall).setWallHole(true)
-
-        window['Tile'] = Tile
-
-        this.putTestTileItem('stove1', 0, 5).setDirection(Direction.EAST)
-        this.putTestTileItem('stove1', 0, 6)
-
-        this.putTestTileItem('counter1', 0, 8).setDirection(Direction.EAST)
-        this.putTestTileItem('counter1', 0, 9)
-
-    
-        
-        
-      
-        let i = 0
-
-        let max = 20
-
-        setInterval(() => {
-            if(i >= max) return
-
-            //HudScene.Instance?.addNotification(`Spawned Player (${max-1-i} left)`)
-
-            this.createTestPlayer()
-
-            i++
-        }, 2000)
-
-        const player = this.createPlayer(0, 0)
-        player.sitAtChair(this.getChairs()[0])
-        
     }
 
-    private createTestPlayer()
+    public addNewTileItem(id: string, tile: Tile, direction?: Direction, tileItemId?: string)
     {
-        
+        const tileItem = this.getGame().getTileItemFactory().createTileItem(id)
 
-        const spawnTile = Math.random() > 0.5 ? this.getLeftSideWalkSpawn() : this.getRightSideWalkSpawn()
-        
-        const player = this.createPlayer(spawnTile.x, spawnTile.y)
+        if(tileItemId != null) tileItem.setId(tileItemId)
 
-        
+        this.putTileItemInTile(tileItem, tile)
 
-        setInterval(() => {
-            if(!player.isWalking())
-            {
-                const tile = this.getRandomWalkableTile()
-                player.taskWalkToTile(tile.x, tile.y)
-            }
-        }, 1000)
+        if(direction != undefined) tileItem.setDirection(direction)
 
-     
+        return tileItem
     }
 
+  
     public getPlayers()
     {
         return this._players.values()
     }
 
-    public createPlayer(tilex: number, tiley: number)
+    public getPlayerClients()
     {
-        const player = new Player(this)
+        return this.getPlayers().filter(player => player.type == PlayerType.CLIENT) as PlayerClient[]
+    }
 
-        this._players.set(player.id, player)
+    public getPlayerWaiters()
+    {
+        return this.getPlayers().filter(player => player.type == PlayerType.WAITER) as PlayerWaiter[]
+    }
 
-        player.setAtTile(tilex, tiley)
+    public removePlayer(player: Player)
+    {
+        this._players.delete(player.id)
+        player.destroy()
+    }
+
+    public createPlayer(tileX: number, tileY: number)
+    {
+        return this.setupPlayer(new Player(this), tileX, tileY)
+    }
+
+    public spawnPlayerClient()
+    {
+        const spawnTile = Math.random() > 0.5 ? this.getLeftSideWalkSpawn() : this.getRightSideWalkSpawn()
+        
+        const player = this.createPlayerClient(spawnTile.x, spawnTile.y)
+
+        this.events.emit(WorldEvent.PLAYER_CLIENT_SPAWNED, player)
+
+        player.startClientBehavior()
+    }
+
+    public createPlayerClient(tileX: number, tileY: number)
+    {
+        const player = this.setupPlayer(new PlayerClient(this), tileX, tileY) as PlayerClient
 
         return player
     }
+
+    public createPlayerWaiter(tileX: number, tileY: number)
+    {
+        const player = this.setupPlayer(new PlayerWaiter(this), tileX, tileY) as PlayerWaiter
+
+        return player
+        
+    }
     
+    private setupPlayer(player: Player, tileX, tileY)
+    {
+        this._players.set(player.id, player)
+
+        player.setAtTile(tileX, tileY)
+
+        return player
+    }
 
     public getDoors(): TileItemDoor[]
     {
@@ -334,7 +464,15 @@ export class World
     {
         let chairs = this.getAllTileItemsOfType(TileItemType.CHAIR) as TileItemChair[]
 
-        //if(empty) chairs = chairs.filter(chair => chair.isEmpty())
+        if(empty)
+        {
+            chairs = chairs.filter(chair =>
+            {
+                if(!chair.isEmpty()) return false
+                if(chair.isReserved()) return false
+                return true
+            })
+        }
 
         return chairs
     }
@@ -352,15 +490,6 @@ export class World
         })
 
         return tileItems
-    }
-
-    private putTestTileItem(id: string, x: number, y: number)
-    {
-        const tileItem = this.getGame().getTileItemFactory().createTileItem(id)
-
-        this.putTileItemInTile(tileItem, this.getTile(x, y))
-
-        return tileItem
     }
 
     public getGame()

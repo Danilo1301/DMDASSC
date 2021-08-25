@@ -8,12 +8,27 @@ import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
 import { TaskExecuteAction, PlayerTaskManager } from "./PlayerTaskManager";
 import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
 
-enum PlayerState
+export interface PlayerSerializedData
+{
+    id: string
+    x: number
+    y: number
+}
+
+export enum PlayerState
 {
     IDLE,
     WALKING,
     SITTING,
     EATING
+}
+
+export enum PlayerType
+{
+    NONE,
+    CLIENT,
+    WAITER,
+    CHEFF
 }
 
 export class Player
@@ -52,6 +67,12 @@ export class Player
 
     private _sittingAtChair: TileItemChair | undefined
 
+    private _destroyed: boolean = false
+
+    protected _type: PlayerType = PlayerType.NONE
+
+    protected _spriteTexture: string = "PlayerSpriteTexture_NoTexture"
+
     constructor(world: World)
     {
         this._world = world
@@ -70,14 +91,44 @@ export class Player
         return this._id
     }
 
+    public get type()
+    {
+        return this._type
+    }
+
     public get direction()
     {
         return this._direction
     }
 
+    public get state()
+    {
+        return this._state
+    }
+
+    public setState(state: PlayerState)
+    {
+        this._state = state
+    }
+
+    public setId(id: string)
+    {
+        this._id = id
+    }
+
+    public isSitting()
+    {
+        return this._state == PlayerState.SITTING
+    }
+
     public isWalking()
     {
         return this._state == PlayerState.WALKING
+    }
+
+    public isEating()
+    {
+        return this._state == PlayerState.EATING
     }
 
     public getSprite()
@@ -120,10 +171,33 @@ export class Player
         return this._world
     }
 
+    public taskWalkNearToTile(tile: Tile)
+    {
+        const tiles = tile.getAdjacentTiles().filter(tile => tile.isWalkable())
+        const closestTile = Tile.getClosestTile(this.getPosition(), tiles)
+
+        this.taskWalkToTile(closestTile.x, closestTile.y)
+    }
+
+    public getChairPlayerIsSitting()
+    {
+        return this._sittingAtChair!
+    }
+
     public sitAtChair(chair: TileItemChair)
     {
         this._sittingAtChair = chair
         this._state = PlayerState.SITTING
+
+        chair.setPlayerSitting(this)
+    }
+
+    public liftUpFromChair()
+    {
+        this._sittingAtChair?.setPlayerSitting(undefined)
+        this._sittingAtChair = undefined
+
+        this._state = PlayerState.IDLE
     }
 
     public update(delta: number)
@@ -163,6 +237,8 @@ export class Player
                 this._targetTile = undefined
                 this._moveToTileCallback?.()
 
+                console.log(`[Player] Is at ${this._atTile.x},${this._atTile.y}`)
+
                 if(this._atTile == this._finalTargetTile)
                 {
                     this._finalTargetTile = undefined
@@ -173,7 +249,6 @@ export class Player
                 
             }
         }
-
 
         this.handleSittingAtChair()
     }
@@ -245,8 +320,6 @@ export class Player
     {
         const scene = GameScene.Instance
         
-        const useDefaultTexture = textureName === undefined
-
         if(textureName)
         {
             const PTF = await import("./PlayerTextureFactory")
@@ -255,11 +328,7 @@ export class Player
         } 
         else
         {
-            textureName = 'PlayerSpriteTexture_NoTexture'
-            textureName = 'PlayerSpriteTexture_TestClient'
-
-            //PlayerSpriteTexture_NoTexture
-            //textureName = this.isWaiter ? "PlayerSpriteTexture_TestWaiter" : 'PlayerSpriteTexture_TestClient'
+            textureName = this._spriteTexture
         }
 
         if(this._sprite) this._sprite.destroy()
@@ -299,10 +368,13 @@ export class Player
         this._state = PlayerState.WALKING
     }
 
+    public setFinalTargetTile(tile: Tile)
+    {
+        this._finalTargetTile = tile
+    }
+
     public taskWalkToTile(x: number, y: number, dontEnterTile?: boolean)
     {
-        this._finalTargetTile = this.getWorld().getTile(x, y)
-     
         this._taskManager.addTask(new TaskWalkToTile(this, x, y, dontEnterTile))
     }
 
@@ -314,5 +386,43 @@ export class Player
     public taskExecuteAction(action: () => void)
     {
         this._taskManager.addTask(new TaskExecuteAction(action))
+    }
+
+    public destroy()
+    {
+        if(this._destroyed) return
+
+        this._destroyed = true
+
+        this.getWorld().removePlayer(this)
+
+        this._container?.destroy()
+        this._sprite?.destroy()
+
+        if(this._sittingAtChair)
+        {
+            this._sittingAtChair.setPlayerSitting(undefined)
+            this._sittingAtChair = undefined
+        }
+
+        this.log(`destroyed`)
+    }
+
+    public serialize()
+    {
+        const json: PlayerSerializedData = {
+            id: this.id,
+            x: this._atTile.x || 0,
+            y: this._atTile.y || 0
+        }
+
+        return json
+    }
+
+    public log(...args)
+    {
+        args.unshift(`[${this.constructor.name} : ${this.id}]`)
+
+        console.log.apply(null, args)
     }
 }

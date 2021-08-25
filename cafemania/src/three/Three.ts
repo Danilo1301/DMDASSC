@@ -33,7 +33,7 @@ export default class Three
         const light = new THREE.AmbientLight( 0xffffff, 1 );
         scene.add( light );
 
-        document.body.appendChild( this.renderer.domElement );
+        //document.body.appendChild( this.renderer.domElement );
     }
 
     public static setAngle(deg: number)

@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { GameClient } from '@cafemania/game/GameClient'
 
 export class BaseScene extends Phaser.Scene

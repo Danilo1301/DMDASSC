@@ -1,11 +1,17 @@
 import { GameScene } from "@cafemania/scenes/GameScene"
-import { TileItem } from "@cafemania/tileItem/TileItem"
+import { TileItem, TileItemSerializedData } from "@cafemania/tileItem/TileItem"
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor"
 import { TileItemPlaceType, TileItemType } from "@cafemania/tileItem/TileItemInfo"
 import { TileItemWall } from "@cafemania/tileItem/TileItemWall"
 import { Direction } from "@cafemania/utils/Direction"
 import { World } from "@cafemania/world/World"
 
+export interface TileSerializedData
+{
+    x: number
+    y: number
+    tileItems: TileItemSerializedData[]
+}
 
 export class Tile
 {
@@ -85,6 +91,26 @@ export class Tile
         return options.get(find)!
     }
 
+    public static getClosestTile(position: Phaser.Math.Vector2, tiles: Tile[])
+    {
+        let closestTile = tiles[0]
+
+        for (const tile of tiles)
+        {
+            if(tile == closestTile) continue
+
+            const tileDistance = Phaser.Math.Distance.BetweenPoints(position, tile.getPosition())
+            const closestTileDistance = Phaser.Math.Distance.BetweenPoints(position, closestTile.getPosition())
+
+            if(tileDistance < closestTileDistance)
+            {
+                closestTile = tile
+            }
+        }
+        
+        return closestTile
+    }
+
     private _position = new Phaser.Math.Vector2()
 
     private _sprite?: Phaser.GameObjects.Sprite
@@ -141,6 +167,11 @@ export class Tile
         })
     }
 
+    public isSideWalk()
+    {
+        return this.getWorld().isTileInSideWalk(this)
+    }
+
     public isWalkable()
     {
         const tileItems = this.getTileItemsThatOcuppesThisTile()
@@ -192,6 +223,23 @@ export class Tile
         if(!world.hasTile(findX, findY)) return
 
         return world.getTile(findX, findY)
+    }
+
+    public getAdjacentTiles()
+    {
+        const directions = [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]
+        const tiles: Tile[] = []
+
+        for (const direction of directions)
+        {
+            const offset = Tile.getOffsetFromDirection(direction)
+
+            const tile = this.getTileInOffset(offset.x, offset.y)
+
+            if(tile) tiles.push(tile)
+        }
+
+        return tiles
     }
 
     public getTileItemsOfType(type: TileItemType)
@@ -257,6 +305,7 @@ export class Tile
         this._tileItems.push(tileItem)
 
         tileItem.setTile(this)
+        tileItem.onAddedToTile(this)
     }
 
     public getTileItem(id: string): TileItem | undefined
@@ -268,5 +317,18 @@ export class Tile
         if(ts.length > 0) return ts[0]
         
         return
+    }
+
+    public serialize()
+    {
+        const tileItems = this.getTileItems().map(tileItem => tileItem.serialize())
+
+        const json: TileSerializedData = {
+            x: this.x,
+            y: this.y,
+            tileItems: tileItems
+        }
+
+        return json
     }
 }

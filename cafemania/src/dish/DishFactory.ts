@@ -1,7 +1,7 @@
 import { Game } from "@cafemania/game/Game"
 import Dish from "./Dish"
 
-export default class DishFactory
+export class DishFactory
 {
     private _game: Game
 

@@ -44,9 +44,9 @@ export class PlayerTaskManager
         this._tasks.splice(index, 0, task)
     }
 
-    public clearTasks()
+    public clearTasks(keepFirst?: boolean)
     {
-        this._tasks.splice(1)
+        this._tasks.splice(keepFirst ? 1 : 0)
     }
 
     public update(delta: number)

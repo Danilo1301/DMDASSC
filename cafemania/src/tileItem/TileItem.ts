@@ -5,6 +5,14 @@ import { Tile } from "@cafemania/tile/Tile";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Direction } from "@cafemania/utils/Direction";
 
+export interface TileItemSerializedData
+{
+    id: string
+    tileItemInfo: string
+    direction: Direction
+    data?: any
+}
+
 export class TileItem
 {
     public events = new Phaser.Events.EventEmitter()
@@ -38,6 +46,8 @@ export class TileItem
         this.events.on("pointerout", () => {
             this._isHovering = false
         })
+
+        this.events.on("update_sprites", () => this.updateSprites())
     }
 
     public get direction()
@@ -48,6 +58,11 @@ export class TileItem
     public get id()
     {
         return this._id
+    }
+
+    public setId(id: string)
+    {
+        this._id = id
     }
 
     public getWorld()
@@ -199,14 +214,22 @@ export class TileItem
         }
     }
 
+    public onAddedToTile(tile: Tile) {}
+
+    public onRemovedFromTile(tile: Tile) {}
+
     public serialize()
     {
-        return {
+        const json: TileItemSerializedData = {
             id: this._id,
             tileItemInfo: this._tileItemInfo.id,
             direction: this._direction
         }
+
+        return json
     }
+
+    public setData(data: any) {}
 
     private destroySprites()
     {

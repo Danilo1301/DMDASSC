@@ -237,7 +237,8 @@ export class PlayerTextureFactory
 
         canvas.refresh()
 
-        console.log(this._cachedTextures)
+        this._cachedTextures.map(texture => texture.destroy())
+        this._cachedTextures = []
 
         console.log("Completed")
 

@@ -83,17 +83,39 @@ export class MainScene extends BaseScene
 
     public async create(): Promise<void>
     {
+        const network = this.getGame().getNetwork()
+
+        network.events.on("connected", async () => {
+            
+            await this.startGameScene()
+
+            const world = this.getGame().createClientWorld()
+
+            network.emit("loaded")
+        })
+        network.connect()
+    }
+
+    private async startGameScene()
+    {
         const PlayerTextureFactory = (await import("../player/PlayerTextureFactory")).PlayerTextureFactory
 
         const tag = 'PlayerSpriteTexture_'
 
-        await PlayerTextureFactory.create(tag + 'NoTexture', {})
-        await PlayerTextureFactory.create(tag + 'TestClient', {head: ['player/head'], body: ['player/body1'], leg: ['player/leg']})
-        //await PlayerTextureFactory.default.create(tag + 'TestWaiter', {head: ['head'], body: ['body2'], leg: ['1x1white']})
-        
         SceneManager.startScene('GameScene', GameScene)
         SceneManager.startScene('HudScene', HudScene)
         SceneManager.startScene('MapGridScene', MapGridScene)
+
+        await PlayerTextureFactory.create(tag + 'NoTexture', {})
+        await PlayerTextureFactory.create(tag + 'TestClient', {head: ['player/head'], body: ['player/body1'], leg: ['player/leg']})
+        await PlayerTextureFactory.create(tag + 'TestWaiter', {head: ['player/head'], leg: ['player/leg']})
+       
+        
+        
+        this.scene.get('GameScene').scene.bringToTop()
+        this.scene.get('MapGridScene').scene.bringToTop()
+        this.scene.get('HudScene').scene.bringToTop()
+        
 
         this.scene.remove('MainScene')
         console.log("[MainScene] Removed")
@@ -101,6 +123,6 @@ export class MainScene extends BaseScene
 
     public update(time: number, delta: number): void
     {
-        console.log("[MainScene] Update")
+        
     }
 }

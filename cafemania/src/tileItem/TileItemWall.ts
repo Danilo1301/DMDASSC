@@ -39,6 +39,13 @@ export class TileItemWall extends TileItem
         this.renderWallHole()
     }
 
+    public updateSprites()
+    {
+        super.updateSprites()
+
+        this._hasHole = this.getDoorInFront() != undefined
+    }
+
     private renderWallHole(): void
     {
         const tileItemRender = this.getTileItemRender()

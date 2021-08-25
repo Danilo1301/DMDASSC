@@ -1,18 +1,19 @@
 import Dish from "@cafemania/dish/Dish";
 import DishPlate from "@cafemania/dish/DishPlate";
+import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { TileItem } from "./TileItem";
 import { TileItemInfo } from "./TileItemInfo";
 
 export class CounterData
 {
-    public dish: Dish | null = null
+    public dish?: string
     public amount: number = 0
 
     public serialize()
     {
         return {
-            dish: this.dish?.id || null,
+            dish: this.dish,
             amount: this.amount
         }
     }
@@ -24,17 +25,46 @@ export class TileItemCounter extends TileItem
 
     private _dishPlate?: DishPlate
 
+    private _waitersComing: number = 0
+
     constructor(tileItemInfo: TileItemInfo)
     {
         super(tileItemInfo)
     }
 
-    public setDish(dish: Dish)
+    public getAmountOfWaitersComing()
     {
-        this._data.dish = dish
-        this._data.amount = dish.servings
+        return this._waitersComing
+    }
 
-        GameScene.Instance?.drawWorldText(`set dish`, this.getPosition())
+    public addWaiterComing()
+    {
+        this._waitersComing++
+    }
+
+    public removeWaiterComing()
+    {
+        this._waitersComing--
+    }
+
+    public getDishAmount()
+    {
+        return this._data.amount
+    }
+
+    public removeOneDish()
+    {
+        this._data.amount--
+
+        if(this._data.amount == 0) this._data.dish = undefined
+    }
+
+    public setDish(dish: Dish, amount?: number)
+    {
+        this._data.dish = dish.id
+        this._data.amount = amount == undefined ? dish.servings : amount
+
+        //GameScene.Instance?.drawWorldText(`set dish`, this.getPosition())
     }
 
     public addDish(dish: Dish)
@@ -55,7 +85,7 @@ export class TileItemCounter extends TileItem
 
     public getDish()
     {
-        return this._data.dish!
+        return this.getWorld().getGame().getDishItemFactory().getDish(this._data.dish!)
     }
 
     public update(delta: number)
@@ -75,7 +105,7 @@ export class TileItemCounter extends TileItem
 
                 const position = this.getPosition().add(new Phaser.Math.Vector2(0, -h))
 
-                this._dishPlate = new DishPlate(this._data.dish!)
+                this._dishPlate = new DishPlate(this.getDish())
                 this._dishPlate.setPosition(position.x, position.y) 
                 this._dishPlate.setDepth(position.y + h)
             }
@@ -92,6 +122,7 @@ export class TileItemCounter extends TileItem
 
     public serialize()
     {
+
         let json = super.serialize()
 
         json = Object.assign(json, {
@@ -99,5 +130,11 @@ export class TileItemCounter extends TileItem
         })
 
         return json
+    }
+
+    public setData(data: CounterData)
+    {
+        this._data.dish = data.dish
+        this._data.amount = data.amount
     }
 }

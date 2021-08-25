@@ -28,23 +28,15 @@ export class TaskWalkToTile extends Task
 
     public onStart()
     {
+        
+
         const world = this.player.getWorld()
         const pathFind = new PathFind()
 
+        this.player.setFinalTargetTile(world.getTile(this.tileX, this.tileY))
+
         const grid = world.getGrid()
 
-        const checkTileItem = (tile: Tile, tileItem: TileItem) =>
-        {
-            const info = tileItem.getInfo()
-            const type = info.type
-            const placeType = info.placeType
-
-            if(placeType == TileItemPlaceType.FLOOR && type != TileItemType.FLOOR) return false
-
-            return true
-        }
-
-        
 
         grid.getCells().map(cell =>
         {

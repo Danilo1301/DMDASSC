@@ -7,14 +7,14 @@ import { TileItemInfo } from "./TileItemInfo";
 
 export class StoveData
 {
-    public cookingDish: Dish | null = null
+    public cookingDish?: string
 
     public startedAt: number = -1
 
     public serialize()
     {
         return {
-            cookingDish: this.cookingDish?.id || null,
+            cookingDish: this.cookingDish,
             startedAt: this.startedAt
         }
     }
@@ -100,18 +100,18 @@ export class TileItemStove extends TileItem
 
     public startCook(dish: Dish)
     {
-        this._data.cookingDish = dish
+        this._data.cookingDish = dish.id
         this._data.startedAt = new Date().getTime()
     }
 
     public getCookingDish()
     {
-        return this._data.cookingDish!
+        return this.getWorld().getGame().getDishItemFactory().getDish(this._data.cookingDish!)
     }
 
     public clearDish()
     {
-        this._data.cookingDish = null
+        this._data.cookingDish = undefined
         this._data.startedAt = -1
     }
 
@@ -159,7 +159,7 @@ export class TileItemStove extends TileItem
 
                 const position = this.getPosition().add(new Phaser.Math.Vector2(0, -h))
 
-                this._dishPlate = new DishPlate(this._data.cookingDish!)
+                this._dishPlate = new DishPlate(this.getCookingDish())
                 this._dishPlate.setPosition(position.x, position.y) 
                 this._dishPlate.setDepth(position.y + h)
             }
