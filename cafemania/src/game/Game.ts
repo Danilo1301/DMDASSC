@@ -7,6 +7,8 @@ import { WorldServer } from '@cafemania/world/WorldServer';
 
 export class Game
 {
+    public events = new Phaser.Events.EventEmitter()
+
     private _worlds = new Phaser.Structs.Map<string, World>([])
 
     private _tileItemFactory: TileItemFactory
