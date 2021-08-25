@@ -102,7 +102,8 @@ export class TileTextureGenerator
         canvas.context.fillStyle = "red"
         canvas.context.fillRect(0, 0, canvas.width, canvas.height)
         canvas.refresh()
-        canvas.setFilter(Phaser.Textures.FilterMode.NEAREST)
+        canvas.setFilter(Phaser.Textures.FilterMode.LINEAR)
+        //canvas.setFilter(Phaser.Textures.FilterMode.NEAREST)
         canvas.add(`MAIN`, 0, 0, 0, canvas.width, canvas.height)
 
         this._frames.map((frame, index) =>
