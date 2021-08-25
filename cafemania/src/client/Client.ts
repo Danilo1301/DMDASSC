@@ -203,7 +203,10 @@ export class Client
         try {
             this.events.emit(packet.id, packet.data)
         } catch (error) {
+            
             console.log(`Error during process of packet '${packet.id}'\n\n`, error)
+
+            this.send("DISPLAY_MESSAGE", `${error}`)
         }
         
     }

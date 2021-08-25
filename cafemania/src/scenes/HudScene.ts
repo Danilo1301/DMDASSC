@@ -31,9 +31,9 @@ export class HudScene extends BaseScene
         this.load.image('button/fullscreen', 'button/fullscreen.png')
     }
 
-    public addNotification(text: string)
+    public addNotification(text: string, textColor?: number, backgroundColor?: number)
     {
-        this._notification?.addItem(text)
+        this._notification?.addItem(text, textColor, backgroundColor)
     }
 
     public create(): void
@@ -45,6 +45,7 @@ export class HudScene extends BaseScene
         this.createZoomButtons()
 
         this.scene.bringToTop()
+
     }
 
     public update(time: number, delta: number): void

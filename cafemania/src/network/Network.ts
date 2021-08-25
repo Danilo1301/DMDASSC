@@ -1,4 +1,5 @@
 import { GameClient } from "@cafemania/game/GameClient";
+import { HudScene } from "@cafemania/scenes/HudScene";
 import { io, Socket } from "socket.io-client";
 import { Packet } from "./Packet";
 
@@ -29,13 +30,23 @@ export default class Network
         socket.on("packets", (packets: Packet[]) => {
             packets.map(packet => this.onReceivePacket(packet))
         })
+
+        this.events.on("DISPLAY_MESSAGE", (data: string) =>
+        {
+            HudScene.Instance.addNotification(`[server error] ${data}`, 0, 0xffb0ab)
+        })
     }
 
     private onReceivePacket(packet: Packet)
     {
         console.log(`[Network] Received packet '${packet.id}'`)
 
-        this.events.emit(packet.id, packet.data)
+        try {
+            this.events.emit(packet.id, packet.data)
+        } catch (error) {
+            HudScene.Instance.addNotification(`[local error] ${error}`, 0, 0xffb0ab)
+        }
+        
     }
 
     private onConnect()
