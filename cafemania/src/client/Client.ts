@@ -132,6 +132,8 @@ export class Client
         }
 
         this._packets.push(packet)
+
+        console.log("queted ", id)
     }
 
     public sendFirstJoinWorldData()

@@ -199,6 +199,8 @@ export class Player
 
     public liftUpFromChair()
     {
+        this.log(`liftUpFromChair`)
+
         this._sittingAtChair?.setIsReserved(false)
         this._sittingAtChair?.setPlayerSitting(undefined)
         this._sittingAtChair = undefined
@@ -411,9 +413,7 @@ export class Player
         this._container?.destroy()
         this._sprite?.destroy()
 
-        
-
-        this.log(`destroyed`)
+        this.log(`playerdestroy: destroyed`)
     }
 
     public serialize()

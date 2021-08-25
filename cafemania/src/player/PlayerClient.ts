@@ -144,37 +144,28 @@ export class PlayerClient extends Player
 
             this._findChairAttempts++
 
-            ///console.log(`attempt ${this._findChairAttempts}`)
-
-            //attempt
-
-            const result = this.tryFindAvaliableChair()
-
-            if(result) {
-                //console.log("yes, we found!")
-
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair)
-            } else {
-                //console.log("no")
-            }
-            
-
-            //no chair
             if(this._findChairAttempts >= PlayerClient.MAX_FIND_CHAIR_ATTEMPTS)
             {
-                this._isWaitingForChair = false
-
-                //console.log(`no chairs`)
-
-                this.log(`couldnt find any chairs`)
-
-                if(!result)
-                {
-                    this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair)
-                }
+                this.log("no more attempts")
 
                 this.exitCafe()
+                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, undefined) //tells client to exit cafe
+                
+                return
             }
+          
+            const result = this.tryFindAvaliableChair()
+
+            if(result)
+            {
+                this.log("attempt success")
+
+                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair) //tells client to go to chair
+                
+                return
+            }
+            
+            this.log("attempt failed")
         }
     }
 
@@ -195,6 +186,8 @@ export class PlayerClient extends Player
 
     public warpToDoor()
     {
+        this.log(`Warped to door`)
+
         const door = this._goingToDoor!
         const tile = door.getTile()
 
@@ -216,15 +209,19 @@ export class PlayerClient extends Player
 
     public warpToChair()
     {
+        this.log(`Warped to chair`)
+        
         const chair = this._goingToChair!
 
         this.sitAtChair(chair)
         this.setIsWaitingForWaiter(true)
+
+        
     }
 
     public startClientBehavior()
     {
-        //this.log(`startClientBehavior`)
+        this.log(`Started client behaviour`)
 
         this._goingToDoor = this.getClosestDoor()
 
@@ -241,6 +238,8 @@ export class PlayerClient extends Player
         {
             
         } else {
+            this.log(`Walking to door`)
+
             this.taskWalkToDoor()
         }
     }
@@ -271,7 +270,7 @@ export class PlayerClient extends Player
 
     public tryFindAvaliableChair()
     {
-        //this.log(`tryFindAvaliableChair`)
+        this.log(`Try find chair`)
 
         const chairs = this.getWorld().getChairs(true)
 
@@ -292,6 +291,8 @@ export class PlayerClient extends Player
 
     public setGoingToChair(chair: TileItemChair)
     {
+        this.log(`Setted going to chair`)
+
         this._goingToChair = chair
     }
     
@@ -307,7 +308,7 @@ export class PlayerClient extends Player
     {
         this._exitingCafe = true
 
-        this.log(`exit cafe`)
+        this.log(`Exit cafe`)
 
         this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, this)
 
@@ -328,6 +329,8 @@ export class PlayerClient extends Player
     public destroy()
     {
         super.destroy()
+
+        this.log(`Destroy`)
 
         this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_DESTROYED, this)
     }
