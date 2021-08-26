@@ -81,9 +81,11 @@ export class World
         this._id = uuidv4()
         this._grid = new Grid()
 
-        this.events.on(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, () =>
+        this.events.on(WorldEvent.PLAYER_CLIENT_DESTROYED, () =>
         {
             this._spawnedPlayersAmount--
+
+            console.log("destroyed", this._spawnedPlayersAmount)
         })
     }
 

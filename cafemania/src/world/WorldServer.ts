@@ -143,6 +143,16 @@ export class WorldServer extends World
         
     }
     
+    private checkExpectedTime(player: PlayerClient, callback: (result: boolean, time: number, expected: number) => void)
+    {
+        const time = Date.now() - player.beginWalkTime
+        const minTime = player.aproximattedTimeToWalk * 0.85
+
+        const isExpectedTime = time > minTime
+
+        callback(isExpectedTime, time, minTime)
+    }
+
     private setupWorldReceiveEvents()
     {
         console.log(`[WorldServer] Listening for Socket events`)
@@ -156,20 +166,38 @@ export class WorldServer extends World
 
             if(!client) throw `Client not found (PLAYER_CLIENT_REACHED_DOOR)`
 
-            client.warpToDoor()
+            this.checkExpectedTime(client, (result, time, expectedTime) =>
+            {
+                if(result)
+                {
+                    client.warpToDoor()
+                    return
+                }
+
+                client.destroy()
+                this.getClient().displayMessage(`Action took ${time}ms (expected ${expectedTime}ms)`)
+            })
+    
         })
 
         clientEvents.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (data: IPacketClientReachedDoorData) =>
         {
-            //error is here
-            console.log(-1)
-            console.log(data)
-
             const client = world.findPlayer(data.clientId) as PlayerClient | undefined
 
             if(!client) throw `\n\nClient not found (PLAYER_CLIENT_REACHED_CHAIR)\n\n`
 
-            client.warpToChair()
+            this.checkExpectedTime(client, (result, time, expectedTime) =>
+            {
+                if(result)
+                {
+                    client.warpToChair()
+                    return
+                }
+                
+                client.destroy()
+                this.getClient().displayMessage(`Action took ${time}ms (expected ${expectedTime}ms)`)
+            })
+            
         })
 
         clientEvents.on(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, (data: IPacketWaiterReachCounterData) =>

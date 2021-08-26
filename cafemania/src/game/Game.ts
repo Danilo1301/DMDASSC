@@ -2,8 +2,6 @@ import Phaser from 'phaser';
 import { TileItemFactory } from '@cafemania/tileItem/TileItemFactory';
 import { World } from '@cafemania/world/World';
 import { DishFactory } from '@cafemania/dish/DishFactory';
-import { WorldClient } from '@cafemania/world/WorldClient';
-import { WorldServer } from '@cafemania/world/WorldServer';
 
 export class Game
 {
@@ -39,6 +37,12 @@ export class Game
     public getWorlds(): World[]
     {
         return this._worlds.values()
+    }
+
+    public createWorld(): World
+    {
+        const world = new World(this)
+        return this.setupWorld(world)
     }
 
     public setupWorld<T extends World>(world: T): T

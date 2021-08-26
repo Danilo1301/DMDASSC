@@ -51,6 +51,8 @@ export class Player
     private _distanceMoved: number = 0
     private _moveToTileCallback?: () => void
 
+    public _totalDistanceMoved: number = 0
+
     private _container?: Phaser.GameObjects.Container
 
     private _sprite?: Phaser.GameObjects.Sprite
@@ -73,6 +75,9 @@ export class Player
 
     protected _spriteTexture: string = "PlayerSpriteTexture_NoTexture"
 
+    public beginWalkTime: number = 0
+    public aproximattedTimeToWalk: number = 0
+
     constructor(world: World)
     {
         this._world = world
@@ -84,6 +89,11 @@ export class Player
         this._atTile = world.getTile(0, 0)
 
         window['player'] = this
+    }
+
+    public get speed()
+    {
+        return this._speed
     }
 
     public onCreate()
@@ -240,10 +250,14 @@ export class Player
             {
                 this.setPosition(this._targetTile.getPosition())
 
+                this._totalDistanceMoved += Phaser.Math.Distance.BetweenPoints(this._atTile.getPosition(), this._targetTile.getPosition())
+
+                console.log(this._totalDistanceMoved)
+
                 this._atTile = this._targetTile
 
                 this._targetTile = undefined
-                this._moveToTileCallback?.()
+                
 
                 //console.log(`[Player] Is at ${this._atTile.x},${this._atTile.y}`)
 
@@ -253,6 +267,8 @@ export class Player
 
                     this._state = PlayerState.IDLE
                 }
+
+                this._moveToTileCallback?.()
 
                 
             }
@@ -366,6 +382,7 @@ export class Player
         this._distanceMoved = 0
 
         this._moveToTileCallback = callback
+        
 
 
         //console.log(dir.x, dir.y)
@@ -383,12 +400,35 @@ export class Player
 
     public taskWalkToTile(x: number, y: number, dontEnterTile?: boolean)
     {
-        this._taskManager.addTask(new TaskWalkToTile(this, x, y, dontEnterTile))
+        const task = new TaskWalkToTile(this, x, y, dontEnterTile)
+
+        this.log(`>>> Event added`)
+        task.events.once("time", (aproxTime) =>
+        {
+            this.log(`>>> Task has started, got time`, aproxTime)
+
+            this.aproximattedTimeToWalk = aproxTime
+        })
+
+ 
+        this._taskManager.addTask(task)
     }
 
     public taskPlayAnim(anim: string, time: number)
     {
         this._taskManager.addTask(new TaskPlayAnim(this, anim, time))
+    }
+
+    public resetMovementAndTasks()
+    {
+        this.getTaskManager().clearTasks()
+
+        this.setState(PlayerState.IDLE)
+        this._targetTile = undefined
+
+        const tile = this._atTile
+
+        this.setAtTile(tile.x, tile.y)
     }
 
     public taskExecuteAction(action: () => void)
@@ -413,7 +453,9 @@ export class Player
         this._container?.destroy()
         this._sprite?.destroy()
 
-        this.log(`playerdestroy: destroyed`)
+        this.log(`Destroyed`)
+
+        if(this.type == PlayerType.CLIENT) this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_DESTROYED, this)
     }
 
     public serialize()

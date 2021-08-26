@@ -208,9 +208,14 @@ export class Client
             
             console.log(`Error during process of packet '${packet.id}'\n\n`, error)
 
-            this.send("DISPLAY_MESSAGE", `[server error] ${error}`)
+            this.displayMessage(`[server error] ${error}`)
         }
         
+    }
+
+    public displayMessage(text: string)
+    {
+        this.send("DISPLAY_MESSAGE", text)
     }
 
     private onLoaded()

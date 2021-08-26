@@ -1,12 +1,20 @@
 export abstract class Task
 {
-    public completed: boolean = false
+    public events = new Phaser.Events.EventEmitter()
 
-    public onStart() {}
+    public start()
+    {
+        this.events.emit('start')
+    }
 
     protected completeTask()
     {
-        this.completed = true
+        this.events.emit('complete', true)
+    }
+
+    public cancel()
+    {
+        this.events.emit('complete', false)
     }
 }
 
@@ -21,8 +29,10 @@ export class TaskExecuteAction extends Task
         this.action = action
     }
 
-    public onStart()
+    public start()
     {
+        super.start()
+
         this.action()
         this.completeTask()
     }
@@ -32,11 +42,17 @@ export class PlayerTaskManager
 {
     private _tasks: Task[] = []
 
-    private _executingTask = false
+    private _executingTask?: Task
 
     public addTask(task: Task)
     {
         this._tasks.push(task)
+
+        console.log(`[TaskManager] Added task ${task.constructor.name}`)
+
+        this.tryStartTask()
+
+        return task
     }
 
     public addTaskAt(task: Task, index: number)
@@ -46,31 +62,51 @@ export class PlayerTaskManager
 
     public clearTasks(keepFirst?: boolean)
     {
-        this._tasks.splice(keepFirst ? 1 : 0)
+        //this._tasks.splice(keepFirst ? 1 : 0)
+        this._tasks = []
+
+        if(this._executingTask)
+        {
+            const task = this._executingTask
+
+            this._executingTask = undefined
+
+            task.cancel()
+        }
     }
 
     public update(delta: number)
     {
-        if(this._executingTask)
-        {
-            const task = this._tasks[0]
+        this.tryStartTask()
+    }
 
-            if(task.completed)
+    private tryStartTask()
+    {
+        if(!this._executingTask && this._tasks.length > 0)
+        {
+            const task = this._tasks.splice(0, 1)[0]
+
+            console.log(`[TaskManager] Executing task ${task.constructor.name}`)
+
+            this._executingTask = task
+
+            task.events.once('complete', (result) =>
             {
-                this._tasks.splice(0, 1)
-                this._executingTask = false
-            }
-        } 
 
-        if(this._tasks.length > 0 && !this._executingTask)
-        {
-            const task = this._tasks[0]
-            this._executingTask = true
-            
-            //console.log(task)
+                if(this._executingTask == task)
+                {
+                    console.log("completed with result", result)
 
-            task.onStart()
+                    this._executingTask = undefined
+    
+                    this.tryStartTask()
+                } else {
+                    console.log("completed, but was already discarted")
+                }
+
+                
+            })
+            task.start()
         }
-        
     }
 }

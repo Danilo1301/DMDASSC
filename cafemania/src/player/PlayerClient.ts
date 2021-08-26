@@ -20,8 +20,6 @@ export class PlayerClient extends Player
 
     private _isWaitingForChair: boolean = false
 
-    private _waitForGameClient: boolean = false
-
     private _exitingCafe: boolean = false
 
     private _hasStartedEating: boolean = false
@@ -32,8 +30,6 @@ export class PlayerClient extends Player
 
         this._spriteTexture = 'PlayerSpriteTexture_TestClient'
         this._type = PlayerType.CLIENT
-
-        this._waitForGameClient = world.type == WorldType.SERVER
     }
 
     public isExitingCafe()
@@ -90,10 +86,13 @@ export class PlayerClient extends Player
 
             this._isWaitingForChair = false
 
-            if(!this._waitForGameClient)
+            this.beginWalkTime = Date.now()
+
+            this.taskWalkToChair()
+   
+            if(this.isWorldServer())
             {
-                //go to chair
-                this.taskWalkToChair()
+                this.resetMovementAndTasks()
             }
         }
 
@@ -225,6 +224,8 @@ export class PlayerClient extends Player
     {
         this.log(`Started client behaviour`)
 
+        
+
         this._goingToDoor = this.getClosestDoor()
 
         if(!this.isWorldClient()) {
@@ -236,14 +237,18 @@ export class PlayerClient extends Player
             }
         }
 
-        if(this._waitForGameClient)
-        {
-            
-        } else {
-            this.log(`Walking to door`)
+        this.beginWalkTime = Date.now()
 
-            this.taskWalkToDoor()
+        this.log(`Walking to door`)
+
+        this.taskWalkToDoor()
+
+        if(this.isWorldServer())
+        {
+            this.resetMovementAndTasks()
         }
+
+   
     }
 
     //add for player later
@@ -332,8 +337,6 @@ export class PlayerClient extends Player
     {
         super.destroy()
 
-        this.log(`Destroy`)
-
-        this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_DESTROYED, this)
+        this._goingToChair?.setIsReserved(false)
     }
 }

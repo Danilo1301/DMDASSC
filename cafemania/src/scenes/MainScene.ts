@@ -83,6 +83,21 @@ export class MainScene extends BaseScene
 
     public async create(): Promise<void>
     {
+
+        /*
+        await this.startGameScene()
+
+        const world = this.getGame().createWorld()
+        world.createDefaultMap(15, 15)
+
+        //world.createDefaultWaiters()
+
+        const started = Date.now()
+
+        const client = world.spawnPlayerClient()
+
+        */
+      
         const network = this.getGame().getNetwork()
 
         network.events.on("connected", async () => {
@@ -90,10 +105,13 @@ export class MainScene extends BaseScene
             await this.startGameScene()
 
             const world = this.getGame().createClientWorld()
+            
 
             network.send("loaded")
         })
         network.connect()
+
+        
     }
 
     private async startGameScene()

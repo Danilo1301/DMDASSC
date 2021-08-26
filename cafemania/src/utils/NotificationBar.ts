@@ -121,7 +121,7 @@ export class NotificationBar
         {
             if(it == item) break
             
-            h += item.height + 3
+            h += it.height + 3
         }
 
         return h

@@ -11,6 +11,8 @@ import { Task } from "./PlayerTaskManager"
 
 export class TaskWalkToTile extends Task
 {
+
+
     private player: Player
     private tileX: number
     private tileY: number
@@ -26,9 +28,11 @@ export class TaskWalkToTile extends Task
         this.dontEnterTile = dontEnterTile || false
     }
 
-    public onStart()
+    public start()
     {
-        
+        super.start()
+
+        console.log("TaskWalkToTile it has started")
 
         const world = this.player.getWorld()
         const pathFind = new PathFind()
@@ -53,7 +57,38 @@ export class TaskWalkToTile extends Task
 
         pathFind.find(atTile.x, atTile.y, this.tileX, this.tileY, async (path) =>
         {
+            console.log(-1, 'doing path find')
+
             if(path.length == 0) return
+
+            //console.log(path)
+
+            let totalDistance = 0
+
+            for (let i = 0; i < path.length-1; i++)
+            {
+                const from = path[i]
+                const to = path[i + 1]
+
+                const fromTile = world.getTile(from.x, from.y)
+                const toTile = world.getTile(to.x, to.y)
+
+                totalDistance += Phaser.Math.Distance.BetweenPoints(fromTile.getPosition(), toTile.getPosition())
+
+                //console.log(`from ${from.x} ${from.y} to ${to.x} ${to.y}`)
+            }
+
+            const aproxTimePerDistance = 11147 / 973.5742752749559
+            const perSpeed = aproxTimePerDistance / 1.8
+
+            const aproxTime = totalDistance * perSpeed * this.player.speed
+
+            console.log(aproxTime)
+
+            this.events.emit("time", aproxTime)
+
+            console.log(`[TaskWalkToTile] Distance: ${totalDistance}, Aprox. time: ${aproxTime}`)
+
             path.splice(0, 1)
 
             const tasks: Task[] = []
@@ -69,9 +104,11 @@ export class TaskWalkToTile extends Task
                 tasks.push(task)
             } 
 
-            tasks.reverse().map(task => this.player.getTaskManager().addTaskAt(task, 1))
+            tasks.map((task, index) => this.player.getTaskManager().addTaskAt(task, 0 + index))
         })
 
+
+        this.player._totalDistanceMoved = 0
 
         this.completeTask()
     }
@@ -90,8 +127,10 @@ export class TaskWalkToSingleTile extends Task
         this.tile = tile
     }
 
-    public onStart()
+    public start()
     {
+        super.start()
+
         this.player.moveToTile(this.tile.x, this.tile.y, () => {
 
 
@@ -118,8 +157,9 @@ export class TaskPlayAnim extends Task
         this.time = time
     }
 
-    public onStart()
+    public start()
     {
+        super.start()
         //this.player.getAnimationManager().play(this.anim, false)
 
         if(this.time <= 0)
