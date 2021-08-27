@@ -1,5 +1,5 @@
 import Dish from "@cafemania/dish/Dish";
-import DishPlate from "@cafemania/dish/DishPlate";
+import DishPlate, { DishState } from "@cafemania/dish/DishPlate";
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { WorldEvent } from "@cafemania/world/World";
 import { TileItem } from "./TileItem";
@@ -62,8 +62,10 @@ export class TileItemStove extends TileItem
             return
         }
 
-        const dishFactory = this.getTile().getWorld().getGame().getDishItemFactory()
-        const food = dishFactory.getDish(Math.random() >= 0.5 ? "dish1" : "dish2")
+        const serveDish1 = this.getWorld().getStoves()[0] == this
+
+        const dishFactory = this.getTile().getWorld().getGame().getDishFactory()
+        const food = dishFactory.getDish(serveDish1 ? "dish1" : "dish2")
 
         this.startCook(food)
 
@@ -73,16 +75,23 @@ export class TileItemStove extends TileItem
 
     private getAvaliableCounters()
     {
+        let countersSameDish: TileItemCounter[] = []
         let counters = this.getWorld().getCounters()
 
         counters = counters.filter(counter => {
             if(counter.isEmpty()) return true
 
-            if(counter.getDish().id == this.getCookingDish().id) return true
+            if(counter.getDish().id == this.getCookingDish().id)
+            {
+                countersSameDish.push(counter)
+                return true
+            }
 
             return false
         })
 
+        if(countersSameDish.length > 0) return countersSameDish
+     
         return counters
     }
 
@@ -113,7 +122,7 @@ export class TileItemStove extends TileItem
 
     public getCookingDish()
     {
-        return this.getWorld().getGame().getDishItemFactory().getDish(this._data.cookingDish!)
+        return this.getWorld().getGame().getDishFactory().getDish(this._data.cookingDish!)
     }
 
     public clearDish()
@@ -122,13 +131,16 @@ export class TileItemStove extends TileItem
         this._data.startedAt = -1
     }
 
-
-    public isDishReady()
+    public getCookingPercentage()
     {
         const now = Date.now()
         const delta = now - this._data.startedAt
+        return delta / this.getCookingDish().cookTime
+    }
 
-        return (delta >= this.getCookingDish().cookTime)
+    public isDishReady()
+    {
+        return this.getCookingPercentage() >= 1
     }
 
     private onDishReady()
@@ -171,7 +183,10 @@ export class TileItemStove extends TileItem
                 this._dishPlate = new DishPlate(this.getCookingDish())
                 this._dishPlate.setPosition(position.x, position.y) 
                 this._dishPlate.setDepth(position.y + h)
+                this._dishPlate.setState(DishState.COOKING)
             }
+
+            this._dishPlate.setPercentage(this.getCookingPercentage())
 
         } else {
      

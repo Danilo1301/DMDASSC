@@ -48,8 +48,6 @@ export class PlayerTaskManager
     {
         this._tasks.push(task)
 
-        console.log(`[TaskManager] Added task ${task.constructor.name}`)
-
         this.tryStartTask()
 
         return task
@@ -86,25 +84,16 @@ export class PlayerTaskManager
         {
             const task = this._tasks.splice(0, 1)[0]
 
-            console.log(`[TaskManager] Executing task ${task.constructor.name}`)
-
             this._executingTask = task
 
             task.events.once('complete', (result) =>
             {
-
                 if(this._executingTask == task)
                 {
-                    console.log("completed with result", result)
-
                     this._executingTask = undefined
     
                     this.tryStartTask()
-                } else {
-                    console.log("completed, but was already discarted")
                 }
-
-                
             })
             task.start()
         }

@@ -4,30 +4,6 @@ import { GameScene } from './GameScene';
 import { HudScene } from './HudScene';
 import { MapGridScene } from './MapGridScene';
 
-/*
-
-Convert TileItemDirection to 
-NORTH,
-SOUTH,
-EAST,
-WEST,
-
-Change the way TileItem rotates
-
-Create method to convert PlayerDirection to Tile Offset and vice-versa
-- Create method get tile item in front (Tile Offset)
-
-Adjust Depth for TileItems that have PlaceType = WALL
-
-Maybe change auto rotate to support New tile rotations if needed
-
-Clear console logs
-
-
-Global function to convert Direction into Tile Offset <<
-
-*/
-
 export class MainScene extends BaseScene
 {
     public static Instance: MainScene
@@ -70,7 +46,7 @@ export class MainScene extends BaseScene
 
     private loadDishes()
     {
-        const dishList = this.getGame().getDishItemFactory().getDishList()
+        const dishList = this.getGame().getDishFactory().getDishList()
 
         for (const id in dishList)
         {

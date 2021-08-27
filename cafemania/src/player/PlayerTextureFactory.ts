@@ -219,8 +219,8 @@ export class PlayerTextureFactory
         sheet.organize()
 
         const canvas = MainScene.Instance.textures.createCanvas(queryItem.name, sheet.width, sheet.height) 
-        canvas.context.fillStyle = "red"
-        canvas.context.fillRect(0, 0, canvas.width, canvas.height)
+        //canvas.context.fillStyle = "red"
+        //canvas.context.fillRect(0, 0, canvas.width, canvas.height)
 
         canvas.add('MAIN', 0, 0, 0, canvas.width, canvas.height)
 

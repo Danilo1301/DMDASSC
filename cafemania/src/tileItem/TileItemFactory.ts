@@ -223,9 +223,9 @@ export class TileItemFactory
             collision: {
                 x: 0,
                 y: 0,
-                height: 42
+                height: 55
             },
-            originPosition: new Phaser.Math.Vector2(84, 42)
+            originPosition: new Phaser.Math.Vector2(84, 55)
         })
     }
 

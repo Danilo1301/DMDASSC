@@ -226,7 +226,7 @@ export class WorldServer extends World
 
             if(!stove) throw `Waiter not found (TILE_ITEM_STOVE_BEGIN_COOK)`
 
-            const dish = world.getGame().getDishItemFactory().getDish(data.dishId)
+            const dish = world.getGame().getDishFactory().getDish(data.dishId)
 
             stove.startCook(dish)
         })
@@ -242,7 +242,7 @@ export class WorldServer extends World
         
         this.setPlayerClientSpawnEnabled(false)
 
-        this.getCounters()[0].setDish(this.getGame().getDishItemFactory().getDish('dish1'), 4)
+        this.getCounters()[0].setDish(this.getGame().getDishFactory().getDish('dish1'), 4)
     }
 
     public beginTestClients()

@@ -18,6 +18,7 @@ import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
 import { v4 as uuidv4 } from 'uuid';
 import { TileItemTable } from "@cafemania/tileItem/TileItemTable";
 import { PlayerCheff } from "@cafemania/player/PlayerCheff";
+import { TileItemStove } from "@cafemania/tileItem/TileItemStove";
 
 export enum WorldEvent
 {
@@ -363,10 +364,10 @@ export class World
                 {
                     const chair = tileItemFactory.createTileItem('chair1')
                     this.putTileItemInTile(chair, tile)
-                    chair.setDirection(Direction.NORTH)
+                    chair.setDirection(Direction.SOUTH)
                 }
 
-                if(y % 3 == 0 && x >= 4)
+                if(y % 3 == 2 && x >= 4)
                 {
                     const floorDecoration1 = tileItemFactory.createTileItem('table1')
                     this.putTileItemInTile(floorDecoration1, tile)
@@ -498,6 +499,11 @@ export class World
     public getDoors(): TileItemDoor[]
     {
         return this.getAllTileItemsOfType(TileItemType.DOOR) as TileItemDoor[]
+    }
+
+    public getStoves(): TileItemStove[]
+    {
+        return this.getAllTileItemsOfType(TileItemType.STOVE) as TileItemStove[]
     }
 
     public getCounters(empty?: boolean): TileItemCounter[]

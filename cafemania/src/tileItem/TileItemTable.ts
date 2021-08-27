@@ -1,5 +1,5 @@
 import Dish from "@cafemania/dish/Dish";
-import DishPlate from "@cafemania/dish/DishPlate";
+import DishPlate, { DishState } from "@cafemania/dish/DishPlate";
 import { TileItem } from "./TileItem";
 import { TileItemInfo } from "./TileItemInfo";
 
@@ -12,6 +12,11 @@ export class TileItemTable extends TileItem
     constructor(tileItemInfo: TileItemInfo)
     {
         super(tileItemInfo)
+    }
+
+    public getDishPlate()
+    {
+        return this._dishPlate!
     }
 
     public isEmpty()
@@ -42,13 +47,14 @@ export class TileItemTable extends TileItem
         {
             if(!this._dishPlate)
             {
-                const h = 20
+                const h = 33
 
                 const position = this.getPosition().add(new Phaser.Math.Vector2(0, -h))
 
                 this._dishPlate = new DishPlate(this.getDish())
                 this._dishPlate.setPosition(position.x, position.y) 
                 this._dishPlate.setDepth(position.y + h)
+                this._dishPlate.setState(DishState.EATING)
             }
         }
         else

@@ -3,50 +3,35 @@ import { TileItemFactory } from '@cafemania/tileItem/TileItemFactory';
 import { World } from '@cafemania/world/World';
 import { DishFactory } from '@cafemania/dish/DishFactory';
 
-export class Game
-{
+export class Game {
+
     public events = new Phaser.Events.EventEmitter()
 
     private _worlds = new Phaser.Structs.Map<string, World>([])
 
     private _tileItemFactory: TileItemFactory
+
     private _dishFactory: DishFactory
 
-    constructor()
-    {
+    constructor() {
         this._tileItemFactory = new TileItemFactory(this)
         this._dishFactory = new DishFactory(this)
     }
 
-    public start(): void
-    {
+    public getTileItemFactory() { return this._tileItemFactory }
+    public getDishFactory() { return this._dishFactory }
+    public getWorlds() { return this._worlds.values() }
+
+    public start() {
         console.log('Game started')
     }
 
-    public getTileItemFactory(): TileItemFactory
-    {
-        return this._tileItemFactory
-    }
-
-    //name mistake lol
-    public getDishItemFactory(): DishFactory
-    {
-        return this._dishFactory
-    }
-
-    public getWorlds(): World[]
-    {
-        return this._worlds.values()
-    }
-
-    public createWorld(): World
-    {
+    public createWorld() {
         const world = new World(this)
         return this.setupWorld(world)
     }
 
-    public setupWorld<T extends World>(world: T): T
-    {
+    public setupWorld<T extends World>(world: T) {
         this._worlds.set(world.id, world);
         return world
     }

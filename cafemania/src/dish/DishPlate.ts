@@ -1,17 +1,26 @@
 import { GameScene } from "@cafemania/scenes/GameScene"
 import Dish from "./Dish"
 
-export default class DishPlate
+export enum DishState
 {
-    private _dish: Dish
+    NONE,
+    COOKING,
+    EATING
+}
 
-    private _sprite: Phaser.GameObjects.Sprite
+export default class DishPlate {
+
+    private _dish: Dish;
+
+    private _sprite: Phaser.GameObjects.Sprite;
+
+    private _state: DishState = DishState.NONE
+
+    private _percentage: number = 0
 
     constructor(dish: Dish)
     {
-        this._dish = dish
-
-        const scene = GameScene.Instance
+        this._dish = dish;
 
         /*
         const texture = scene.textures.get(dish.texture)
@@ -32,37 +41,85 @@ export default class DishPlate
             }
         }*/
 
-        const texture = scene.textures.get(dish.texture)
+        const scene = GameScene.Instance;
+        const texture = scene.textures.get(dish.texture);
+        const image = texture.getSourceImage()
 
-        
-        
+        const totalNumFrames = dish.frames.cooking + dish.frames.eating + 1
+        const cropRect = new Phaser.Geom.Rectangle(0, 0, image.width / totalNumFrames, image.height)
 
-        if(texture.getFrameNames().length == 0)
-        {
-            texture.add('1', 0, 0, 0, 138, 100)
+        const addTextureFrame = (ix: number, name: string) => {
+            texture.add(name, 0, ix*cropRect.width, 0, cropRect.width, cropRect.height);
         }
 
-        
+        if(texture.getFrameNames().length == 0) {
 
-        const sprite = this._sprite = scene.add.sprite(0, 0, dish.texture)
-        sprite.setFrame('1')
-        sprite.setOrigin(0.5, 1)
+            addTextureFrame(0, 'default')
 
-        scene.objectsLayer.add(sprite)
+            let i = 1
+
+            for (let index = 0; index < dish.frames.cooking; index++) {
+                addTextureFrame(i, 'cook_' + index)
+
+                i++
+            }
+
+            for (let index = 0; index < dish.frames.eating; index++) {
+                addTextureFrame(i, 'eat_' + index)
+
+                i++
+            }
+
+            
+        }
+
+        const sprite = this._sprite = scene.add.sprite(0, 0, dish.texture);
+        sprite.setOrigin(0.5, 1);
+
+        scene.objectsLayer.add(sprite);
     }
 
-    public setPosition(x: number, y: number)
-    {
-        this._sprite.setPosition(x, y)
+    public setState(state: DishState) {
+        this._state = state
+        this.updateSprites()
     }
 
-    public setDepth(depth: number)
-    {
-        this._sprite.setDepth(depth)
+    public setPercentage(value: number) {
+        this._percentage = value
+        this.updateSprites()
     }
 
-    public destroy()
+    private updateSprites()
     {
-        this._sprite.destroy()
+        this._sprite.setFrame(this.getFrameKey())
+    }
+
+    public getFrameKey()
+    {
+        if(this._state == DishState.NONE) return 'default'
+
+        const k = this._state == DishState.EATING ? 'eat' : 'cook'
+        const maxFrames = this._state == DishState.EATING ? this._dish.frames.eating+1 : this._dish.frames.cooking
+
+        let frame = Math.round((maxFrames-1) * this._percentage)
+
+        if(this._state == DishState.EATING) {
+            if(frame == 0) return 'default'
+            frame--
+        }
+
+        return `${k}_${frame}`
+    }
+
+    public setPosition(x: number, y: number) {
+        this._sprite.setPosition(x, y);
+    }
+
+    public setDepth(depth: number) {
+        this._sprite.setDepth(depth);
+    }
+
+    public destroy() {
+        this._sprite.destroy();
     }
 }

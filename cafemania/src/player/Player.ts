@@ -228,8 +228,6 @@ export class Player
 
             const ang = Phaser.Math.Angle.BetweenPoints(this._position, this._targetTile.getCenterPosition())
     
-            // * delta * 0.05
-
             const moveDir = new Phaser.Math.Vector2(
                 Math.cos(ang),
                 Math.sin(ang)
@@ -252,15 +250,10 @@ export class Player
 
                 this._totalDistanceMoved += Phaser.Math.Distance.BetweenPoints(this._atTile.getPosition(), this._targetTile.getPosition())
 
-                console.log(this._totalDistanceMoved)
-
                 this._atTile = this._targetTile
 
                 this._targetTile = undefined
                 
-
-                //console.log(`[Player] Is at ${this._atTile.x},${this._atTile.y}`)
-
                 if(this._atTile == this._finalTargetTile)
                 {
                     this._finalTargetTile = undefined
@@ -358,11 +351,10 @@ export class Player
         if(this._sprite) this._sprite.destroy()
 
         
-        this._sprite = scene.add.sprite(0, 40, textureName)
+        this._sprite = scene.add.sprite(0, 30, textureName)
         this._sprite.setScale(1.05)
         this._sprite.setOrigin(0.5, 1)
         this._sprite.setFrame(`Idle_0_0`)
-
         this._container!.add(this._sprite)
     }
 

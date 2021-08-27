@@ -24,6 +24,8 @@ export class PlayerClient extends Player
 
     private _hasStartedEating: boolean = false
 
+    private _eatTime: number = (Math.random()*6000)+13000
+
     constructor(world: World)
     {
         super(world)
@@ -126,7 +128,11 @@ export class PlayerClient extends Player
         {
             this._eatingTimeElapsed += delta
 
-            if(this._eatingTimeElapsed >= 11000)
+            console.log(`Eating ${this._eatingTimeElapsed / this._eatTime}`)
+
+            this.getChairPlayerIsSitting().getTableInFront()!.getDishPlate()?.setPercentage(this._eatingTimeElapsed / this._eatTime)
+
+            if(this._eatingTimeElapsed >= this._eatTime)
             {
                 this.onFinishEating()
             }
