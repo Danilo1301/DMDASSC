@@ -137,7 +137,7 @@ export class PlayerWaiter extends Player
             this.onGetDish()
         })
 
-        this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTile())
+        this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTableInFront()!.getTile())
         this.taskExecuteAction(() =>
         {
             //this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, this)

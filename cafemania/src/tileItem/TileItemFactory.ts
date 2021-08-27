@@ -210,6 +210,8 @@ export class TileItemFactory
             originPosition: new Phaser.Math.Vector2(84, 42)
         })
 
+        //height is wrong!!
+        
         this.addTileItemInfo({
             id: 'table1',
             name: 'table1',
