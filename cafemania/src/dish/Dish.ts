@@ -1,4 +1,4 @@
-export default interface Dish {
+export interface Dish {
     id: string
     name: string
     cookTime: number

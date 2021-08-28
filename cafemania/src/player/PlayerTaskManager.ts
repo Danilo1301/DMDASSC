@@ -7,14 +7,9 @@ export abstract class Task
         this.events.emit('start')
     }
 
-    protected completeTask()
+    public completeTask()
     {
         this.events.emit('complete', true)
-    }
-
-    public cancel()
-    {
-        this.events.emit('complete', false)
     }
 }
 
@@ -58,9 +53,8 @@ export class PlayerTaskManager
         this._tasks.splice(index, 0, task)
     }
 
-    public clearTasks(keepFirst?: boolean)
+    public clearTasks()
     {
-        //this._tasks.splice(keepFirst ? 1 : 0)
         this._tasks = []
 
         if(this._executingTask)
@@ -69,7 +63,7 @@ export class PlayerTaskManager
 
             this._executingTask = undefined
 
-            task.cancel()
+            task.completeTask()
         }
     }
 

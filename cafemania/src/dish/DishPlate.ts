@@ -1,25 +1,23 @@
 import { GameScene } from "@cafemania/scenes/GameScene"
-import Dish from "./Dish"
+import { Dish } from "./Dish"
 
-export enum DishState
-{
+export enum DishPlateState {
     NONE,
     COOKING,
     EATING
 }
 
-export default class DishPlate {
+export class DishPlate {
 
     private _dish: Dish;
 
     private _sprite: Phaser.GameObjects.Sprite;
 
-    private _state: DishState = DishState.NONE
+    private _state: DishPlateState = DishPlateState.NONE;
 
-    private _percentage: number = 0
+    private _percentage: number = 0;
 
-    constructor(dish: Dish)
-    {
+    constructor(dish: Dish) {
         this._dish = dish;
 
         /*
@@ -43,10 +41,10 @@ export default class DishPlate {
 
         const scene = GameScene.Instance;
         const texture = scene.textures.get(dish.texture);
-        const image = texture.getSourceImage()
+        const image = texture.getSourceImage();
 
-        const totalNumFrames = dish.frames.cooking + dish.frames.eating + 1
-        const cropRect = new Phaser.Geom.Rectangle(0, 0, image.width / totalNumFrames, image.height)
+        const totalNumFrames = dish.frames.cooking + dish.frames.eating + 1;
+        const cropRect = new Phaser.Geom.Rectangle(0, 0, image.width / totalNumFrames, image.height);
 
         const addTextureFrame = (ix: number, name: string) => {
             texture.add(name, 0, ix*cropRect.width, 0, cropRect.width, cropRect.height);
@@ -54,23 +52,19 @@ export default class DishPlate {
 
         if(texture.getFrameNames().length == 0) {
 
-            addTextureFrame(0, 'default')
+            addTextureFrame(0, 'default');
 
-            let i = 1
+            let i = 1;
 
             for (let index = 0; index < dish.frames.cooking; index++) {
-                addTextureFrame(i, 'cook_' + index)
-
-                i++
+                addTextureFrame(i, 'cook_' + index);
+                i++;
             }
 
             for (let index = 0; index < dish.frames.eating; index++) {
-                addTextureFrame(i, 'eat_' + index)
-
-                i++
+                addTextureFrame(i, 'eat_' + index);
+                i++;
             }
-
-            
         }
 
         const sprite = this._sprite = scene.add.sprite(0, 0, dish.texture);
@@ -79,7 +73,7 @@ export default class DishPlate {
         scene.objectsLayer.add(sprite);
     }
 
-    public setState(state: DishState) {
+    public setState(state: DishPlateState) {
         this._state = state
         this.updateSprites()
     }
@@ -89,26 +83,24 @@ export default class DishPlate {
         this.updateSprites()
     }
 
-    private updateSprites()
-    {
-        this._sprite.setFrame(this.getFrameKey())
+    private updateSprites() {
+        this._sprite.setFrame(this.getFrameKey());
     }
 
-    public getFrameKey()
-    {
-        if(this._state == DishState.NONE) return 'default'
+    public getFrameKey() {
+        if(this._state == DishPlateState.NONE) return 'default';
 
-        const k = this._state == DishState.EATING ? 'eat' : 'cook'
-        const maxFrames = this._state == DishState.EATING ? this._dish.frames.eating+1 : this._dish.frames.cooking
+        const k = this._state == DishPlateState.EATING ? 'eat' : 'cook';
+        const maxFrames = this._state == DishPlateState.EATING ? this._dish.frames.eating+1 : this._dish.frames.cooking;
 
-        let frame = Math.round((maxFrames-1) * this._percentage)
+        let frame = Math.round((maxFrames-1) * this._percentage);
 
-        if(this._state == DishState.EATING) {
-            if(frame == 0) return 'default'
-            frame--
+        if(this._state == DishPlateState.EATING) {
+            if(frame == 0) return 'default';
+            frame--;
         }
 
-        return `${k}_${frame}`
+        return `${k}_${frame}`;
     }
 
     public setPosition(x: number, y: number) {

@@ -47,6 +47,8 @@ export class Client {
     public addTileToUpdate(tile: Tile) {
         if(this._updateTiles.includes(tile)) return
         this._updateTiles.push(tile)
+
+        this.sendData()
     }
 
     private startUpdateTimer() {
@@ -72,7 +74,7 @@ export class Client {
 
         const now = Date.now()
 
-        if(now - this._lastSentPackets >= 500 && this._packets.length > 0) {
+        if(now - this._lastSentPackets >= 250 && this._packets.length > 0) {
             this.socket.emit('packets', this._packets)
             
             console.log(`[Client] Sent ${this._packets.length} packets ${this._packets.map(packet => packet.id).join(",") }`)
@@ -80,11 +82,6 @@ export class Client {
             this._packets = []
             this._lastSentPackets = now
         }
-    }
-
-    public sendAllUpdatesQueued() {
-        if(this._updateTiles.length == 0) return
-        this.sendData()
     }
 
     public send(id: string, data?: any){
@@ -114,9 +111,7 @@ export class Client {
         }
         
         this._updateTiles = []
-        this.send("worldData", data)
-
-        console.log(`[Client] Sending data (${JSON.stringify(data).length} len)`)
+        this.send("WORLD_DATA", data)
     }
 
     public setSocket(socket: Socket) {

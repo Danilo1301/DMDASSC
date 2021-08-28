@@ -1,5 +1,5 @@
-import Dish from "@cafemania/dish/Dish";
-import DishPlate from "@cafemania/dish/DishPlate";
+import { Dish } from "@cafemania/dish/Dish";
+import { DishPlate } from "@cafemania/dish/DishPlate";
 import { TileItem } from "./TileItem";
 import { TileItemInfo } from "./TileItemInfo";
 
@@ -88,7 +88,7 @@ export class TileItemCounter extends TileItem
 
     public getDish()
     {
-        return this.getWorld().getGame().getDishFactory().getDish(this._data.dish!)
+        return this.getWorld().game.getDishFactory().getDish(this._data.dish!)
     }
 
     public update(delta: number)
@@ -138,6 +138,6 @@ export class TileItemCounter extends TileItem
     public setData(data: CounterData)
     {
         this._data.dish = data.dish
-        this._data.amount = data.amount + this._waitersComing
+        this._data.amount = data.amount
     }
 }

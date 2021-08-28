@@ -1,11 +1,8 @@
-import Dish from "@cafemania/dish/Dish";
-import DishPlate from "@cafemania/dish/DishPlate";
-import { Tile } from "@cafemania/tile/Tile";
-import { TileItem } from "@cafemania/tileItem/TileItem";
+import { Dish } from "@cafemania/dish/Dish";
+import { DishPlate } from "@cafemania/dish/DishPlate";
 import { TileItemCounter } from "@cafemania/tileItem/TileItemCounter";
 import { Utils } from "@cafemania/utils/Utils";
 import { World, WorldEvent, WorldType } from "@cafemania/world/World";
-import { WorldServer } from "@cafemania/world/WorldServer";
 import { Player, PlayerType } from "./Player";
 import { PlayerClient } from "./PlayerClient";
 
@@ -27,12 +24,12 @@ export class PlayerWaiter extends Player
 
     public isWorldClient()
     {
-        return this.getWorld().type == WorldType.CLIENT
+        return this.world.type == WorldType.CLIENT
     }
 
     public isWorldServer()
     {
-        return this.getWorld().type == WorldType.SERVER
+        return this.world.type == WorldType.SERVER
     }
 
     constructor(world: World)
@@ -120,7 +117,7 @@ export class PlayerWaiter extends Player
         {
             //counter.removeOneDish()
 
-            this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, this, client, counter)
+            this.world.events.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, this, client, counter)
 
             return
         }
@@ -140,7 +137,7 @@ export class PlayerWaiter extends Player
         this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTableInFront()!.getTile())
         this.taskExecuteAction(() =>
         {
-            //this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, this)
+            //this.world.events.emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, this)
 
             counter.removeWaiterComing()
 
@@ -162,12 +159,15 @@ export class PlayerWaiter extends Player
 
         counter.removeWaiterComing()
 
-        counter.removeOneDish()
+        if(!this.isWorldClient()) counter.removeOneDish()
+
         counter.setAsUpdated()
+
+        console.log(counter['_data'])
 
         if(this.isWorldClient())
         {
-            this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, this)
+            this.world.events.emit(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, this)
         }
     }
 
@@ -188,6 +188,8 @@ export class PlayerWaiter extends Player
             //unlikely to happen
             if(!this._hasGotDish)
             {
+                console.log("_hasGotDish was false?")
+
                 counter.removeWaiterComing()
                 counter.removeOneDish()
                 counter.setAsUpdated()
@@ -201,7 +203,7 @@ export class PlayerWaiter extends Player
         
         if(this.isWorldClient())
         {
-            this.getWorld().events.emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, this)
+            this.world.events.emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, this)
         }
 
         
@@ -211,8 +213,8 @@ export class PlayerWaiter extends Player
 
     private getRandomPlayerWaitingForWaiter()
     {
-        const world = this.getWorld()
-        const players = this.getWorld().getPlayerClients()
+        const world = this.world
+        const players = this.world.getPlayerClients()
 
         for (const player of players)
         {
@@ -227,7 +229,7 @@ export class PlayerWaiter extends Player
 
     public getAnyAvaliableCounter()
     {
-        const counters = this.getWorld().getCounters().filter(counter => {
+        const counters = this.world.getCounters().filter(counter => {
             if(counter.isEmpty()) return false
 
             const servings = counter.getDishAmount() - counter.getAmountOfWaitersComing()

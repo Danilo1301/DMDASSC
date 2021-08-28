@@ -24,7 +24,7 @@ export class PlayerClient extends Player
 
     private _hasStartedEating: boolean = false
 
-    private _eatTime: number = (Math.random()*6000)+13000
+    private _eatTime: number = (Math.random()*10000)+20000
 
     constructor(world: World)
     {
@@ -46,12 +46,12 @@ export class PlayerClient extends Player
 
     public isWorldServer()
     {
-        return this.getWorld().type == WorldType.SERVER
+        return this.world.type == WorldType.SERVER
     }
 
     public isWorldClient()
     {
-        return this.getWorld().type == WorldType.CLIENT
+        return this.world.type == WorldType.CLIENT
     }
 
     public isWaitingForWaiter()
@@ -98,18 +98,18 @@ export class PlayerClient extends Player
             }
         }
 
-        if(this._goingToChair && this.isSitting())
+        if(this._goingToChair && this.isSitting)
         {
             this._goingToChair = undefined
 
             if(this.isWorldClient())
             {
                 this.log("reached chair locally", WorldEvent.PLAYER_CLIENT_REACHED_CHAIR)
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, this)
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, this)
             }
         }
 
-        if(this.isSitting() && !this.isEating())
+        if(this.isSitting && !this.isEating)
         {
             const table = this.getChairPlayerIsSitting().getTableInFront()
 
@@ -124,11 +124,9 @@ export class PlayerClient extends Player
             }
         }
 
-        if(this.isEating())
+        if(this.isEating)
         {
             this._eatingTimeElapsed += delta
-
-            console.log(`Eating ${this._eatingTimeElapsed / this._eatTime}`)
 
             this.getChairPlayerIsSitting().getTableInFront()!.getDishPlate()?.setPercentage(this._eatingTimeElapsed / this._eatTime)
 
@@ -156,7 +154,7 @@ export class PlayerClient extends Player
 
                 //DONT CHANGE THE ORDER AGAIN!!
                 
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, undefined) //tells client to exit cafe
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, undefined) //tells client to exit cafe
                 this.exitCafe()
                 return
             }
@@ -167,7 +165,7 @@ export class PlayerClient extends Player
             {
                 this.log("attempt success")
 
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair) //tells client to go to chair
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair) //tells client to go to chair
                 
                 return
             }
@@ -191,20 +189,16 @@ export class PlayerClient extends Player
         this.exitCafe()
     }
 
-    public warpToDoor()
-    {
-        this.log(`Warped to door`)
+    public warpToDoor() {
+        const door = this._goingToDoor!;
+        const tile = door.getTile();
 
-        const door = this._goingToDoor!
-        const tile = door.getTile()
+        this.setAtTile(tile);
 
-        this.setAtTile(tile.x, tile.y)
-
-        this._isWaitingForChair = true
+        this._isWaitingForChair = true;
     }
 
-    public taskWalkToChair()
-    {
+    public taskWalkToChair() {
         const chair = this._goingToChair!
         const tile = chair.getTile()
 
@@ -239,7 +233,7 @@ export class PlayerClient extends Player
 
             if(result)
             {
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair)
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair)
             }
         }
 
@@ -257,12 +251,6 @@ export class PlayerClient extends Player
    
     }
 
-    //add for player later
-    private emitWorldEvent()
-    {
-
-    }
-
     public taskWalkToDoor()
     {
         const door = this._goingToDoor!
@@ -273,7 +261,7 @@ export class PlayerClient extends Player
             
             if(this.isWorldClient())
             {
-                this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, this)
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, this)
             }
 
             this.warpToDoor()
@@ -285,7 +273,7 @@ export class PlayerClient extends Player
     {
         this.log(`Try find chair`)
 
-        const chairs = this.getWorld().getChairs(true)
+        const chairs = this.world.getChairs(true)
 
         if(chairs.length == 0) return false
 
@@ -311,7 +299,7 @@ export class PlayerClient extends Player
     
     private getClosestDoor()
     {
-        const doors = this.getWorld().getDoors()
+        const doors = this.world.getDoors()
         const tile = Tile.getClosestTile(this.getPosition(), doors.map(door => door.getTile()))
 
         return tile.getDoor()
@@ -323,7 +311,7 @@ export class PlayerClient extends Player
 
         this.log(`Exit cafe`)
 
-        this.getWorld().events.emit(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, this)
+        this.world.events.emit(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, this)
 
         if(this.isWorldServer())
         {
@@ -331,7 +319,7 @@ export class PlayerClient extends Player
             return
         }
 
-        const world = this.getWorld()
+        const world = this.world
                 
         const tile = Tile.getClosestTile(this.getPosition(), [world.getLeftSideWalkSpawn(), world.getRightSideWalkSpawn()])
 

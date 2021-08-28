@@ -22,57 +22,6 @@ export class WorldServer extends World
         this.setupWorld()
 
         this.setupWorldSendEvents()
-
-        /*
-
-        this.events.on("playerwaiter_spawned", (player: PlayerWaiter) =>
-        {
-            player.setDisable(false)
-        })
-
-        this.events.on("playerclient_spawned", (player: PlayerClient) =>
-        {
-            console.log("playerclient_spawned")
-
-            player.getTaskManager().clearTasks()
-
-            //setTimeout(() => this.events.emit("playerclient_arrived_door", player) , 1000);
-            
-        })
-
-        this.events.on(WorldEvent.PLAYER_CLIENT_ARRIVED_DOOR, (player: PlayerClient) =>
-        {
-            console.log(`[WorldServer] PLAYER_CLIENT_ARRIVED_DOOR`)
-            player.onArrivedDoor()
-        })
-
-        this.events.on("playerclient_find_avaliable_chair_fail", () =>
-        {
-            console.log('playerclient_find_avaliable_chair_fail')
-        })
-
-        this.events.on(WorldEvent.PLAYER_CLIENT_GO_TO_CHAIR, (player: PlayerClient, chair: TileItemChair) =>
-        {
-            console.log('PLAYER_CLIENT_GO_TO_CHAIR')
-            player.getTaskManager().clearTasks()
-        })
-
-
-
-        this.events.on("playerwaiter_served_player", (player: PlayerWaiter) =>
-        {
-            console.log('playerwaiter_served_player', player)
-        })
-
-        this.createTileMap(7, 10)
-        this.createPlayerWaiter(2, 6)
-        this.createPlayerWaiter(2, 8)
-        this.setPlayerClientSpawnEnabled(false)
-
-        this.getCounters()[0].setDish(this.getGame().getDishItemFactory().getDish('dish1'), 100)
-
-        */
-       
     }
 
     public setClient(client: Client)
@@ -226,7 +175,7 @@ export class WorldServer extends World
 
             if(!stove) throw `Waiter not found (TILE_ITEM_STOVE_BEGIN_COOK)`
 
-            const dish = world.getGame().getDishFactory().getDish(data.dishId)
+            const dish = world.game.getDishFactory().getDish(data.dishId)
 
             stove.startCook(dish)
         })
@@ -242,7 +191,7 @@ export class WorldServer extends World
         
         this.setPlayerClientSpawnEnabled(false)
 
-        this.getCounters()[0].setDish(this.getGame().getDishFactory().getDish('dish1'), 4)
+        this.getCounters()[0].setDish(this.game.getDishFactory().getDish('dish1'), 4)
     }
 
     public beginTestClients()

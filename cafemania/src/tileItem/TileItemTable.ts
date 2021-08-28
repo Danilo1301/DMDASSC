@@ -1,5 +1,5 @@
-import Dish from "@cafemania/dish/Dish";
-import DishPlate, { DishState } from "@cafemania/dish/DishPlate";
+import { Dish } from "@cafemania/dish/Dish";
+import { DishPlate, DishPlateState } from "@cafemania/dish/DishPlate";
 import { TileItem } from "./TileItem";
 import { TileItemInfo } from "./TileItemInfo";
 
@@ -54,7 +54,7 @@ export class TileItemTable extends TileItem
                 this._dishPlate = new DishPlate(this.getDish())
                 this._dishPlate.setPosition(position.x, position.y) 
                 this._dishPlate.setDepth(position.y + h)
-                this._dishPlate.setState(DishState.EATING)
+                this._dishPlate.setState(DishPlateState.EATING)
             }
         }
         else

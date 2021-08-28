@@ -1,16 +1,16 @@
 import { Game } from "@cafemania/game/Game"
-import Dish from "./Dish"
+import { Dish } from "./Dish"
 
 export class DishFactory {
 
-    private _game: Game
+    //private _game: Game;
 
-    private _dishList: {[id: string]: Dish} = {}
+    private _dishList: {[id: string]: Dish} = {};
 
     constructor(game: Game) {
-        this._game = game
+        //this._game = game;
 
-        this.init()
+        this.init();
     }
 
     private init() {

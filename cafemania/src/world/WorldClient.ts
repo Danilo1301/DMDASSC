@@ -1,4 +1,4 @@
-import Dish from "@cafemania/dish/Dish";
+import { Dish } from "@cafemania/dish/Dish";
 import { GameClient } from "@cafemania/game/GameClient";
 import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketData_PlayerId, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterReachCounterData, IPacketWaiterServeClientData, IPacketWorldData } from "@cafemania/network/Packet";
 import { PlayerClient } from "@cafemania/player/PlayerClient";
@@ -21,16 +21,13 @@ export class WorldClient extends World
         this.setupWorldSendEvents() 
     }
 
-    private getNetwork()
-    {
-        return this.getGame().getNetwork()
-    }
-
     private setupWorldSendEvents()
     {
         const world = this
+        const network = world.game.network
+        const worldEvents = world.events
 
-        world.events.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (client: PlayerClient) =>
+        worldEvents.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (client: PlayerClient) =>
         {
             HudScene.Instance.addNotification('[send] PLAYER_CLIENT_REACHED_DOOR')
 
@@ -38,10 +35,10 @@ export class WorldClient extends World
                 clientId: client.id
             }
 
-            world.getNetwork().send(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, data)
+            network.send(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, data)
         })
 
-        world.events.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (client: PlayerClient) =>
+        worldEvents.on(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, (client: PlayerClient) =>
         {
             HudScene.Instance.addNotification('[send] PLAYER_CLIENT_REACHED_CHAIR')
 
@@ -49,10 +46,10 @@ export class WorldClient extends World
                 clientId: client.id
             }
 
-            world.getNetwork().send(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, data)
+            network.send(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, data)
         })
         
-        world.events.on(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, (waiter: PlayerWaiter) =>
+        worldEvents.on(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, (waiter: PlayerWaiter) =>
         {
             HudScene.Instance.addNotification('[send] PLAYER_WAITER_REACHED_COUNTER')
 
@@ -60,10 +57,10 @@ export class WorldClient extends World
                 waiterId: waiter.id
             }
 
-            world.getNetwork().send(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, data)
+            network.send(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, data)
         })
 
-        world.events.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (waiter: PlayerWaiter) =>
+        worldEvents.on(WorldEvent.PLAYER_WAITER_FINISH_SERVE, (waiter: PlayerWaiter) =>
         {
             HudScene.Instance.addNotification('[send] PLAYER_WAITER_FINISH_SERVE')
 
@@ -71,10 +68,10 @@ export class WorldClient extends World
                 waiterId: waiter.id
             }
 
-            world.getNetwork().send(WorldEvent.PLAYER_WAITER_FINISH_SERVE, data)
+            network.send(WorldEvent.PLAYER_WAITER_FINISH_SERVE, data)
         })
 
-        world.events.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (stove: TileItemStove, dish: Dish) =>
+        worldEvents.on(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, (stove: TileItemStove, dish: Dish) =>
         {
             HudScene.Instance.addNotification('[send] TILE_ITEM_STOVE_BEGIN_COOK')
 
@@ -83,7 +80,7 @@ export class WorldClient extends World
                 dishId: dish.id
             }
 
-            world.getNetwork().send(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, data)
+            network.send(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, data)
         })
 
         
@@ -92,9 +89,9 @@ export class WorldClient extends World
     private setupWorldReceiveEvents()
     {
         const world = this
-        const networkEvent = world.getNetwork().events
+        const networkEvent = world.game.network.events
 
-        networkEvent.on("worldData", packet => world.onReceivePacketWorldData(packet))
+        networkEvent.on("WORLD_DATA", packet => world.onReceivePacketWorldData(packet))
 
         networkEvent.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (data: IPacketSpawnClientData) =>
         {
@@ -158,9 +155,9 @@ export class WorldClient extends World
     
     }
 
-    public getGame()
+    public get game()
     {
-        return super.getGame() as GameClient
+        return super.game as GameClient
     }
 
     private onReceivePacketWorldData(data: IPacketWorldData)
@@ -189,7 +186,12 @@ export class WorldClient extends World
 
                     const tileItem = tile.getTileItem(tileItemData.id)!
 
-                    if(tileItemData.data) tileItem.setData(tileItemData.data)
+                    if(tileItemData.data)
+                    {
+                        tileItem.setData(tileItemData.data)
+
+                        console.log(`[WorldClient] TileItem Data updated ${tileItem.getInfo().name}`)
+                    }
                 }
             }
         }

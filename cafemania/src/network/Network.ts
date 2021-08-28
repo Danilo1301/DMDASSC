@@ -3,7 +3,7 @@ import { HudScene } from "@cafemania/scenes/HudScene";
 import { io, Socket } from "socket.io-client";
 import { Packet } from "./Packet";
 
-export default class Network
+export class Network
 {
     public events = new Phaser.Events.EventEmitter()
 

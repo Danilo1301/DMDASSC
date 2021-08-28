@@ -32,7 +32,7 @@ export class TaskWalkToTile extends Task
     {
         super.start()
 
-        const world = this.player.getWorld()
+        const world = this.player.world
         const pathFind = new PathFind()
 
         this.player.setFinalTargetTile(world.getTile(this.tileX, this.tileY))
@@ -91,10 +91,8 @@ export class TaskWalkToTile extends Task
                 tasks.push(task)
             } 
 
-            tasks.map((task, index) => this.player.getTaskManager().addTaskAt(task, 0 + index))
+            tasks.map((task, index) => this.player.taskManager.addTaskAt(task, 0 + index))
         })
-
-        this.player._totalDistanceMoved = 0
 
         this.completeTask()
     }

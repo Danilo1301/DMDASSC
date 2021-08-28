@@ -7,7 +7,6 @@ import { TileItem } from "@cafemania/tileItem/TileItem";
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
 import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import { TileItemRender } from "@cafemania/tileItem/TileItemRender";
-import { TileItemWall } from "@cafemania/tileItem/TileItemWall";
 import { Direction } from "@cafemania/utils/Direction";
 import { WorldText } from "@cafemania/utils/WorldText";
 import { Utils } from "@cafemania/utils/Utils";
@@ -20,8 +19,7 @@ import { TileItemTable } from "@cafemania/tileItem/TileItemTable";
 import { PlayerCheff } from "@cafemania/player/PlayerCheff";
 import { TileItemStove } from "@cafemania/tileItem/TileItemStove";
 
-export enum WorldEvent
-{
+export enum WorldEvent {
     PLAYER_CLIENT_SPAWNED = "PLAYER_CLIENT_SPAWNED",
     PLAYER_CLIENT_DESTROYED = "PLAYER_CLIENT_DESTROYED",
     PLAYER_CLIENT_SIT_CHAIR_DATA = "PLAYER_CLIENT_SIT_CHAIR_DATA", //change to find chair
@@ -34,17 +32,9 @@ export enum WorldEvent
     PLAYER_CLIENT_EXITED_CAFE = "PLAYER_CLIENT_EXITED_CAFE",
     TILE_ITEM_UPDATED = "TILE_ITEM_UPDATED",
     TILE_ITEM_STOVE_BEGIN_COOK = "TILE_ITEM_STOVE_BEGIN_COOK",
-    
-
-    //PLAYER_CLIENT_ARRIVED_DOOR = "PLAYER_CLIENT_ARRIVED_DOOR",
-    //PLAYER_CLIENT_GO_TO_CHAIR = "PLAYER_CLIENT_GO_TO_CHAIR",
-    //PLAYER_CLIENT_SAT_ON_CHAIR = "PLAYER_CLIENT_SAT_ON_CHAIR",
-    //PLAYER_WAITER_BEGIN_SERVE = "PLAYER_WAITER_BEGIN_SERVE",
-    //PLAYER_WAITER_FINISHED_SERVE = "PLAYER_WAITER_FINISHED_SERVE"
 }
 
-export enum WorldType
-{
+export enum WorldType {
     DEFAULT,
     CLIENT,
     SERVER
@@ -76,29 +66,19 @@ export class World
 
     protected _type: WorldType = WorldType.DEFAULT
 
-    constructor(game: Game)
-    {
+    constructor(game: Game) {
         this._game = game
         this._id = uuidv4()
         this._grid = new Grid()
 
-        this.events.on(WorldEvent.PLAYER_CLIENT_DESTROYED, () =>
-        {
-            this._spawnedPlayersAmount--
-
-            console.log("destroyed", this._spawnedPlayersAmount)
+        this.events.on(WorldEvent.PLAYER_CLIENT_DESTROYED, () => {
+            if(this._canSpawnPlayer) this._spawnedPlayersAmount--
         })
     }
 
-    public get type()
-    {
-        return this._type
-    }
+    public get type() { return this._type; }
 
-    public get id()
-    {
-        return this._id
-    }
+    public get id() { return this._id; }
 
     public getSideWalkSize()
     {
@@ -339,7 +319,7 @@ export class World
     {
         this.createTileMap(sizeX, sizeY)
 
-        const tileItemFactory = this.getGame().getTileItemFactory()
+        const tileItemFactory = this.game.getTileItemFactory()
 
         this.addNewTileItem('door1', this.getTile(0, 1), Direction.EAST)
 
@@ -380,7 +360,7 @@ export class World
     {
         this._sideWalkSize = Math.max(sizeX, sizeY) + 3
 
-        const tileItemFactory = this.getGame().getTileItemFactory()
+        const tileItemFactory = this.game.getTileItemFactory()
 
         for (let y = 0; y < sizeY; y++)
         {
@@ -409,7 +389,7 @@ export class World
 
     public addNewTileItem(id: string, tile: Tile, direction?: Direction, tileItemId?: string)
     {
-        const tileItem = this.getGame().getTileItemFactory().createTileItem(id)
+        const tileItem = this.game.getTileItemFactory().createTileItem(id)
 
         if(tileItemId != null) tileItem.setId(tileItemId)
 
@@ -490,7 +470,7 @@ export class World
 
         this._players.set(player.id, player)
 
-        player.setAtTile(tileX, tileY)
+        player.setAtTile(this.getTile(tileX, tileY))
         player.onCreate()
 
         return player
@@ -553,10 +533,7 @@ export class World
         return tileItems
     }
 
-    public getGame()
-    {
-        return this._game
-    }
+    public get game() { return this._game; }
 
     private startRandomlyRotate(tileItem: TileItem, time: number)
     {

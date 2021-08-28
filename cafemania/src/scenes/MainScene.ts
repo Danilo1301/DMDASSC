@@ -74,7 +74,7 @@ export class MainScene extends BaseScene
 
         */
       
-        const network = this.getGame().getNetwork()
+        const network = this.getGame().network
 
         network.events.on("connected", async () => {
             
