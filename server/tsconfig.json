@@ -7,6 +7,7 @@
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
+      "@game/*": ["./../game/src/*"],
       "@phaserGame/*": ["./../phaser-game/src/*"],
       "@cafemania/*": ["./../cafemania/src/*"]
     },
