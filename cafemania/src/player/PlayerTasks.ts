@@ -72,7 +72,9 @@ export class TaskWalkToTile extends Task
             const aproxTimePerDistance = 11147 / 973.5742752749559
             const perSpeed = aproxTimePerDistance / 1.8
 
-            const aproxTime = totalDistance / perSpeed * this.player.speed
+            //const aproxTime = totalDistance / perSpeed * this.player.speed
+            //const aproxTime = totalDistance * perSpeed * this.player.speed
+            const aproxTime = 0
 
             this.events.emit("time", aproxTime)
 

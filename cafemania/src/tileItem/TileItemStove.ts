@@ -101,22 +101,23 @@ export class TileItemStove extends TileItem
     public update(delta: number) {
         super.update(delta);
 
-        /*
-        if(this.isCooking) {
-            if(this._prevDishReadyState != this.isDishReady){
-                this._prevDishReadyState = this.isDishReady;
-    
-                if(this.isDishReady) this.onDishReady();
+        if(this.world.isWorldServer) {
+            if(this.isCooking) {
+                if(this._prevDishReadyState != this.isDishReady){
+                    this._prevDishReadyState = this.isDishReady;
+        
+                    if(this.isDishReady) this.onDishReady();
+                }
             }
         }
-        */
-
         
-        if(!this.isCooking && this._wasCooking) {
-            this.onDishReady();
-            this._wasCooking = false;
-        }
 
+        if(this.world.isWorldClient) {
+            if(!this.isCooking && this._wasCooking) {
+                this.onDishReady();
+                this._wasCooking = false;
+            }
+        }
         
     }
 

@@ -192,7 +192,7 @@ export class WorldServer extends World
         
         this.setPlayerClientSpawnEnabled(false)
 
-        this.getCounters()[0].setDish(this.game.dishFactory.getDish('dish1'), 4)
+        this.getCounters()[0].setDish(this.game.dishFactory.getDish('dish2'), 4)
     }
 
     public beginTestClients()
