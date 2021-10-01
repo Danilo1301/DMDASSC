@@ -9,12 +9,9 @@ export enum DishPlateState {
 
 export class DishPlate {
 
-    private _dish: Dish;
-
-    private _sprite: Phaser.GameObjects.Sprite;
-
     private _state: DishPlateState = DishPlateState.NONE;
-
+    private _dish: Dish;
+    private _sprite: Phaser.GameObjects.Sprite;
     private _percentage: number = 0;
 
     constructor(dish: Dish) {
@@ -74,13 +71,13 @@ export class DishPlate {
     }
 
     public setState(state: DishPlateState) {
-        this._state = state
-        this.updateSprites()
+        this._state = state;
+        this.updateSprites();
     }
 
     public setPercentage(value: number) {
-        this._percentage = value
-        this.updateSprites()
+        this._percentage = value;
+        this.updateSprites();
     }
 
     private updateSprites() {
@@ -101,6 +98,10 @@ export class DishPlate {
         }
 
         return `${k}_${frame}`;
+    }
+
+    public getPosition() {
+        return new Phaser.Math.Vector2(this._sprite.x, this._sprite.y);
     }
 
     public setPosition(x: number, y: number) {

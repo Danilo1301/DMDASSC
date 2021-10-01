@@ -36,11 +36,15 @@ export class TileItemChair extends TileItem
         this._isReserved = value
     }
 
+    public getPlayerSitting() {
+        return this._playerSitting
+    }
+
     public getTableInFront()
     {
         const offset = Tile.getOffsetFromDirection(this.direction)
 
-        const tile = this.getTile().getTileInOffset(offset.x, offset.y)
+        const tile = this.tile.getTileInOffset(offset.x, offset.y)
 
         if(!tile) return
         

@@ -8,9 +8,7 @@ export class Game {
     public events = new Phaser.Events.EventEmitter();
 
     private _worlds = new Phaser.Structs.Map<string, World>([]);
-
     private _tileItemFactory: TileItemFactory;
-
     private _dishFactory: DishFactory;
 
     constructor() {
@@ -18,12 +16,12 @@ export class Game {
         this._dishFactory = new DishFactory(this);
     }
 
-    public getTileItemFactory() { return this._tileItemFactory; }
-    public getDishFactory() { return this._dishFactory; }
-    public getWorlds() { return this._worlds.values(); }
+    public get tileItemFactory() { return this._tileItemFactory; }
+    public get dishFactory() { return this._dishFactory; }
+    public get worlds() { return this._worlds.values(); }
 
-    public start() {
-        console.log('Game started');
+    public start() { 
+        console.log('[Game] Game started');
     }
 
     public createWorld() {

@@ -10,19 +10,15 @@ export class Client {
     public events = new Phaser.Events.EventEmitter();
 
     private _game: GameServer;
-
     private _id: string;
-
     private _socket?: Socket;
-
     private _world: WorldServer;
+    private _hasLoaded: boolean = false;
 
     private _updateTiles: Tile[] = [];
 
     private _lastSentPackets: number = 0;
     private _packets: Packet[] = [];
-
-    private _hasLoaded: boolean = false;
 
     constructor(game: GameServer) {
         this._game = game;
@@ -41,46 +37,44 @@ export class Client {
     public get game() { return this._game; }
     public get world() { return this._world; }
     public get socket() { return this._socket!; }
-
     public get isConnected() { return this._socket != undefined; }
 
     public addTileToUpdate(tile: Tile) {
-        if(this._updateTiles.includes(tile)) return
-        this._updateTiles.push(tile)
-
-        this.sendData()
+        if(this._updateTiles.includes(tile)) return;
+        this._updateTiles.push(tile);
+        this.sendData();
     }
 
     private startUpdateTimer() {
-        let last = Date.now()
-        let time = 1000/60
+        let last = Date.now();
+        let time = 1000/60;
 
         setInterval(() => {
-            const now = Date.now()
+            const now = Date.now();
 
             if(now - last >= time) {
-                const delta = now - last
-                last = now
+                const delta = now - last;
+                last = now;
 
-                this.world.update(delta)
+                this.world.update(delta);
             }
 
-            this.processSendPackets()
+            this.processSendPackets();
         }, 0)
     }
 
     private processSendPackets() {
-        if(!this.isConnected) return
+        if(!this.isConnected) return;
 
-        const now = Date.now()
+        const now = Date.now();
 
         if(now - this._lastSentPackets >= 250 && this._packets.length > 0) {
-            this.socket.emit('packets', this._packets)
+            this.socket.emit('packets', this._packets);
             
-            console.log(`[Client] Sent ${this._packets.length} packets ${this._packets.map(packet => packet.id).join(",") }`)
+            console.log(`[Client] Sent ${this._packets.length} packets ${this._packets.map(packet => packet.id).join(",") }`);
 
-            this._packets = []
-            this._lastSentPackets = now
+            this._packets = [];
+            this._lastSentPackets = now;
         }
     }
 
@@ -89,29 +83,29 @@ export class Client {
             id: id,
             data: data
         }
-        this._packets.push(packet)
+        this._packets.push(packet);
     }
 
     public sendFirstJoinWorldData() {
-        this.sendData(true)
+        this.sendData(true);
     }
 
     private sendData(sendAll?: boolean) {
-        const world = this.world
-        const tiles = sendAll ? world.getTiles() : this._updateTiles
+        const world = this.world;
+        const tiles = sendAll ? world.getTiles() : this._updateTiles;
 
         const data: IPacketWorldData = {
             tiles: tiles.map(tile => tile.serialize())
-        }
+        };
 
         if(sendAll) {
-            data.cheff = world.getPlayerCheff().serialize()
-            data.waiters = world.getPlayerWaiters().map(waiter => waiter.serialize())
-            data.sideWalkSize = world.getSideWalkSize()
+            data.cheff = world.getPlayerCheff().serialize();
+            data.waiters = world.getPlayerWaiters().map(waiter => waiter.serialize());
+            data.sideWalkSize = world.sideWalkSize;
         }
         
-        this._updateTiles = []
-        this.send("WORLD_DATA", data)
+        this._updateTiles = [];
+        this.send("WORLD_DATA", data);
     }
 
     public setSocket(socket: Socket) {

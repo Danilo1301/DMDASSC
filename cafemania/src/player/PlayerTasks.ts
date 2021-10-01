@@ -37,13 +37,13 @@ export class TaskWalkToTile extends Task
 
         this.player.setFinalTargetTile(world.getTile(this.tileX, this.tileY))
 
-        const grid = world.getGrid()
+        const grid = world.grid;
 
         grid.getCells().map(cell =>
         {
             const tile = world.getTile(cell.x, cell.y)
 
-            let isWalkable = tile.isWalkable()
+            let isWalkable = tile.isWalkable;
        
             if(tile.x == this.tileX && tile.y == this.tileY) isWalkable = true
 
@@ -72,7 +72,7 @@ export class TaskWalkToTile extends Task
             const aproxTimePerDistance = 11147 / 973.5742752749559
             const perSpeed = aproxTimePerDistance / 1.8
 
-            const aproxTime = totalDistance * perSpeed * this.player.speed
+            const aproxTime = totalDistance / perSpeed * this.player.speed
 
             this.events.emit("time", aproxTime)
 

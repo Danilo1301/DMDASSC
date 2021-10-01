@@ -86,9 +86,8 @@ export class TileItemCounter extends TileItem
         return this._data.dish == null
     }
 
-    public getDish()
-    {
-        return this.getWorld().game.getDishFactory().getDish(this._data.dish!)
+    public getDish() {
+        return this.world.game.dishFactory.getDish(this._data.dish!)
     }
 
     public update(delta: number)

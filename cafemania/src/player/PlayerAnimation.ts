@@ -1,8 +1,7 @@
 import { Direction } from "@cafemania/utils/Direction";
 import { Player } from "./Player";
 
-interface IPlayerAnim
-{
+interface IPlayerAnim {
     name: string
     directions: Direction[]
     frames: number
@@ -11,8 +10,8 @@ interface IPlayerAnim
 }
 
 
-export class PlayerAnimation
-{
+export class PlayerAnimation {
+
     public static Animations: {[key: string]: IPlayerAnim} = {
         'Walk': {
             name: 'Walk', 
@@ -44,8 +43,7 @@ export class PlayerAnimation
         }
     }
 
-    public static directionToAnimDir(direction: Direction)
-    {
+    public static directionToAnimDir(direction: Direction) {
         const d = {dir: 0, flipped: false}
 
         const option = [
@@ -72,72 +70,53 @@ export class PlayerAnimation
     }
 
 
+    private _player: Player;
+    private _currentDirection: Direction;
+    private _currentAnim: string = "";
 
-    private _player: Player
+    private _lastChangedFrame: number = -1;
+    private _currentFrame: number = 0;
 
-    private _currentDirection: Direction
-
-    private _currentAnim: string = ""
-
-    private _lastChangedFrame: number = -1
-
-    private _currentFrame: number = 0
-
-    constructor(player: Player)
-    {
-        this._player = player
-        this._currentDirection = player.direction
+    constructor(player: Player) {
+        this._player = player;
+        this._currentDirection = player.direction;
     }
 
-    public update(delta: number)
-    {
-        const now = new Date().getTime()
+    public update(delta: number) {
+        const now = new Date().getTime();
+        const anim = PlayerAnimation.Animations[this._currentAnim];
 
-        const anim = PlayerAnimation.Animations[this._currentAnim]
+        if(!anim) return;
 
-        if(!anim) return
+        const playerDirection = this._player.direction;
 
-        const playerDirection = this._player.direction
-
-        if(this._currentDirection != playerDirection)
-        {
-            this._currentDirection = playerDirection
-            this._lastChangedFrame = 0
+        if(this._currentDirection != playerDirection) {
+            this._currentDirection = playerDirection;
+            this._lastChangedFrame = 0;
         }
 
-        const totalNumOfFrames = anim.frameOrder.length
+        const totalNumOfFrames = anim.frameOrder.length;
 
         if(now - this._lastChangedFrame >= 1000/anim.frameRate)
         {
-            this._lastChangedFrame = now
-
-            this._currentFrame++
+            this._lastChangedFrame = now;
+            this._currentFrame++;
 
             //console.log(this._currentFrame, totalNumOfFrames)
 
-            if(this._currentFrame >= totalNumOfFrames)
-            {
-                this._currentFrame = 0
+            if(this._currentFrame >= totalNumOfFrames) this._currentFrame = 0;
+
+            const frameN = anim.frameOrder[this._currentFrame];
+            const dir = PlayerAnimation.directionToAnimDir(playerDirection);
+            const frameKey = `${anim.name}_${dir.dir}_${frameN}`;
+            const playerScale = 1.05;
+            const sprite = this._player.getSprite();
+
+            if(sprite) {
+                if(sprite.texture.has(frameKey)) sprite.setFrame(frameKey);
+
+                sprite.setScale((dir.flipped ? -1 : 1) * playerScale, playerScale);
             }
-
-            const frameN = anim.frameOrder[this._currentFrame]
-
-            const dir = PlayerAnimation.directionToAnimDir(playerDirection)
-
-            const frameKey = `${anim.name}_${dir.dir}_${frameN}`
-
-            const playerScale = 1.05
-
-            const sprite = this._player.getSprite()
-
-            if(sprite)
-            {
-                if(sprite.texture.has(frameKey)) sprite.setFrame(frameKey)
-
-                sprite.setScale((dir.flipped ? -1 : 1) * playerScale, playerScale)
-            }
-
-            
         }
 
         /*
@@ -168,19 +147,14 @@ export class PlayerAnimation
         */
     }
 
-    public play(anim: string, forceChange?: boolean)
-    {
-        if(this._currentAnim == anim) return
-
-        this._currentAnim = anim
-
-        this._lastChangedFrame = 0
-
+    public play(anim: string, forceChange?: boolean) {
+        if(this._currentAnim == anim) return;
+        this._currentAnim = anim;
+        this._lastChangedFrame = 0;
         //if(forceChange) this._oldAnim = ""
     }
 
-    public getAnim()
-    {
-        return this._currentAnim
+    public getAnim() {
+        return this._currentAnim;
     }
 }

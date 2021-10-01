@@ -46,20 +46,21 @@ export class WorldServer extends World
         world.events.on(WorldEvent.PLAYER_CLIENT_SPAWNED, (client: PlayerClient) =>
         {
             const data: IPacketSpawnClientData = {
-                client: client.serialize()
+                client: client.serialize(),
+                eatTime: client.eatTime
             }
 
             this.getClient()?.send(WorldEvent.PLAYER_CLIENT_SPAWNED, data)
         })
 
-        world.events.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (client: PlayerClient, chair?: TileItemChair) =>
+        world.events.on(WorldEvent.PLAYER_CLIENT_FIND_CHAIR_DATA, (client: PlayerClient, chair?: TileItemChair) =>
         {
             const data: IPacketClientFindChairData = {
                 clientId: client.id,
                 chairId: chair?.id
             }
 
-            this.getClient()?.send(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, data)
+            this.getClient()?.send(WorldEvent.PLAYER_CLIENT_FIND_CHAIR_DATA, data)
         })
 
         world.events.on(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, (waiter: PlayerWaiter, client: PlayerClient, counter: TileItemCounter) =>
@@ -76,7 +77,7 @@ export class WorldServer extends World
 
         world.events.on(WorldEvent.TILE_ITEM_UPDATED, (tileItem: TileItem) =>
         {
-            this.getClient()?.addTileToUpdate(tileItem.getTile())
+            this.getClient()?.addTileToUpdate(tileItem.tile)
 
             console.log(`[WorldServer] Tile item updated ${tileItem.constructor.name} : ${tileItem.id}`)
         })
@@ -175,7 +176,7 @@ export class WorldServer extends World
 
             if(!stove) throw `Waiter not found (TILE_ITEM_STOVE_BEGIN_COOK)`
 
-            const dish = world.game.getDishFactory().getDish(data.dishId)
+            const dish = world.game.dishFactory.getDish(data.dishId)
 
             stove.startCook(dish)
         })
@@ -191,7 +192,7 @@ export class WorldServer extends World
         
         this.setPlayerClientSpawnEnabled(false)
 
-        this.getCounters()[0].setDish(this.game.getDishFactory().getDish('dish1'), 4)
+        this.getCounters()[0].setDish(this.game.dishFactory.getDish('dish1'), 4)
     }
 
     public beginTestClients()

@@ -19,10 +19,10 @@ export class TileItemWall extends TileItem
     {
         const offset = Tile.getOffsetFromDirection(this.direction)
 
-        const tile = this.getTile().getTileInOffset(offset.x, offset.y)
+        const tile = this.tile.getTileInOffset(offset.x, offset.y)
 
         if(!tile) return
-        if(!tile.hasDoor()) return
+        if(!tile.hasDoor) return
 
         return tile.getDoor()
     }

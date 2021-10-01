@@ -40,9 +40,13 @@ export class TileItemStove extends TileItem
     public get isDishReady() { return this.getCookingPercentage() >= 1; }
 
     public startCookingSomething() {
-        const serveDish1 = this.getWorld().getStoves()[0] == this;
+        const serveDish1 = this.world.getStoves()[0] == this;
 
-        const dishFactory = this.getTile().getWorld().game.getDishFactory();
+        if(this.isCooking) return;
+
+        GameScene.Instance?.sound.play('begin_cook');
+
+        const dishFactory = this.tile.world.game.dishFactory;
         const food = dishFactory.getDish(serveDish1 ? "dish1" : "dish2");
 
         this.startCook(food);
@@ -66,12 +70,12 @@ export class TileItemStove extends TileItem
         this._data.cookingDish = dish.id;
         this._data.startedAt = new Date().getTime();
 
-        this.getWorld().events.emit(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, this, dish);
+        this.world.events.emit(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, this, dish);
         this.setAsUpdated();
     }
 
     public getCookingDish() {
-        return this.getWorld().game.getDishFactory().getDish(this._data.cookingDish!);
+        return this.world.game.dishFactory.getDish(this._data.cookingDish!);
     }
 
     public clearDish() {
@@ -81,8 +85,9 @@ export class TileItemStove extends TileItem
 
     private onDishReady() {
         GameScene.Instance?.drawWorldText(`Dish is ready`, this.getPosition(), 0x00ff00);
+        GameScene.Instance?.sound.play('dish_ready');
 
-        if(this.getWorld().type != WorldType.CLIENT)
+        if(this.world.type != WorldType.CLIENT)
             this.sendDishToCounter();
 
         this.clearDish();
@@ -135,7 +140,7 @@ export class TileItemStove extends TileItem
 
     private getAvaliableCounters() {
         let countersSameDish: TileItemCounter[] = [];
-        let counters = this.getWorld().getCounters();
+        let counters = this.world.getCounters();
 
         counters = counters.filter(counter => {
             if(counter.isEmpty()) return true;

@@ -22,18 +22,22 @@ export class MainScene extends BaseScene
         this.load.image('1x1white', '1x1white.png')
         this.load.image('wallMask', 'wallMask.png')
 
-        this.load.image('player/head', 'player/head.png')
-        this.load.image('player/body1', 'player/body1.png')
-        this.load.image('player/leg', 'player/leg.png')
+        this.load.image('player/head', '/player/head.png')
+        this.load.image('player/body1', '/player/body1.png')
+        this.load.image('player/leg', '/player/leg.png')
         this.load.bitmapFont('gem', '/fonts/gem.png', '/fonts/gem.xml');
        
         this.loadTileItemInfo()
         this.loadDishes()
+
+        this.load.audio('audio_tip', '/audio/tip.mp3');
+        this.load.audio('begin_cook', '/audio/begin_cook.mp3');
+        this.load.audio('dish_ready', '/audio/dish_ready.mp3');
     }
 
     private loadTileItemInfo()
     {
-        const tileItemInfoList = this.getGame().getTileItemFactory().getTileItemInfoList()
+        const tileItemInfoList = this.getGame().tileItemFactory.getTileItemInfoList()
 
         for (const id in tileItemInfoList)
         {
@@ -46,7 +50,7 @@ export class MainScene extends BaseScene
 
     private loadDishes()
     {
-        const dishList = this.getGame().getDishFactory().getDishList()
+        const dishList = this.getGame().dishFactory.getDishList()
 
         for (const id in dishList)
         {
@@ -59,6 +63,9 @@ export class MainScene extends BaseScene
 
     public async create(): Promise<void>
     {
+
+        
+
 
         /*
         await this.startGameScene()

@@ -1,7 +1,7 @@
 import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { Direction } from "@cafemania/utils/Direction";
-import { World, WorldEvent } from "@cafemania/world/World"
+import { World, WorldEvent, WorldType } from "@cafemania/world/World"
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerAnimation } from "./PlayerAnimation";
 import { TaskPlayAnim, TaskWalkToTile } from "./PlayerTasks";
@@ -34,44 +34,31 @@ export class Player {
     public aproximattedTimeToWalk: number = 0;
 
     private _world: World;
-
     private _id: string;
-
     private _position = new Phaser.Math.Vector2();
-
-    private _debugText?: Phaser.GameObjects.BitmapText;
-
     private _atTile!: Tile;
-
     private _state: PlayerState = PlayerState.IDLE;
+    private _direction: Direction = Direction.NORTH;
+    private _speed: number = 4; //1.8
+    private _depth: number = 0;
+    private _sittingAtChair: TileItemChair | undefined;
+    private _destroyed: boolean = false;
+
+    protected _type: PlayerType = PlayerType.NONE;
+    protected _spriteTexture: string = "PlayerSpriteTexture_NoTexture";
 
     private _finalTargetTile: Tile | undefined;
     private _targetTile: Tile | undefined;
     private _targetTileDistance: number = 0;
     private _distanceMoved: number = 0;
     private _moveToTileCallback?: () => void;
-
+    
+    private _debugText?: Phaser.GameObjects.BitmapText;
     private _container?: Phaser.GameObjects.Container;
-
     private _sprite?: Phaser.GameObjects.Sprite;
 
     private _taskManager: PlayerTaskManager;
-
-    private _speed: number = 1.8;
-
-    private _direction: Direction = Direction.NORTH;
-
     private _animation: PlayerAnimation;
-
-    private _depth: number = 0;
-
-    private _sittingAtChair: TileItemChair | undefined;
-
-    private _destroyed: boolean = false;
-
-    protected _type: PlayerType = PlayerType.NONE;
-
-    protected _spriteTexture: string = "PlayerSpriteTexture_NoTexture";
 
     constructor(world: World) {
         this._world = world;
@@ -118,7 +105,7 @@ export class Player {
     public setPosition(position: Phaser.Math.Vector2) { this._position.set(position.x, position.y); }
 
     public taskWalkNearToTile(tile: Tile) {
-        const tiles = tile.getAdjacentTiles().filter(tile => tile.isWalkable());
+        const tiles = tile.getAdjacentTiles().filter(tile => tile.isWalkable);
         const closestTile = Tile.getClosestTile(this.getPosition(), tiles);
 
         this.taskWalkToTile(closestTile.x, closestTile.y);
@@ -311,6 +298,13 @@ export class Player {
 
     public taskExecuteAction(action: () => void) {
         this.taskManager.addTask(new TaskExecuteAction(action));
+    }
+
+    public getClosestDoor() {
+        const doors = this.world.getDoors();
+        const tile = Tile.getClosestTile(this.getPosition(), doors.map(door => door.tile));
+
+        return tile.getDoor()
     }
 
     public destroy() {

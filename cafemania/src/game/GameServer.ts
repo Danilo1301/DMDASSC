@@ -5,33 +5,28 @@ import socketio, { Socket } from 'socket.io';
 
 //let client: Client;
 
-export class GameServer extends Game
-{
-    constructor(io: socketio.Namespace)
-    {
-        super()
+export class GameServer extends Game {
+
+    constructor(io: socketio.Namespace) {
+        super();
 
         io.on("connection", socket => this.onSocketConnect(socket))
-
         //client = new Client(this)
     }
 
-    public async start(): Promise<void>
-    {
+    public async start(): Promise<void> {
         console.log('GameServer started')
     }
 
-    private onSocketConnect(socket: Socket)
-    {
-        console.log(`[GameServer] New socket connected`)
+    private onSocketConnect(socket: Socket) {
+        console.log(`[GameServer] New socket connected`);
 
-        const client = new Client(this)
-        client.setSocket(socket)
+        const client = new Client(this);
+        client.setSocket(socket);
     }
 
-    public createServerWorld(): WorldServer
-    {
-        const world = new WorldServer(this)
-        return this.setupWorld(world)
+    public createServerWorld() {
+        const world = new WorldServer(this);
+        return this.setupWorld(world);
     }
 }

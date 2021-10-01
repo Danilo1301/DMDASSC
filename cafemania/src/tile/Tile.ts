@@ -134,50 +134,29 @@ export class Tile
         this._position.set(pos.x, pos.y)
     }
 
-    public get x()
-    {
-        return this._x
-    }
-
-    public get y()
-    {
-        return this._y
-    }
-
-    public get id()
-    {
-        return `${this.x}:${this.y}`
-    }
-
-    public getWorld()
-    {
-        return this._world
-    }
+    public get x() { return this._x; }
+    public get y() { return this._y; }
+    public get id() { return `${this.x}:${this.y}`; }
+    public get world() { return this._world } 
 
     private getTileItemsThatOcuppesThisTile()
     {
-        const items = this.getWorld().getGrid().getCell(this.x, this.y).ocuppiedByItems
+        const items = this.world.grid.getCell(this.x, this.y).ocuppiedByItems
 
         return items.map(item =>
         {
             const cell = item.getOriginCell()
-            const tile = this.getWorld().getTile(cell.x, cell.y)
+            const tile = this.world.getTile(cell.x, cell.y)
 
             return tile.getTileItem(item.id)!
         })
     }
 
-    public isSideWalk()
-    {
-        return this.getWorld().isTileInSideWalk(this)
-    }
+    public get isSideWalk() { return this.world.isTileInSideWalk(this); }
 
-    public isWalkable()
-    {
+    public get isWalkable() {
         const tileItems = this.getTileItemsThatOcuppesThisTile()
-        
-        
-
+    
         for (const tileItem of tileItems)
         {
             if(tileItem.getInfo().type == TileItemType.WALL)
@@ -202,21 +181,15 @@ export class Tile
         return true
     }
 
-    public hasDoor(): boolean
-    {
-        return this.getDoor() != undefined
-    }
+    public get hasDoor() { return this.getDoor() != undefined; }
 
-    public getDoor(): TileItemDoor
-    {
+    public getDoor() {
         const doors = this.getTileItemsOfType(TileItemType.DOOR)
-
         return doors[0] as TileItemDoor
     }
 
-    public getTileInOffset(x: number, y: number) : Tile | undefined
-    {
-        const world = this.getWorld()
+    public getTileInOffset(x: number, y: number): Tile | undefined {
+        const world = this.world;
         const findX = this.x + x
         const findY = this.y + y
 
@@ -225,15 +198,12 @@ export class Tile
         return world.getTile(findX, findY)
     }
 
-    public getAdjacentTiles()
-    {
+    public getAdjacentTiles() {
         const directions = [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]
         const tiles: Tile[] = []
 
-        for (const direction of directions)
-        {
+        for (const direction of directions) {
             const offset = Tile.getOffsetFromDirection(direction)
-
             const tile = this.getTileInOffset(offset.x, offset.y)
 
             if(tile) tiles.push(tile)
@@ -246,7 +216,7 @@ export class Tile
     {
         const tileItems: TileItem[] = []
 
-        this.getTileItems().map(tileItem =>
+        this.tileItems.map(tileItem =>
         {
             if(tileItem.getInfo().type == type) tileItems.push(tileItem)
         })
@@ -270,7 +240,7 @@ export class Tile
 
     public update(delta: number)
     {
-        this.getTileItems().map(tileItem => tileItem.update(delta))
+        this.tileItems.map(tileItem => tileItem.update(delta))
     }
     
     public render(delta: number)
@@ -292,36 +262,26 @@ export class Tile
         
         this._sprite?.setPosition(position.x - Math.ceil(Tile.SIZE.x/2), position.y - Math.ceil(Tile.SIZE.y/2))
 
-        this.getTileItems().map(tileItem => tileItem.render(delta))
+        this.tileItems.map(tileItem => tileItem.render(delta))
     }
     
-    public getTileItems()
-    {
-        return this._tileItems
-    }
+    public get tileItems() { return this._tileItems; }
 
-    public addTileItem(tileItem: TileItem)
-    {
+    public addTileItem(tileItem: TileItem) {
         this._tileItems.push(tileItem)
 
         tileItem.setTile(this)
         tileItem.onAddedToTile(this)
     }
 
-    public getTileItem(id: string): TileItem | undefined
-    {
-        const tileItems = this.getTileItems()
-
-        const ts = tileItems.filter(tileItem => tileItem.id == id)
-
-        if(ts.length > 0) return ts[0]
-        
+    public getTileItem(id: string): TileItem | undefined {
+        const ts = this.tileItems.filter(tileItem => tileItem.id == id);
+        if(ts.length > 0) return ts[0];
         return
     }
 
-    public serialize()
-    {
-        const tileItems = this.getTileItems().map(tileItem => tileItem.serialize())
+    public serialize() {
+        const tileItems = this.tileItems.map(tileItem => tileItem.serialize())
 
         const json: TileSerializedData = {
             x: this.x,

@@ -22,7 +22,7 @@ import { TileItemStove } from "@cafemania/tileItem/TileItemStove";
 export enum WorldEvent {
     PLAYER_CLIENT_SPAWNED = "PLAYER_CLIENT_SPAWNED",
     PLAYER_CLIENT_DESTROYED = "PLAYER_CLIENT_DESTROYED",
-    PLAYER_CLIENT_SIT_CHAIR_DATA = "PLAYER_CLIENT_SIT_CHAIR_DATA", //change to find chair
+    PLAYER_CLIENT_FIND_CHAIR_DATA = "PLAYER_CLIENT_FIND_CHAIR_DATA", //change to find chair
     PLAYER_CLIENT_REACHED_DOOR = "PLAYER_CLIENT_REACHED_DOOR",
     PLAYER_CLIENT_REACHED_CHAIR = "PLAYER_CLIENT_REACHED_CHAIR",
     PLAYER_WAITER_SERVE_CLIENT = "PLAYER_WAITER_SERVE_CLIENT",
@@ -40,144 +40,99 @@ export enum WorldType {
     SERVER
 }
 
-export class World
-{
-    public events = new Phaser.Events.EventEmitter()
+export class World {
+
+    public events = new Phaser.Events.EventEmitter();
     
-    private _game: Game
+    private _game: Game;
+    private _id: string;
+    private _tiles = new Phaser.Structs.Map<string, Tile>([]);
+    private _sideWalkTiles = new Phaser.Structs.Map<string, Tile>([]);
+    private _tileItems = new Phaser.Structs.Map<string, TileItem>([]);
+    private _players = new Phaser.Structs.Map<string, Player>([]);
+    private _grid: Grid;
 
-    private _id: string
-
-    private _tiles = new Phaser.Structs.Map<string, Tile>([])
-    private _sideWalkTiles = new Phaser.Structs.Map<string, Tile>([])
-
-    private _tileItems = new Phaser.Structs.Map<string, TileItem>([])
-
-    private _players = new Phaser.Structs.Map<string, Player>([])
-
-    private _grid: Grid
-
-    private _sideWalkSize: number = 15
+    private _sideWalkSize: number = 15;
    
-    private _canSpawnPlayer: boolean = false
-    private _lastSpawnedPlayer: number = 0
-    private _spawnedPlayersAmount: number = 0
-    private _maxSpawnPlayers: number = 15
+    private _canSpawnPlayer: boolean = false;
+    private _lastSpawnedPlayer: number = 0;
+    private _spawnedPlayersAmount: number = 0;
+    private _maxSpawnPlayers: number = 15;
 
-    protected _type: WorldType = WorldType.DEFAULT
+    protected _type: WorldType = WorldType.DEFAULT;
 
     constructor(game: Game) {
-        this._game = game
-        this._id = uuidv4()
-        this._grid = new Grid()
+        this._game = game;
+        this._id = uuidv4();
+        this._grid = new Grid();
 
         this.events.on(WorldEvent.PLAYER_CLIENT_DESTROYED, () => {
-            if(this._canSpawnPlayer) this._spawnedPlayersAmount--
+            if(this._canSpawnPlayer) this._spawnedPlayersAmount--;
         })
     }
 
     public get type() { return this._type; }
-
     public get id() { return this._id; }
+    public get isWorldServer() { return this.type == WorldType.SERVER; }
+    public get isWorldClient() { return this.type == WorldType.CLIENT; }
+    public get grid() { return this._grid; }
+    public get sideWalkSize() { return this._sideWalkSize }
 
-    public getSideWalkSize()
-    {
-        return this._sideWalkSize
+    public getLeftSideWalkSpawn() { return this.getTile(-2, this.sideWalkSize - 1) }
+    public getRightSideWalkSpawn() { return this.getTile(this.sideWalkSize - 1, -2) }
+
+    public update(delta: number) {
+        this.getTiles().map(tile => tile.update(delta));
+        this.getPlayers().map(player => player.update(delta));
+
+        if(this._canSpawnPlayer) this.updateSpawnPlayerClient();
     }
 
-    public getLeftSideWalkSpawn()
-    {
-        return this.getTile(-2, this.getSideWalkSize()-1)
-    }
+    public render(delta: number) {
+        //const scene = GameScene.Instance;
 
-    public getRightSideWalkSpawn()
-    {
-        return this.getTile(this.getSideWalkSize()-1, -2)
-    }
-
-    public getGrid()
-    {
-        return this._grid
-    }
-
-
-    public update(delta: number)
-    {
-        this.getTiles().map(tile => tile.update(delta))
-        this.getPlayers().map(player => player.update(delta))
-
-        if(this._canSpawnPlayer) this.updateSpawnPlayerClient()
-    }
-
-    public render(delta: number): void
-    {
-        const scene = GameScene.Instance
-
-        this.getTiles().map(tile => tile.render(delta))
-        this.getPlayers().map(player => player.render(delta))
+        this.getTiles().map(tile => tile.render(delta));
+        this.getPlayers().map(player => player.render(delta));
 
     }
 
-    public findTileItem(id: string): TileItem | undefined
-    {
-        return this._tileItems.get(id)
-    }
+    public findTileItem(id: string): TileItem | undefined { return this._tileItems.get(id); }
+    public findPlayer(id: string): Player | undefined { return this._players.get(id); }
 
-    public findPlayer(id: string): Player | undefined
-    {
-        return this._players.get(id)
-    }
+    private updateSpawnPlayerClient() {
+        const now = new Date().getTime();
 
-    private updateSpawnPlayerClient()
-    {
-        const now = new Date().getTime()
+        if(now - this._lastSpawnedPlayer >= 3000 && this._spawnedPlayersAmount < this._maxSpawnPlayers) {
+            this._lastSpawnedPlayer = now;
+            this._spawnedPlayersAmount++;
 
-        if(now - this._lastSpawnedPlayer >= 3000 && this._spawnedPlayersAmount < this._maxSpawnPlayers)
-        {
-            this._lastSpawnedPlayer = now
-            this._spawnedPlayersAmount++
-
-            this.spawnPlayerClient()
+            this.spawnPlayerClient();
         }
     }
     
-    public hasTile(x: number, y: number)
-    {
-        return this._tiles.has(`${x}:${y}`)
-    }
+    public hasTile(x: number, y: number) { return this._tiles.has(`${x}:${y}`); }
+    public getTiles() { return Array.from(this._tiles.values()); }
 
-    public getTiles()
-    {
-        return Array.from(this._tiles.values())
-    }
+    public addTile(x: number, y: number) {
+        const tile = new Tile(this, x, y);
 
-    public addTile(x: number, y: number)
-    {
-        const grid = this._grid
+        this._grid.addCell(x, y);
+        this._tiles.set(tile.id, tile);
 
-        grid.addCell(x, y)
-
-        const tile = new Tile(this, x, y)
-
-        this._tiles.set(tile.id, tile)
-
-        return tile
         //console.log(`Created tile ${tile.id}`)
+        return tile;
     }
 
-    public addSideWalkTile(x: number, y: number)
-    {
-        const tile = this.addTile(x, y)
-
-        this._sideWalkTiles.set(tile.id, tile)
-
-        return tile
+    public addSideWalkTile(x: number, y: number) {
+        const tile = this.addTile(x, y);
+        this._sideWalkTiles.set(tile.id, tile);
+        return tile;
     }
 
     public getRandomWalkableTile(insideCafe?: boolean): Tile
     {
  
-        let tiles = this.getTiles().filter(tile => tile.isWalkable())
+        let tiles = this.getTiles().filter(tile => tile.isWalkable)
 
         if(insideCafe)
             tiles = tiles.filter(tile => tile.x >= 0 && tile.y >= 0)
@@ -194,7 +149,7 @@ export class World
     {
         if(direction === undefined) direction = tileItem.direction
 
-        const grid = this.getGrid()
+        const grid = this.grid;
         const cell = grid.getCell(tile.x, tile.y)
         const size = tileItem.getInfo().size
 
@@ -225,12 +180,12 @@ export class World
 
     public setTileItemDirection(tileItem: TileItem, direction: Direction)
     {
-        const tile = tileItem.getTile()
+        const tile = tileItem.tile;
         const canBePlaced = this.canTileItemBePlacedAtTile(tileItem, tile, direction)
 
         if(!canBePlaced) return false
         
-        const gridItem = this.getGrid().getItem(tileItem.id)
+        const gridItem = this.grid.getItem(tileItem.id)
         const o = TileItemRender.valuesFromDirection(direction)
 
         gridItem.setChangeRotation(o[0])
@@ -249,7 +204,7 @@ export class World
 
         if(!this._tileItems.has(tileItem.id)) this._tileItems.set(tileItem.id, tileItem)
 
-        const gridItem = this.getGrid().addItem(tileItem.id, tile.x, tile.y, tileItem.getInfo().size)
+        const gridItem = this.grid.addItem(tileItem.id, tile.x, tile.y, tileItem.getInfo().size)
         const type = tileItem.getInfo().type
 
         if(type == TileItemType.FLOOR) gridItem.color = 0
@@ -275,9 +230,9 @@ export class World
     {
         if(size != undefined) this._sideWalkSize = size
 
-        for (let y = -2; y < this.getSideWalkSize(); y++)
+        for (let y = -2; y < this.sideWalkSize; y++)
         {
-            for (let x = -2; x < this.getSideWalkSize(); x++)
+            for (let x = -2; x < this.sideWalkSize; x++)
             {
                 if((x == -2 || y == -2))
                 {
@@ -319,7 +274,7 @@ export class World
     {
         this.createTileMap(sizeX, sizeY)
 
-        const tileItemFactory = this.game.getTileItemFactory()
+        const tileItemFactory = this.game.tileItemFactory;
 
         this.addNewTileItem('door1', this.getTile(0, 1), Direction.EAST)
 
@@ -360,7 +315,7 @@ export class World
     {
         this._sideWalkSize = Math.max(sizeX, sizeY) + 3
 
-        const tileItemFactory = this.game.getTileItemFactory()
+        const tileItemFactory = this.game.tileItemFactory;
 
         for (let y = 0; y < sizeY; y++)
         {
@@ -389,7 +344,7 @@ export class World
 
     public addNewTileItem(id: string, tile: Tile, direction?: Direction, tileItemId?: string)
     {
-        const tileItem = this.game.getTileItemFactory().createTileItem(id)
+        const tileItem = this.game.tileItemFactory.createTileItem(id)
 
         if(tileItemId != null) tileItem.setId(tileItemId)
 
@@ -524,7 +479,7 @@ export class World
 
         this.getTiles().map(tile =>
         {
-            tile.getTileItems().map(tileItem =>
+            tile.tileItems.map(tileItem =>
             {
                 if(tileItem.getInfo().type == type) tileItems.push(tileItem)
             })
@@ -545,7 +500,7 @@ export class World
  
             if(!result)
             {
-                new WorldText(GameScene.Instance, `Can't rotate!`, tileItem.getTile().getPosition(), 0xff0000)
+                new WorldText(GameScene.Instance, `Can't rotate!`, tileItem.tile.getPosition(), 0xff0000)
             }
             
             direction = Math.floor(Math.random()*4)

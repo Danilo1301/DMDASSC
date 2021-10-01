@@ -77,21 +77,20 @@ game.start()
 */
 
 
-
+/*
 console.log("Starting Game1Server...")
 
 import { GameServer as Game1Server } from '../../game/src/game/GameServer'
 
 var game = new Game1Server(io.of("/api/game"))
 game.start()
+*/
 
 
 
-/*
 console.log("Starting CafemaniaServer...")
 
 import { GameServer as CafemaniaServer } from '@cafemania/game/GameServer'
 
 var cafemania = new CafemaniaServer(io.of("/api/cafemania"))
 cafemania.start()
-*/

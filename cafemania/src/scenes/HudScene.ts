@@ -3,59 +3,45 @@ import { FPSCounter } from '@cafemania/utils/FPSCounter';
 import { NotificationBar } from '@cafemania/utils/NotificationBar';
 import { GameScene } from './GameScene';
 
-export class HudScene extends BaseScene
-{
-    public static Instance: HudScene
+export class HudScene extends BaseScene {
 
-    public events = new Phaser.Events.EventEmitter()
+    public static Instance: HudScene;
 
-    private _notification!: NotificationBar
+    public events = new Phaser.Events.EventEmitter();
 
+    private _notification!: NotificationBar;
 
-    constructor()
-    {
-        super({})
-
+    constructor() {
+        super({});
         HudScene.Instance = this
-
-       
-
         window['HudScene'] = this
     }
 
-    public preload(): void
-    {
-        this.load.setPath('/static/cafemania/assets')
-        this.load.image('button/zoom_in', 'button/zoom_in.png')
-        this.load.image('button/zoom_out', 'button/zoom_out.png')
-        this.load.image('button/fullscreen', 'button/fullscreen.png')
+    public preload() {
+        this.load.setPath('/static/cafemania/assets');
+        this.load.image('button/zoom_in', 'button/zoom_in.png');
+        this.load.image('button/zoom_out', 'button/zoom_out.png');
+        this.load.image('button/fullscreen', 'button/fullscreen.png');
     }
 
-    public addNotification(text: string, textColor?: number, backgroundColor?: number)
-    {
-        this._notification?.addItem(text, textColor, backgroundColor)
+    public addNotification(text: string, textColor?: number, backgroundColor?: number) {
+        this._notification?.addItem(text, textColor, backgroundColor);
     }
 
-    public create(): void
-    {
-        this._notification = new NotificationBar(this)
+    public create() {
+        this._notification = new NotificationBar(this);
 
-        FPSCounter.addToScene(this)
+        FPSCounter.addToScene(this);
 
-        this.createZoomButtons()
+        this.createZoomButtons();
 
-        this.scene.bringToTop()
-
+        this.scene.bringToTop();
     }
 
-    public update(time: number, delta: number): void
-    {
+    public update(time: number, delta: number) {
     }
 
-    private createZoomButtons(): void
-    {
-        
-
+    private createZoomButtons() {
         const zoomIn = this.add.sprite(0, 0, 'button/zoom_in')
         const zoomOut = this.add.sprite(0, 0, 'button/zoom_out')
         const fullscreen = this.add.sprite(0, 0, 'button/fullscreen')
@@ -70,8 +56,7 @@ export class HudScene extends BaseScene
         zoomOut.on('pointerdown', () => gameScene.zoom.less())
         fullscreen.on('pointerdown', this.goFullscreen.bind(this))
 
-        const updateButtonsPosition = () =>
-        {
+        const updateButtonsPosition = () => {
             const x = 30//this.game.scale.gameSize.width - 35
 
             const y = 200
@@ -87,14 +72,11 @@ export class HudScene extends BaseScene
         updateButtonsPosition()
     }
 
-    private goFullscreen(): void
-    {
-        if (this.game.scale.isFullscreen)
-        {
-            this.game.scale.stopFullscreen()
-            return
+    private goFullscreen() {
+        if (this.game.scale.isFullscreen) {
+            this.game.scale.stopFullscreen();
+            return;
         }
-        
         this.game.scale.startFullscreen({})
     }
 }

@@ -5,332 +5,263 @@ import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
 import { World, WorldEvent, WorldType } from "@cafemania/world/World";
 import { Player, PlayerState, PlayerType } from "./Player";
 
-export class PlayerClient extends Player
-{
+export class PlayerClient extends Player {
+
     private static MAX_FIND_CHAIR_ATTEMPTS = 5
-    private _findChairAttempts: number = 0 
-    private _attemptTime: number = 0
 
-    private _goingToChair?: TileItemChair
-    private _goingToDoor?: TileItemDoor
+    private _findChairAttempts: number = 0;
+    private _attemptTime: number = 0;
+    
+    private _eatTime: number = (Math.random()*10000)+20000;
+    private _eatTimeEnd: number = 0;
+    private _hasStartedEating: boolean = false;
 
-    private _isWaitingForWaiter: boolean = false
+    private _goingToChair?: TileItemChair;
+    private _goingToDoor?: TileItemDoor;
 
-    private _eatingTimeElapsed: number = 0
+    private _isWaitingForWaiter: boolean = false;
+    private _isWaitingForChair: boolean = false;
+    private _exitingCafe: boolean = false;
 
-    private _isWaitingForChair: boolean = false
+    constructor(world: World) {
+        super(world);
 
-    private _exitingCafe: boolean = false
-
-    private _hasStartedEating: boolean = false
-
-    private _eatTime: number = (Math.random()*10000)+20000
-
-    constructor(world: World)
-    {
-        super(world)
-
-        this._spriteTexture = 'PlayerSpriteTexture_TestClient'
-        this._type = PlayerType.CLIENT
+        this._spriteTexture = 'PlayerSpriteTexture_TestClient';
+        this._type = PlayerType.CLIENT;
     }
 
-    public isExitingCafe()
-    {
-        return this._exitingCafe
+    public get isExitingCafe() { return this._exitingCafe; }
+    public get hasStartedEating() { return this._hasStartedEating; }
+    public get isWaitingForWaiter() { return this._isWaitingForWaiter }
+    public get eatTime() { return this._eatTime; }
+
+
+    public render(delta: number) {
+        super.render(delta);
     }
 
-    public hasStartedEating()
-    {
-        return this._hasStartedEating
-    }
-
-    public isWorldServer()
-    {
-        return this.world.type == WorldType.SERVER
-    }
-
-    public isWorldClient()
-    {
-        return this.world.type == WorldType.CLIENT
-    }
-
-    public isWaitingForWaiter()
-    {
-        return this._isWaitingForWaiter
-    }
-
-    public render(delta: number)
-    {
-        super.render(delta)
-    }
-
-    public update(delta: number)
-    {
-        super.update(delta)
-
+    public update(delta: number) {
+        super.update(delta);
 
         //at door
-        if(this._isWaitingForChair)
-        {
-            
+        if(this._isWaitingForChair) {
             //no chair
-            if(!this._goingToChair) {
-
-                if(this.isWorldServer())
-                {
-                    this.processAttempts(delta)
-                }
-
-                return
+            if(this._goingToChair == undefined) {
+                if(this.world.isWorldServer) this.processFindChairAttempts(delta);
+                return;
             }
 
             //yes chair
 
-            this._isWaitingForChair = false
-
-            this.beginWalkTime = Date.now()
-
-            this.taskWalkToChair()
+            this._isWaitingForChair = false;
+            this.beginWalkTime = Date.now();
+            this.taskWalkToChair();
    
-            if(this.isWorldServer())
-            {
-                this.resetMovementAndTasks()
+            if(this.world.isWorldServer) this.resetMovementAndTasks();
+        }
+
+        //going to chair
+        if(this._goingToChair && this.isSitting) {
+            this._goingToChair = undefined;
+
+            if(this.world.isWorldClient) {
+                this.log("Reached chair locally", WorldEvent.PLAYER_CLIENT_REACHED_CHAIR);
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, this);
             }
         }
 
-        if(this._goingToChair && this.isSitting)
-        {
-            this._goingToChair = undefined
+        //sitting, not eating
+        if(this.isSitting && !this.isEating) {
+            const table = this.getChairPlayerIsSitting().getTableInFront();
 
-            if(this.isWorldClient())
-            {
-                this.log("reached chair locally", WorldEvent.PLAYER_CLIENT_REACHED_CHAIR)
-                this.world.events.emit(WorldEvent.PLAYER_CLIENT_REACHED_CHAIR, this)
-            }
-        }
-
-        if(this.isSitting && !this.isEating)
-        {
-            const table = this.getChairPlayerIsSitting().getTableInFront()
-
-            if(table)
-            {
-                if(!table.isEmpty())
-                {
-                    this._hasStartedEating = true
-
-                    this.setState(PlayerState.EATING)
+            if(table) {
+                if(!table.isEmpty()) {
+                    this._hasStartedEating = true;
+                    this._eatTimeEnd = Date.now() + this._eatTime;
+                    this.setState(PlayerState.EATING);
                 }
             }
         }
 
-        if(this.isEating)
-        {
-            this._eatingTimeElapsed += delta
+        //when eating
+        if(this.isEating) {
+            let percent = 1 - ((this._eatTimeEnd - Date.now()) / this._eatTime);
 
-            this.getChairPlayerIsSitting().getTableInFront()!.getDishPlate()?.setPercentage(this._eatingTimeElapsed / this._eatTime)
+            percent = Math.min(percent, 1);
 
-            if(this._eatingTimeElapsed >= this._eatTime)
-            {
-                this.onFinishEating()
+            //console.log(percent)
+
+            this.getChairPlayerIsSitting().getTableInFront()!.getDishPlate()?.setPercentage( percent );
+
+            if(this.world.isWorldServer) {
+                if(Date.now() >= this._eatTimeEnd) this.onFinishEating();
             }
+
         }
     }
 
-    private processAttempts(delta: number)
-    {
-        this._attemptTime += delta
+    public finishEating() {
+        this._eatTimeEnd = Date.now();
 
-        if(this._attemptTime >= 300)
-        {
-            this._attemptTime = 0
+        this.onFinishEating();
+    }
 
-            this._findChairAttempts++
+    private processFindChairAttempts(delta: number) {
+        this._attemptTime += delta;
 
-            if(this._findChairAttempts >= PlayerClient.MAX_FIND_CHAIR_ATTEMPTS)
-            {
-                this.log("no more attempts")
+        if(this._attemptTime >= 300) {
+            this._attemptTime = 0;
+            this._findChairAttempts++;
 
+            if(this._findChairAttempts >= PlayerClient.MAX_FIND_CHAIR_ATTEMPTS) {
+                this.log("No more attempts");
 
                 //DONT CHANGE THE ORDER AGAIN!!
                 
-                this.world.events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, undefined) //tells client to exit cafe
-                this.exitCafe()
-                return
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_FIND_CHAIR_DATA, this, undefined); //tells client to exit cafe
+                this.exitCafe();
+                return;
             }
           
-            const result = this.tryFindAvaliableChair()
+            const result = this.tryFindAvaliableChair();
 
-            if(result)
-            {
-                this.log("attempt success")
+            if(result) {
+                this.log("Attempt success");
 
-                this.world.events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair) //tells client to go to chair
-                
-                return
+                this.world.events.emit(WorldEvent.PLAYER_CLIENT_FIND_CHAIR_DATA, this, this._goingToChair) //tells client to go to chair
+                return;
             }
             
-            this.log("attempt failed")
+            this.log("Attempt failed");
         }
     }
 
-    private onFinishEating()
-    {
-        this.log(`finish eating`)
+    private onFinishEating() {
+        this.log(`finish eating`);
 
-        const table = this.getChairPlayerIsSitting().getTableInFront()!
-
-        table.clearDish()
-
-
+        const table = this.getChairPlayerIsSitting().getTableInFront()!;
+        table.clearDish();
         //this.getChairPlayerIsSitting().setIsReserved(false)
-
         this.liftUpFromChair()
         this.exitCafe()
+
+        GameScene.Instance?.sound.play('audio_tip');
     }
 
     public warpToDoor() {
+        this.log(`Warped to door`)
         const door = this._goingToDoor!;
-        const tile = door.getTile();
-
+        const tile = door.tile;
         this.setAtTile(tile);
-
         this._isWaitingForChair = true;
     }
 
     public taskWalkToChair() {
-        const chair = this._goingToChair!
-        const tile = chair.getTile()
+        const chair = this._goingToChair!;
+        const tile = chair.tile;
 
-        this.taskWalkToTile(tile.x, tile.y)
+        //fix client bug
+        const playerSitting = chair.getPlayerSitting();
+        if(playerSitting) (playerSitting as PlayerClient).finishEating();
+
+        this.taskWalkToTile(tile.x, tile.y);
         this.taskExecuteAction(() => {
-            this.warpToChair()
+            this.warpToChair();
         })
     }
 
-    public warpToChair()
-    {
-        this.log(`Warped to chair`)
-        
-        const chair = this._goingToChair!
-
-        this.sitAtChair(chair)
-        this.setIsWaitingForWaiter(true)
-
-        
+    public warpToChair() {
+        this.log(`Warped to chair`);
+        const chair = this._goingToChair!;
+        this.sitAtChair(chair);
+        this.setIsWaitingForWaiter(true);
     }
 
-    public startClientBehavior()
-    {
-        this.log(`Started client behaviour`)
-
-        
+    public startClientBehavior() {
+        this.log(`Started client behaviour`);
 
         this._goingToDoor = this.getClosestDoor()
 
-        if(!this.isWorldClient()) {
+        /*
+        if(!this.world.isWorldClient) {
             const result = this.tryFindAvaliableChair()
 
-            if(result)
-            {
-                this.world.events.emit(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, this, this._goingToChair)
-            }
+            if(result) this.world.events.emit(WorldEvent.PLAYER_CLIENT_FIND_CHAIR_DATA, this, this._goingToChair);
         }
+        */
 
-        this.beginWalkTime = Date.now()
+        this.beginWalkTime = Date.now();
 
-        this.log(`Walking to door`)
+        this.log(`Walking to door`);
 
-        this.taskWalkToDoor()
+        this.taskWalkToDoor();
 
-        if(this.isWorldServer())
-        {
-            this.resetMovementAndTasks()
-        }
-
-   
+        if(this.world.isWorldServer) this.resetMovementAndTasks()
     }
 
-    public taskWalkToDoor()
-    {
-        const door = this._goingToDoor!
-        const tile = door.getTile()
+    public taskWalkToDoor() {
+        const door = this._goingToDoor!;
+        const tile = door.tile;
 
         this.taskWalkToTile(tile.x, tile.y)
         this.taskExecuteAction(() => {
-            
-            if(this.isWorldClient())
-            {
-                this.world.events.emit(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, this)
-            }
+            if(this.world.isWorldClient) this.world.events.emit(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, this);
 
-            this.warpToDoor()
-
+            this.warpToDoor();
         })
     }
 
-    public tryFindAvaliableChair()
-    {
-        this.log(`Try find chair`)
+    public tryFindAvaliableChair() {
+        this.log(`Try find chair`);
 
-        const chairs = this.world.getChairs(true)
+        const chairs = this.world.getChairs(true);
 
-        if(chairs.length == 0) return false
+        if(chairs.length == 0) return false;
 
-        const chair = chairs[0]
-        chair.setIsReserved(true)
+        const chair = chairs[0];
+        chair.setIsReserved(true);
 
-        this.setGoingToChair(chair)
+        this.setGoingToChair(chair);
 
-        return true
+        return true;
     }
 
-    public setIsWaitingForWaiter(value: boolean)
-    {
-        this._isWaitingForWaiter = value
+    public setIsWaitingForWaiter(value: boolean) {
+        this._isWaitingForWaiter = value;
     }
 
-    public setGoingToChair(chair: TileItemChair)
-    {
-        this.log(`Setted going to chair`)
-
-        this._goingToChair = chair
-    }
-    
-    private getClosestDoor()
-    {
-        const doors = this.world.getDoors()
-        const tile = Tile.getClosestTile(this.getPosition(), doors.map(door => door.getTile()))
-
-        return tile.getDoor()
+    public setEatTime(time: number) {
+        this._eatTime = time;
     }
 
-    public exitCafe()
-    {
-        this._exitingCafe = true
+    public setGoingToChair(chair: TileItemChair) {
+        this.log(`Setted going to chair`);
 
-        this.log(`Exit cafe`)
+        this._goingToChair = chair;
+    }
 
-        this.world.events.emit(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, this)
+    public exitCafe() {
+        this._exitingCafe = true;
 
-        if(this.isWorldServer())
-        {
-            this.destroy()
-            return
+        this.log(`Exit cafe`);
+
+        this.world.events.emit(WorldEvent.PLAYER_CLIENT_EXITED_CAFE, this);
+
+        if(this.world.isWorldServer) {
+            this.destroy();
+            return;
         }
 
-        const world = this.world
-                
-        const tile = Tile.getClosestTile(this.getPosition(), [world.getLeftSideWalkSpawn(), world.getRightSideWalkSpawn()])
+        const world = this.world;
+        const tile = Tile.getClosestTile(this.getPosition(), [world.getLeftSideWalkSpawn(), world.getRightSideWalkSpawn()]);
 
-        this.taskWalkToTile(tile.x, tile.y)
-        this.taskExecuteAction(() => this.destroy())
+        this.taskWalkToTile(tile.x, tile.y);
+        this.taskExecuteAction(() => this.destroy());
     }
 
-    public destroy()
-    {
-        super.destroy()
+    public destroy() {
+        super.destroy();
 
-        this._goingToChair?.setIsReserved(false)
+        this._goingToChair?.setIsReserved(false);
     }
 }

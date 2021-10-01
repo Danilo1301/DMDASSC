@@ -3,29 +3,28 @@ import { GameClient } from "@cafemania/game/GameClient";
 import { IPacketClientFindChairData, IPacketClientReachedDoorData, IPacketData_PlayerId, IPacketSpawnClientData, IPacketStoveBeginCookData, IPacketTileItemIdData, IPacketWaiterFinishServeData, IPacketWaiterReachCounterData, IPacketWaiterServeClientData, IPacketWorldData } from "@cafemania/network/Packet";
 import { PlayerClient } from "@cafemania/player/PlayerClient";
 import { PlayerWaiter } from "@cafemania/player/PlayerWaiter";
+import { GameScene } from "@cafemania/scenes/GameScene";
 import { HudScene } from "@cafemania/scenes/HudScene";
 import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
 import { TileItemCounter } from "@cafemania/tileItem/TileItemCounter";
 import { TileItemStove } from "@cafemania/tileItem/TileItemStove";
 import { World, WorldEvent, WorldType } from "./World";
 
-export class WorldClient extends World
-{
-    constructor(game: GameClient)
-    {
-        super(game)
+export class WorldClient extends World {
 
-        this._type = WorldType.CLIENT
+    constructor(game: GameClient) {
+        super(game);
 
-        this.setupWorldReceiveEvents()
-        this.setupWorldSendEvents() 
+        this._type = WorldType.CLIENT;
+
+        this.setupWorldReceiveEvents();
+        this.setupWorldSendEvents() ;
     }
 
-    private setupWorldSendEvents()
-    {
-        const world = this
-        const network = world.game.network
-        const worldEvents = world.events
+    private setupWorldSendEvents() {
+        const world = this;
+        const network = world.game.network;
+        const worldEvents = world.events;
 
         worldEvents.on(WorldEvent.PLAYER_CLIENT_REACHED_DOOR, (client: PlayerClient) =>
         {
@@ -97,17 +96,18 @@ export class WorldClient extends World
         {
             HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_SPAWNED')
 
-            const player = world.createPlayerClient(data.client.x, data.client.y, data.client.id)
-            player.startClientBehavior()
+            const client = world.createPlayerClient(data.client.x, data.client.y, data.client.id)
+            client.startClientBehavior()
+            client.setEatTime(data.eatTime);
         })
 
-        networkEvent.on(WorldEvent.PLAYER_CLIENT_SIT_CHAIR_DATA, (data: IPacketClientFindChairData) =>
+        networkEvent.on(WorldEvent.PLAYER_CLIENT_FIND_CHAIR_DATA, (data: IPacketClientFindChairData) =>
         {
-            HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_SIT_CHAIR_DATA')
+            HudScene.Instance.addNotification('[receive] PLAYER_CLIENT_FIND_CHAIR_DATA')
 
             const client = world.findPlayer(data.clientId) as PlayerClient | undefined
 
-            if(!client) throw `Client not found (PLAYER_CLIENT_SIT_CHAIR_DATA)`
+            if(!client) throw `Client not found (PLAYER_CLIENT_FIND_CHAIR_DATA)`
 
             if(!data.chairId)
             {
@@ -117,7 +117,7 @@ export class WorldClient extends World
 
             const chair = world.findTileItem(data.chairId) as TileItemChair | undefined
 
-            if(!chair) throw `Chair not found (PLAYER_CLIENT_SIT_CHAIR_DATA)`
+            if(!chair) throw `Chair not found (PLAYER_CLIENT_FIND_CHAIR_DATA)`
 
             client.setGoingToChair(chair)
         })
@@ -147,8 +147,18 @@ export class WorldClient extends World
 
             if(!client) throw `Client not found (PLAYER_CLIENT_DESTROYED)`
 
-            if(client.isExitingCafe()) return console.log(`Can't destroy; is exiting cafe`)
-            if(client.hasStartedEating()) return console.log("Can't destroy; has started eating")
+            if(client.isExitingCafe) return console.log(`Can't destroy; is exiting cafe`)
+            if(client.hasStartedEating) {
+                
+                console.warn("tip");
+
+                const position = client.getChairPlayerIsSitting().getTableInFront()!.getDishPlate().getPosition();
+                GameScene.Instance.drawWorldText(`tip`, position, 0x000000)
+
+                client.finishEating();
+
+                return;
+            }
 
             client.destroy()
         })
@@ -175,7 +185,7 @@ export class WorldClient extends World
             {
                 const tile = world.getTile(tileData.x, tileData.y)
 
-                const tileItemIds = tile.getTileItems().map(tileItem => tileItem.id)
+                const tileItemIds = tile.tileItems.map(tileItem => tileItem.id)
 
                 for (const tileItemData of tileData.tileItems)
                 {

@@ -70,7 +70,7 @@ export class TileItemDoor extends TileItem
 
         //console.log(offset)
 
-        const tile = this.getTile().getTileInOffset(offset.x, offset.y)
+        const tile = this.tile.getTileInOffset(offset.x, offset.y)
 
         if(!tile) return
 

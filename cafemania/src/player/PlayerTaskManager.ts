@@ -1,15 +1,13 @@
-export abstract class Task
-{
-    public events = new Phaser.Events.EventEmitter()
+export abstract class Task {
 
-    public start()
-    {
-        this.events.emit('start')
+    public events = new Phaser.Events.EventEmitter();
+
+    public start() {
+        this.events.emit('start');
     }
 
-    public completeTask()
-    {
-        this.events.emit('complete', true)
+    public completeTask() {
+        this.events.emit('complete', true);
     }
 }
 

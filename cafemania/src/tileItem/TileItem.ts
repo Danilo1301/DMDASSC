@@ -6,109 +6,71 @@ import { GameScene } from "@cafemania/scenes/GameScene";
 import { Direction } from "@cafemania/utils/Direction";
 import { WorldEvent } from "@cafemania/world/World";
 
-export interface TileItemSerializedData
-{
+export interface TileItemSerializedData {
     id: string
     tileItemInfo: string
     direction: Direction
     data?: any
 }
 
-export class TileItem
-{
+export class TileItem {
+
     public events = new Phaser.Events.EventEmitter()
 
-    private _tileItemInfo: TileItemInfo
+    private _tileItemInfo: TileItemInfo;
+    private _id: string;
+    private _tileItemRender?: TileItemRender;
+    private _tile?: Tile;
+    private _direction: Direction = Direction.SOUTH;
+    private _debugText?: Phaser.GameObjects.BitmapText;
+    private _isHovering: boolean = false;
 
-    private _id: string
+    private _animIndex: number = 0;
+    private _layerIndex: number = 0;
 
-    private _tileItemRender?: TileItemRender
+    constructor(tileItemInfo: TileItemInfo) {
+        this._id = uuidv4();
+        this._tileItemInfo = tileItemInfo;
 
-    private _tile?: Tile
-
-    private _direction: Direction = Direction.SOUTH
-
-    private _animIndex: number = 0
-    private _layerIndex: number = 0
-
-    private _debugText?: Phaser.GameObjects.BitmapText
-    
-    private _isHovering: boolean = false
-
-    constructor(tileItemInfo: TileItemInfo)
-    {
-        this._id = uuidv4()
-        this._tileItemInfo = tileItemInfo
-
-        this.events.on("pointerover", () => {
-            this._isHovering = true
-        })
-
-        this.events.on("pointerout", () => {
-            this._isHovering = false
-        })
-
-        this.events.on("update_sprites", () => this.updateSprites())
+        this.events.on("pointerover", () => this._isHovering = true);
+        this.events.on("pointerout", () => this._isHovering = false);
+        this.events.on("update_sprites", () => this.updateSprites());
     }
 
-    public get direction()
-    {
-        return this._direction
+    public get direction() { return this._direction; }
+    public get id() { return this._id; }
+    public get world() { return this.tile.world; }
+    public get tile() { return this._tile!; }
+
+    public setId(id: string) {
+        this._id = id;
     }
 
-    public get id()
-    {
-        return this._id
+    public getPosition() {
+        return this.tile.getPosition();
     }
 
-    public setId(id: string)
-    {
-        this._id = id
-    }
-
-    public getWorld()
-    {
-        return this.getTile().getWorld()
-    }
-
-    public getPosition()
-    {
-        return this.getTile().getPosition()
-    }
-
-    public setAnimIndex(value: number)
-    {
-        if(value != this._animIndex)
-        {
-            this._animIndex = value
-
-            this.updateSprites()
+    public setAnimIndex(value: number) {
+        if(value != this._animIndex) {
+            this._animIndex = value;
+            this.updateSprites();
         }
     }
 
-    public getTileItemRender()
-    {
-        return this._tileItemRender
+    public getTileItemRender() {
+        return this._tileItemRender;
     }
 
-    public getTile()
-    {
-        return this._tile!
-    }
-
-    public setTile(tile: Tile)
-    {
-        this._tile = tile
+    public setTile(tile: Tile) {
+        this._tile = tile;
     }   
 
-    public getInfo()
-    {
-        return this._tileItemInfo
+    public getInfo() {
+        return this._tileItemInfo;
     }
 
-    public setDirection(direction: Direction)
-    {
-        const result = this.getTile().getWorld().setTileItemDirection(this, direction)
+    public setDirection(direction: Direction) {
+        const result = this.tile.world.setTileItemDirection(this, direction)
 
         if(result)
         {
@@ -230,9 +192,8 @@ export class TileItem
         return json
     }
 
-    public setAsUpdated()
-    {
-        this.getWorld().events.emit(WorldEvent.TILE_ITEM_UPDATED, this)
+    public setAsUpdated() {
+        this.world.events.emit(WorldEvent.TILE_ITEM_UPDATED, this)
     }
 
     public setData(data: any) {}

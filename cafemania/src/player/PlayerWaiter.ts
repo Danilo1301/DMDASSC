@@ -6,135 +6,107 @@ import { World, WorldEvent, WorldType } from "@cafemania/world/World";
 import { Player, PlayerType } from "./Player";
 import { PlayerClient } from "./PlayerClient";
 
-export class PlayerWaiter extends Player
-{
+export class PlayerWaiter extends Player {
+
     private _isBusy: boolean = false
 
     private _servingPlayer?: PlayerClient
     private _servingDish?: Dish
     private _servingCounter?: TileItemCounter
 
+    private _dishPlate?: DishPlate
+    private _isCarryingDishPlate: boolean = false
+    private _hasGotDish: boolean = false
+    
     private _checkClientsTime: number = 0
 
-    private _isCarryingDishPlate: boolean = false
+    constructor(world: World) {
+        super(world);
 
-    private _dishPlate?: DishPlate
-
-    private _hasGotDish: boolean = false
-
-    public isWorldClient()
-    {
-        return this.world.type == WorldType.CLIENT
+        this._spriteTexture = 'PlayerSpriteTexture_TestWaiter';
+        this._type = PlayerType.WAITER;
     }
 
-    public isWorldServer()
-    {
-        return this.world.type == WorldType.SERVER
-    }
+    public update(delta: number) {
+        super.update(delta);
 
-    constructor(world: World)
-    {
-        super(world)
+        this._checkClientsTime += delta;
 
-        this._spriteTexture = 'PlayerSpriteTexture_TestWaiter'
-        this._type = PlayerType.WAITER
-    }
-
-    public update(delta: number)
-    {
-        super.update(delta)
-
-        this._checkClientsTime += delta
-
-        if(this._checkClientsTime >= 500 && !this._isBusy)
-        {
-            this._checkClientsTime = 0
-
-            this.checkClients_Serve()
+        if(this._checkClientsTime >= 500 && !this._isBusy) {
+            this._checkClientsTime = 0;
+            this.checkClients_Serve();
         }
     }
 
-    public render(delta: number)
-    {
-        super.render(delta)
+    public render(delta: number) {
+        super.render(delta);
 
-        this.renderDishPlate()
+        this.renderDishPlate();
     }
 
-    private renderDishPlate()
-    {
-        const dish = this._servingDish
+    private renderDishPlate() {
+        const dish = this._servingDish;
 
-        if(dish && this._isCarryingDishPlate)
-        {
-            if(!this._dishPlate)
-            {
-                this._dishPlate = new DishPlate(dish)
+        if(dish && this._isCarryingDishPlate) {
+            if(!this._dishPlate) {
+                this._dishPlate = new DishPlate(dish);
             }
 
-            const h = 20
-            const position = this.getPosition().add(new Phaser.Math.Vector2(0, -h))
+            const h = 20;
+            const position = this.getPosition().add(new Phaser.Math.Vector2(0, -h));
         
-            this._dishPlate.setPosition(position.x, position.y) 
-            this._dishPlate.setDepth(position.y + h)
+            this._dishPlate.setPosition(position.x, position.y);
+            this._dishPlate.setDepth(position.y + h);
         } else {
-            if(this._dishPlate)
-            {
-                this.destroyDishPlate()
-            }
+            if(this._dishPlate) this.destroyDishPlate();
         }
     }
 
-    private checkClients_Serve()
-    {
-        if(this.isWorldClient()) return
+    private checkClients_Serve() {
+        if(this.world.isWorldClient) return
 
-        const client = this.getRandomPlayerWaitingForWaiter()
-        const counter = this.getAnyAvaliableCounter()
+        const client = this.getRandomPlayerWaitingForWaiter();
+        const counter = this.getAnyAvaliableCounter();
 
-        if(!client || !counter) return
+        if(!client || !counter) return;
 
-        client.setIsWaitingForWaiter(false)
+        client.setIsWaitingForWaiter(false);
 
-        this.taskServeClient(client, counter)
+        this.taskServeClient(client, counter);
     }
 
-    public taskServeClient(client: PlayerClient, counter: TileItemCounter)
-    {
-        this._isBusy = true
+    public taskServeClient(client: PlayerClient, counter: TileItemCounter) {
+        this._isBusy = true;
 
-        this.log("serving client")
-        const dish = counter.getDish()
+        this.log("serving client", client.id, client.serialize());
+        const dish = counter.getDish();
 
-        this._servingPlayer = client
-        this._servingDish = dish
-        this._servingCounter = counter
+        this._servingPlayer = client;
+        this._servingDish = dish;
+        this._servingCounter = counter;
 
         
-        counter.addWaiterComing()
+        counter.addWaiterComing();
 
-        if(this.isWorldServer())
-        {
+        if(this.world.isWorldServer) {
             //counter.removeOneDish()
-
-            this.world.events.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, this, client, counter)
-
-            return
+            this.world.events.emit(WorldEvent.PLAYER_WAITER_SERVE_CLIENT, this, client, counter);
+            return;
         }
 
         
 
 
-        this.taskWalkNearToTile(counter.getTile())
+        this.taskWalkNearToTile(counter.tile);
         this.taskExecuteAction(() => {
             //this.setCarryingDish(dish)
 
-            this._isCarryingDishPlate = true
+            this._isCarryingDishPlate = true;
 
-            this.onGetDish()
-        })
+            this.onGetDish();
+        });
 
-        this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTableInFront()!.getTile())
+        this.taskWalkNearToTile(client.getChairPlayerIsSitting().getTableInFront()!.tile)
         this.taskExecuteAction(() =>
         {
             //this.world.events.emit(WorldEvent.PLAYER_WAITER_FINISHED_SERVE, this)
@@ -159,13 +131,13 @@ export class PlayerWaiter extends Player
 
         counter.removeWaiterComing()
 
-        if(!this.isWorldClient()) counter.removeOneDish()
+        if(!this.world.isWorldClient) counter.removeOneDish()
 
         counter.setAsUpdated()
 
         console.log(counter['_data'])
 
-        if(this.isWorldClient())
+        if(this.world.isWorldClient)
         {
             this.world.events.emit(WorldEvent.PLAYER_WAITER_REACHED_COUNTER, this)
         }
@@ -183,16 +155,16 @@ export class PlayerWaiter extends Player
 
         this._isBusy = false
 
-        if(this.isWorldServer())
+        if(this.world.isWorldServer)
         {
             //unlikely to happen
             if(!this._hasGotDish)
             {
                 console.log("_hasGotDish was false?")
 
-                counter.removeWaiterComing()
-                counter.removeOneDish()
-                counter.setAsUpdated()
+                counter.removeWaiterComing();
+                counter.removeOneDish();
+                counter.setAsUpdated();
             }
         }
 
@@ -201,34 +173,22 @@ export class PlayerWaiter extends Player
         this._servingDish = undefined
         this._servingCounter = counter
         
-        if(this.isWorldClient())
-        {
-            this.world.events.emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, this)
-        }
-
-        
+        if(this.world.isWorldClient) this.world.events.emit(WorldEvent.PLAYER_WAITER_FINISH_SERVE, this);
 
         this.log("finished serving")
     }
 
-    private getRandomPlayerWaitingForWaiter()
-    {
-        const world = this.world
-        const players = this.world.getPlayerClients()
+    private getRandomPlayerWaitingForWaiter() {
+        const players = this.world.getPlayerClients();
 
-        for (const player of players)
-        {
-            if(player.isWaitingForWaiter())
-            {
-                return player
-            }
+        for (const player of players) {
+            if(player.isWaitingForWaiter) return player;
         }
 
-        return
+        return;
     }
 
-    public getAnyAvaliableCounter()
-    {
+    public getAnyAvaliableCounter() {
         const counters = this.world.getCounters().filter(counter => {
             if(counter.isEmpty()) return false
 
@@ -244,16 +204,14 @@ export class PlayerWaiter extends Player
         return Utils.shuffleArray(counters)[0]
     }
 
-    public destroy()
-    {
-        super.destroy()
+    public destroy() {
+        super.destroy();
 
-        this.destroyDishPlate()
+        this.destroyDishPlate();
     }
 
-    private destroyDishPlate()
-    {
-        this._dishPlate?.destroy()
-        this._dishPlate = undefined
+    private destroyDishPlate() {
+        this._dishPlate?.destroy();
+        this._dishPlate = undefined;
     }
 }

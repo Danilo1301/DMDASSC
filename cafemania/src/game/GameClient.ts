@@ -10,7 +10,6 @@ export class GameClient extends Game
 
     constructor() {
         super();
-
         this._network = new Network(this);
     }
 
@@ -23,7 +22,7 @@ export class GameClient extends Game
     }
 
     private setupResize() {
-        const game = SceneManager.getPhaser();
+        const game = SceneManager.phaser;
         const scaleManager = game.scale;
 
         document.body.style.height = "100%";
@@ -35,10 +34,8 @@ export class GameClient extends Game
             const a = window.innerWidth / window.innerHeight;
             const s = 1;
 
-            if(a < 1)
-                scaleManager.setGameSize(600 * s, 900 * s);
-            else
-                scaleManager.setGameSize(1000, 600);
+            if(a < 1) scaleManager.setGameSize(600 * s, 900 * s);
+            else scaleManager.setGameSize(1000, 600);
         });
 
         window.addEventListener('resize', () => {
