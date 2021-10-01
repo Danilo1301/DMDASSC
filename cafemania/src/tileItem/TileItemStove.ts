@@ -27,6 +27,8 @@ export class TileItemStove extends TileItem
 
     private _prevDishReadyState: boolean = false;
 
+    private _wasCooking: boolean = false;
+
     constructor(tileItemInfo: TileItemInfo)
     {
         super(tileItemInfo);
@@ -72,6 +74,8 @@ export class TileItemStove extends TileItem
 
         this.world.events.emit(WorldEvent.TILE_ITEM_STOVE_BEGIN_COOK, this, dish);
         this.setAsUpdated();
+
+        this._wasCooking = true;
     }
 
     public getCookingDish() {
@@ -97,6 +101,7 @@ export class TileItemStove extends TileItem
     public update(delta: number) {
         super.update(delta);
 
+        /*
         if(this.isCooking) {
             if(this._prevDishReadyState != this.isDishReady){
                 this._prevDishReadyState = this.isDishReady;
@@ -104,6 +109,15 @@ export class TileItemStove extends TileItem
                 if(this.isDishReady) this.onDishReady();
             }
         }
+        */
+
+        
+        if(!this.isCooking && this._wasCooking) {
+            this.onDishReady();
+            this._wasCooking = false;
+        }
+
+        
     }
 
     public render(delta: number) {
