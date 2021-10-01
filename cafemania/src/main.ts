@@ -7,7 +7,10 @@ function main(): void
     
     const game = window['game'] = new GameClient()
     
-    const text = document.createElement('span');
+    const text = document.createElement('b');
+    text.style.position = "fixed";
+    text.style.left = "30px";
+    text.style.top = "30px";
     text.innerText = `Clique para iniciar o jogo`;
     document.body.appendChild(text);
 
@@ -16,6 +19,8 @@ function main(): void
         if(started) return;
         started = true;
         game.start()
+
+        text.remove();
     })
 }
 
