@@ -42,9 +42,11 @@ export class GameClient extends Game
             this.events.emit('resize');
 
             //fix weird resize bug
-            setTimeout(() => this.events.emit('resize'), 500);
+            
         })
         this.events.emit('resize');
+
+        setInterval(() => this.events.emit('resize'), 500)
     }
 
     public createClientWorld() {
