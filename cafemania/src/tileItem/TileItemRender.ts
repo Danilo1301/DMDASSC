@@ -164,7 +164,7 @@ export class TileItemRender
 
 
                     //change
-                    const canCreateCol = this._tileItemInfo.type == TileItemType.STOVE || this._tileItemInfo.type == TileItemType.DOOR || this._tileItemInfo.type == TileItemType.COUNTER
+                    const canCreateCol = this._tileItemInfo.type == TileItemType.WALL_DECORATION || this._tileItemInfo.type == TileItemType.STOVE || this._tileItemInfo.type == TileItemType.DOOR || this._tileItemInfo.type == TileItemType.COUNTER
 
                     if(extraLayer == 0 && canCreateCol) this.createCollisionForSprite(sprite)
 
@@ -278,7 +278,7 @@ export class TileItemRender
         });
     }
 
-    private updateSprites(): void
+    public updateSprites(): void
     {
         const changeRotation = this._changeRotation
         const flipCells = this._flipCells

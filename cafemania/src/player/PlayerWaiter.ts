@@ -179,7 +179,7 @@ export class PlayerWaiter extends Player {
     }
 
     private getRandomPlayerWaitingForWaiter() {
-        const players = this.world.getPlayerClients();
+        const players = Utils.shuffleArray(this.world.getPlayerClients());
 
         for (const player of players) {
             if(player.isWaitingForWaiter) return player;

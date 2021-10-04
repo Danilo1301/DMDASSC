@@ -101,7 +101,7 @@ export class TileItemStove extends TileItem
     public update(delta: number) {
         super.update(delta);
 
-        if(this.world.isWorldServer) {
+        if(this.world.isWorldServer || this.world.type == WorldType.DEFAULT) {
             if(this.isCooking) {
                 if(this._prevDishReadyState != this.isDishReady){
                     this._prevDishReadyState = this.isDishReady;

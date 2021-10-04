@@ -1,7 +1,7 @@
 import { Direction } from "@cafemania/utils/Direction";
 import { Player } from "./Player";
 
-interface IPlayerAnim {
+export interface IPlayerAnim {
     name: string
     directions: Direction[]
     frames: number
@@ -13,19 +13,19 @@ interface IPlayerAnim {
 export class PlayerAnimation {
 
     public static Animations: {[key: string]: IPlayerAnim} = {
-        'Walk': {
-            name: 'Walk', 
-            directions: [Direction.NORTH, Direction.SOUTH, Direction.NORTH_WEST, Direction.NORTH_EAST, Direction.SOUTH_EAST],
-            frames: 3,
-            frameOrder: [0, 1, 2, 1],
-            frameRate: 4
-        },
         'Idle': {
             name: 'Idle',
             directions: [Direction.NORTH, Direction.SOUTH, Direction.NORTH_WEST, Direction.NORTH_EAST, Direction.SOUTH_EAST],
             frames: 3,
             frameOrder: [0, 1, 2, 1],
             frameRate: 2
+        },
+        'Walk': {
+            name: 'Walk', 
+            directions: [Direction.NORTH, Direction.SOUTH, Direction.NORTH_WEST, Direction.NORTH_EAST, Direction.SOUTH_EAST],
+            frames: 3,
+            frameOrder: [0, 1, 2, 1],
+            frameRate: 4
         },
         'Sit': {
             name: 'Sit',

@@ -8,8 +8,9 @@ import { TileItemInfo, TileItemType } from "./TileItemInfo";
 export class TileItemDoor extends TileItem
 {
     private _isOpen: boolean = false
-
     private _openPercentage: number = 0
+    private _closeTime: number = 0;
+    private _waitingForClose = false;
 
     constructor(tileItemInfo: TileItemInfo)
     {
@@ -20,6 +21,43 @@ export class TileItemDoor extends TileItem
             this.setOpen(!this._isOpen)
         })
 
+    }
+
+    public update(delta: number)
+    {
+        super.update(delta);
+
+        const players = this.world.getPlayerClients();
+
+        let canOpen = false;
+
+        for (const player of players) {
+            const distance = Phaser.Math.Distance.BetweenPoints(player.getPosition(), this.getPosition())
+
+            if(distance < 100) {
+                canOpen = true;
+                break;
+            }
+        }
+
+        if(canOpen && !this._isOpen) {
+            this.setOpen(true);
+
+            this._closeTime = 1000;
+            this._waitingForClose = true;
+
+            console.log('open')
+        }
+
+        this._closeTime -= delta;
+
+        if(this._closeTime <= 0 && this._waitingForClose) {
+            this.setOpen(false)
+
+            
+
+            console.log('cloos')
+        }
     }
 
     public render(delta: number)
@@ -39,6 +77,8 @@ export class TileItemDoor extends TileItem
     public setOpen(value: boolean)
     {
         this._isOpen = value
+
+        if(!this._isOpen) this._waitingForClose = false;
     }
 
     public onAddedToTile(tile: Tile)

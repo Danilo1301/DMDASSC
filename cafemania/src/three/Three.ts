@@ -1,20 +1,30 @@
 import * as THREE from 'three';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { ThreeModels } from './ThreeModels';
+
+export interface ThreeModel {
+    object: THREE.Group
+    mixer?: THREE.AnimationMixer
+    clip?: THREE.AnimationClip
+}
 
 export default class Three
 {
-    public static size = new Phaser.Math.Vector2(175, 200)
+    public static size = new Phaser.Math.Vector2(175*1.2, 200*1.2)
     public static camera: THREE.OrthographicCamera
     public static scene: THREE.Scene
     public static renderer: THREE.WebGLRenderer
-    public static object?: THREE.Group
+    private static _initialized: boolean = false;
 
-    public static async init()
-    {
-        console.log("three init")
+    public static async init() {
+
+        if(this._initialized) return;
+        this._initialized = true;
+
+        console.log("[Three] Init")
 
         const size = this.size
-        const frustumSize = 5;
+        const frustumSize = 5.5;
         const aspect = size.x / size.y //window.innerWidth / window.innerHeight;
         const camera = this.camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000 );
 
@@ -36,74 +46,80 @@ export default class Three
         //document.body.appendChild( this.renderer.domElement );
     }
 
-    public static setAngle(deg: number)
-    {
-        this.object!.rotation.y = Phaser.Math.DegToRad(deg)
+    public static setAngle(model: ThreeModel, deg: number) {
+        model.object.rotation.y = Phaser.Math.DegToRad(deg);
     }
 
-    public static animate()
-    {
+    public static animate() {
         this.renderer.render( this.scene, this.camera );
     }
 
-    public static async loadGLTFModel(path: string)
-    {
-        return new Promise<GLTF>((resolve) => {
-            const onProgress = () => console.log("onProgress")
-    
-            const onError = (error) => console.log("onError", error)
-        
+    public static async loadGLTFModel(path: string, loadAnimation?: boolean) {
+        return new Promise<ThreeModel>(async (resolve) => {
+            
+            
             const scene = this.scene;
-
-            console.log(this, this.scene)
-
-            /*
-            const textureLoader = new THREE.TextureLoader();
-
-            const map1 = textureLoader.load("/static/cafemania/assets/eye.png");
-            const map = textureLoader.load("/static/cafemania/assets/eye2.png");
-
-            map.encoding = THREE.sRGBEncoding;
-
-            map.flipY = false;
-
-            */
-
-            var loader = new GLTFLoader();
-            loader.load(path, function(gltf) {
-
-                const object = Three.object = gltf.scene
-                object.position.y = 1
-
-
-                /*
-                    mixer = new THREE.AnimationMixer( object );
-
-					const action = mixer.clipAction( object.animations[ 0 ] );
-					action.play();
-                */
-
-                    /*
-                object.traverse( function ( child ) {
-
-                    if ( child.isMesh )
-                    {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-
-                } );
-                */
+            const hasLoaded = ThreeModels.hasLoaded(path);
+            const gltf = await ThreeModels.get(path);
+            const object = hasLoaded ? gltf.scene.clone() : gltf.scene
+            scene.add(object);
         
-				scene.add(object);
 
-                resolve(gltf)
-            }, onProgress, onError);
+            const result: ThreeModel = {
+                object: object
+            }
+
+            if(loadAnimation) {
+                const mixer = new THREE.AnimationMixer(object);
+                const clip = gltf.animations[0]
+                const anim = mixer.clipAction(clip)
+
+                result.mixer = mixer
+                result.clip = clip
+
+                anim.reset()
+                anim.play()
+            }
+            resolve(result)
         })
     }
 
-    public static getImageData()
-    {
+    public static setModelToObject(model: ThreeModel, object: THREE.Object3D) {
+        const pos = new THREE.Vector3();
+        const quat = new THREE.Quaternion();
+        object.getWorldPosition( pos );
+        object.getWorldQuaternion( quat );
+    
+        model.object.position.set(pos.x, pos.y, pos.z)
+        model.object.quaternion.set(quat.x, quat.y, quat.z, quat.w)
+    }
+
+    public static setAnimationFrame(model: ThreeModel, frame: number, totalFrames: number) {
+
+        if(!model.clip || !model.mixer) return;
+
+        /*
+        console.log(this._clip.duration)
+
+        this._anim.time = frame * (this._clip.duration / totalFrames)
+        this._mixer.update(0)
+
+        console.log(`setAnimFrame`, frame, totalFrames, this._clip.duration / totalFrames * (frame), this._clip.duration)
+        */
+        const timeInSeconds = frame * ((model.clip.duration - (model.clip.duration*0.01)) / (totalFrames-1))
+        const animMixer: any = model.mixer
+        
+        //console.log(this._clip.duration)
+
+
+        animMixer.time=0;
+            for(var i=0;i<animMixer._actions.length;i++){
+            animMixer._actions[i].time=0;
+        }
+        animMixer.update(timeInSeconds)
+    }
+
+    public static getImageData() {
         const canvas = Three.renderer.domElement
         const gl = Three.renderer.getContext()
 

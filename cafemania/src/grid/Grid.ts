@@ -119,8 +119,12 @@ export class Grid
 
             let result = true
             
+            //console.log(`at ${coord.x}, ${coord.y}`)
+
             for(const item of coordCell.ocuppiedByItems)
             {
+                //console.log(`found item ${item.name}`, item)
+
                 if(compareFn(coordCell, item) === false) result = false
             }
 
@@ -177,18 +181,23 @@ export class Grid
 
         for (const cell of cells)
         {
-            if(!cell.item) continue
+            if(cell.items.length == 0) continue
 
-            if(cell != cell.item.getOriginCell()) continue
+            for (const item of cell.items) {
+                if(cell != item.getOriginCell()) continue
 
-            const item = cell.item
+                const coords = this.getCoordsItemOcuppes(cell, item.size, item.changeRotation, item.flipCells)
 
-            const coords = this.getCoordsItemOcuppes(cell, item.size, item.changeRotation, item.flipCells)
+                coords.map(coord =>
+                {
+                    const list = this.getCell(coord.x, coord.y).ocuppiedByItems;
+                    
+                    if(!list.includes(item)) list.push(item)
+                })
+            }
 
-            coords.map(coord =>
-            {
-                this.getCell(coord.x, coord.y).ocuppiedByItems.push(item)
-            })
+
+            
 
             //console.log(coords)
         }

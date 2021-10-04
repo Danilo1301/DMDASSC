@@ -39,7 +39,7 @@ export class Player {
     private _atTile!: Tile;
     private _state: PlayerState = PlayerState.IDLE;
     private _direction: Direction = Direction.NORTH;
-    private _speed: number = 4; //1.8
+    private _speed: number = 2.5; //1.8
     private _depth: number = 0;
     private _sittingAtChair: TileItemChair | undefined;
     private _destroyed: boolean = false;
@@ -240,7 +240,7 @@ export class Player {
         
         if(textureName) {
             const PTF = await import("./PlayerTextureFactory");
-            await PTF.PlayerTextureFactory.create(textureName, {}) ;
+            await PTF.PlayerTextureFactory.generatePlayerTexture(textureName, {animations: []}) ;
         } else {
             textureName = this._spriteTexture;
         }

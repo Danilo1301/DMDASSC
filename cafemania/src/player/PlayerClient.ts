@@ -2,12 +2,14 @@ import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileItemChair } from "@cafemania/tileItem/TileItemChair";
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
+import { Utils } from "@cafemania/utils/Utils";
 import { World, WorldEvent, WorldType } from "@cafemania/world/World";
 import { Player, PlayerState, PlayerType } from "./Player";
 
 export class PlayerClient extends Player {
 
     private static MAX_FIND_CHAIR_ATTEMPTS = 5
+    private static beginEatSoundIndex = 0;
 
     private _findChairAttempts: number = 0;
     private _attemptTime: number = 0;
@@ -36,6 +38,15 @@ export class PlayerClient extends Player {
     public get eatTime() { return this._eatTime; }
 
 
+    public static playBeginEatSound() {
+        this.beginEatSoundIndex++;
+        if(this.beginEatSoundIndex >= 4) this.beginEatSoundIndex = 0;
+        
+        console.log(this.beginEatSoundIndex)
+
+        GameScene.Instance?.sound.play(`begin_eat${this.beginEatSoundIndex+1}`);
+    }
+
     public render(delta: number) {
         super.render(delta);
     }
@@ -46,6 +57,11 @@ export class PlayerClient extends Player {
         //at door
         if(this._isWaitingForChair) {
             //no chair
+
+            if(this.world.type == WorldType.DEFAULT) {
+                this.processFindChairAttempts(delta);
+            }
+
             if(this._goingToChair == undefined) {
                 if(this.world.isWorldServer) this.processFindChairAttempts(delta);
                 return;
@@ -79,6 +95,8 @@ export class PlayerClient extends Player {
                     this._hasStartedEating = true;
                     this._eatTimeEnd = Date.now() + this._eatTime;
                     this.setState(PlayerState.EATING);
+
+                    PlayerClient.playBeginEatSound();
                 }
             }
         }
@@ -93,7 +111,7 @@ export class PlayerClient extends Player {
 
             this.getChairPlayerIsSitting().getTableInFront()!.getDishPlate()?.setPercentage( percent );
 
-            if(this.world.isWorldServer) {
+            if(this.world.isWorldServer || this.world.type == WorldType.DEFAULT) {
                 if(Date.now() >= this._eatTimeEnd) this.onFinishEating();
             }
 
@@ -139,13 +157,20 @@ export class PlayerClient extends Player {
     private onFinishEating() {
         this.log(`finish eating`);
 
+        //
+        this.log("tip");
+        GameScene.Instance?.sound.play('audio_tip');
+        const position = this.getChairPlayerIsSitting().getTableInFront()!.getDishPlate().getPosition();
+        GameScene.Instance?.drawWorldText(`tip`, position, 0x000000)
+        //
+
         const table = this.getChairPlayerIsSitting().getTableInFront()!;
         table.clearDish();
         //this.getChairPlayerIsSitting().setIsReserved(false)
         this.liftUpFromChair()
         this.exitCafe()
 
-        GameScene.Instance?.sound.play('audio_tip');
+        
     }
 
     public warpToDoor() {
@@ -218,7 +243,7 @@ export class PlayerClient extends Player {
 
         if(chairs.length == 0) return false;
 
-        const chair = chairs[0];
+        const chair = Utils.shuffleArray(chairs)[0];
         chair.setIsReserved(true);
 
         this.setGoingToChair(chair);

@@ -9,16 +9,11 @@ export class Cell
 
     public ocuppiedByItems: Item[] = []
     
-    private _item?: Item
+    public items: Item[] = [];
 
     public get id()
     {
         return `${this.x}:${this.y}`
-    }
-
-    public get item()
-    {
-        return this._item
     }
 
     constructor(grid: Grid, x: number, y: number)
@@ -28,13 +23,11 @@ export class Cell
         this.y = y
     }
 
-    public setItem(item: Item)
-    {
-        this._item = item
+    public addItem(item: Item) {
+        this.items.push(item);
     }
 
-    public removeItem()
-    {
-        this._item = undefined
+    public removeItem(item: Item) {
+        this.items.splice(this.items.indexOf(item), 1)
     }
 }

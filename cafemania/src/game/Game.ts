@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { TileItemFactory } from '@cafemania/tileItem/TileItemFactory';
 import { World } from '@cafemania/world/World';
 import { DishFactory } from '@cafemania/dish/DishFactory';
+import { PlayerClothesFactory } from '@cafemania/player/PlayerClothesFactory';
 
 export class Game {
 
@@ -10,14 +11,17 @@ export class Game {
     private _worlds = new Phaser.Structs.Map<string, World>([]);
     private _tileItemFactory: TileItemFactory;
     private _dishFactory: DishFactory;
+    private _playerClothesFactory: PlayerClothesFactory;
 
     constructor() {
         this._tileItemFactory = new TileItemFactory(this);
         this._dishFactory = new DishFactory(this);
+        this._playerClothesFactory = new PlayerClothesFactory(this);
     }
 
     public get tileItemFactory() { return this._tileItemFactory; }
     public get dishFactory() { return this._dishFactory; }
+    public get playerClothesFactory() { return this._playerClothesFactory; }
     public get worlds() { return this._worlds.values(); }
 
     public start() { 

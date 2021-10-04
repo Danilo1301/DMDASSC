@@ -3,6 +3,8 @@ import { Grid } from "./Grid"
 
 export class Item
 {
+    public name: string = "";
+
     public readonly id: string
 
     public readonly size: Phaser.Math.Vector2
@@ -21,7 +23,7 @@ export class Item
         this.color = Math.round(Math.random() * 16777215)
         this._cell = cell
         
-        cell.setItem(this)
+        cell.addItem(this)
     }
 
     public get flipCells(): boolean

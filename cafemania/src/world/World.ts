@@ -5,7 +5,7 @@ import { GameScene } from "@cafemania/scenes/GameScene";
 import { Tile } from "@cafemania/tile/Tile";
 import { TileItem } from "@cafemania/tileItem/TileItem";
 import { TileItemDoor } from "@cafemania/tileItem/TileItemDoor";
-import { TileItemType } from "@cafemania/tileItem/TileItemInfo";
+import { TileItemRotationType, TileItemType } from "@cafemania/tileItem/TileItemInfo";
 import { TileItemRender } from "@cafemania/tileItem/TileItemRender";
 import { Direction } from "@cafemania/utils/Direction";
 import { WorldText } from "@cafemania/utils/WorldText";
@@ -147,6 +147,8 @@ export class World {
 
     public canTileItemBePlacedAtTile(tileItem: TileItem, tile: Tile, direction?: Direction)
     {
+        //console.log(`canTileItemBePlacedAtTile :`, tileItem.getInfo().name)
+
         if(direction === undefined) direction = tileItem.direction
 
         const grid = this.grid;
@@ -154,16 +156,23 @@ export class World {
         const size = tileItem.getInfo().size
 
         const o = TileItemRender.valuesFromDirection(direction)
+        
 
-        return grid.canItemBePlaced(cell, size, o[0], o[1], (compareCell, compareItem) =>
+        var result = grid.canItemBePlaced(cell, size, o[0], o[1], (compareCell, compareItem) =>
         {
+
             if(!compareItem)
                 return true
 
             if(compareItem.id == tileItem.id)
                 return true
-            
+
+                
+
             const compareTileItem = this.getTile(compareItem.getOriginCell().x, compareItem.getOriginCell().y).getTileItem(compareItem.id)!
+
+            //console.log(`compare ${compareTileItem.getInfo().name}`)
+
 
             if(tileItem.getInfo().type == TileItemType.WALL)
                 return false
@@ -176,6 +185,10 @@ export class World {
                 
             return true
         })
+
+        //console.log("the result was ", result)
+
+        return result;
     }
 
     public setTileItemDirection(tileItem: TileItem, direction: Direction)
@@ -205,10 +218,14 @@ export class World {
         if(!this._tileItems.has(tileItem.id)) this._tileItems.set(tileItem.id, tileItem)
 
         const gridItem = this.grid.addItem(tileItem.id, tile.x, tile.y, tileItem.getInfo().size)
+        gridItem.name = tileItem.getInfo().name;
+
         const type = tileItem.getInfo().type
 
         if(type == TileItemType.FLOOR) gridItem.color = 0
         if(type == TileItemType.WALL) gridItem.color = 0xcccccc
+
+        console.log("placed")
     }
 
     public setPlayerClientSpawnEnabled(value: boolean)
@@ -276,22 +293,33 @@ export class World {
 
         const tileItemFactory = this.game.tileItemFactory;
 
-        this.addNewTileItem('door1', this.getTile(0, 1), Direction.EAST)
+        this.addNewTileItem('door1', this.getTile(0, 2), Direction.EAST)
 
-        this.addNewTileItem('stove1', this.getTile(0, 2), Direction.EAST)
-        this.addNewTileItem('stove1', this.getTile(0, 3), Direction.EAST)
 
-        this.addNewTileItem('counter1', this.getTile(0, 4), Direction.EAST)
-        this.addNewTileItem('counter1', this.getTile(0, 5), Direction.EAST)
-        this.addNewTileItem('counter1', this.getTile(0, 6), Direction.EAST)
-        this.addNewTileItem('counter1', this.getTile(0, 7), Direction.EAST)
-        this.addNewTileItem('counter1', this.getTile(0, 8), Direction.EAST)
+        var window1 = window['test1'] = this.addNewTileItem('window1', this.getTile(0, 0), Direction.EAST)
+        this.addNewTileItem('counter1', this.getTile(0, 0), Direction.EAST)
+        this.addNewTileItem('counter1', this.getTile(1, 0), Direction.EAST)
+
+        this.addNewTileItem('floorDecoration2', this.getTile(2, 2), Direction.EAST)
+
+     
+  
+        let y = 3;
+        this.addNewTileItem('stove1', this.getTile(0, y++), Direction.EAST)
+        var stove2 = this.addNewTileItem('stove1', this.getTile(0, y++), Direction.EAST)
+      
+        this.startRandomlyRotate(window1, 500);
+        this.startRandomlyRotate(stove2, 500);
+
+
+
+        
         
 
 
-        for (let y = 0; y < sizeY-1; y++)
+        for (let y = 0; y < 6; y++)
         {
-            for (let x = 0; x < sizeX; x++)
+            for (let x = 0; x < 8; x++)
             {
                 const tile = this.getTile(x, y)
 
@@ -503,7 +531,7 @@ export class World {
                 new WorldText(GameScene.Instance, `Can't rotate!`, tileItem.tile.getPosition(), 0xff0000)
             }
             
-            direction = Math.floor(Math.random()*4)
+            direction = tileItem.getInfo().rotationType == TileItemRotationType.SIDE_ONLY ? Phaser.Math.RND.integerInRange(1, 2) : Phaser.Math.RND.integerInRange(0, 3)
 
         }, time)
     }

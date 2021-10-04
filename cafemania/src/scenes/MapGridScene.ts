@@ -73,7 +73,7 @@ export class MapGridScene extends BaseScene
                 }
 
                 
-                if(cell.item != undefined)
+                if(cell.items.length > 0)
                 {
                     //graphics.fillStyle(0x000)
                 }

@@ -8,6 +8,7 @@ import { TileItemRender } from "./TileItemRender"
 import { TileItemStove } from "./TileItemStove"
 import { TileItemTable } from "./TileItemTable"
 import { TileItemWall } from "./TileItemWall"
+import { TileItemWallDecoration } from "./TileItemWallDecoration"
 
 export class TileItemFactory
 {
@@ -159,7 +160,7 @@ export class TileItemFactory
             texture: 'door/door1',
             type: TileItemType.DOOR,
             rotationType: TileItemRotationType.SIDE_AND_BACK,
-            placeType: TileItemPlaceType.FLOOR,
+            placeType: TileItemPlaceType.WALL,
             size: new Phaser.Math.Vector2(1, 1),
             layers: new Phaser.Math.Vector2(2, 1),
             extraLayers: 0,
@@ -229,6 +230,27 @@ export class TileItemFactory
             },
             originPosition: new Phaser.Math.Vector2(84, 55)
         })
+
+        this.addTileItemInfo({
+            id: 'window1',
+            name: 'window1',
+            texture: 'wallDecoration/window1',
+            type: TileItemType.WALL_DECORATION,
+            rotationType: TileItemRotationType.SIDE_ONLY,
+            placeType: TileItemPlaceType.WALL,
+            size: new Phaser.Math.Vector2(2, 1),
+            layers: new Phaser.Math.Vector2(1, 1),
+            extraLayers: 0,
+            collision: {
+                x: 20,
+                y: 60,
+                height: 40,
+                isWall: true,
+                wallAtFront: false,
+                wallSize: 5
+            },
+            originPosition: new Phaser.Math.Vector2(84, 198)
+        })
     }
 
     public getTileItemInfoList()
@@ -244,12 +266,13 @@ export class TileItemFactory
         const tileItemInfo = this.getTileItemInfo(id)
 
         const map = new Map<TileItemType, typeof TileItem>()
-        map.set(TileItemType.WALL, TileItemWall)
-        map.set(TileItemType.DOOR, TileItemDoor)
-        map.set(TileItemType.CHAIR, TileItemChair)
+        map.set(TileItemType.WALL, TileItemWall);
+        map.set(TileItemType.DOOR, TileItemDoor);
+        map.set(TileItemType.CHAIR, TileItemChair);
         map.set(TileItemType.STOVE, TileItemStove)
-        map.set(TileItemType.COUNTER, TileItemCounter)
-        map.set(TileItemType.TABLE, TileItemTable)
+        map.set(TileItemType.COUNTER, TileItemCounter);
+        map.set(TileItemType.TABLE, TileItemTable);
+        map.set(TileItemType.WALL_DECORATION, TileItemWallDecoration);
 
         const type = tileItemInfo.type
 

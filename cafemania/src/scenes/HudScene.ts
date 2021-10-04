@@ -1,4 +1,6 @@
+import { PlayerTextureFactory } from '@cafemania/player/PlayerTextureFactory';
 import { BaseScene } from '@cafemania/scenes/BaseScene';
+import Three from '@cafemania/three/Three';
 import { FPSCounter } from '@cafemania/utils/FPSCounter';
 import { NotificationBar } from '@cafemania/utils/NotificationBar';
 import { GameScene } from './GameScene';
@@ -36,6 +38,7 @@ export class HudScene extends BaseScene {
         this.createZoomButtons();
 
         this.scene.bringToTop();
+
     }
 
     public update(time: number, delta: number) {

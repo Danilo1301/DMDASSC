@@ -187,7 +187,7 @@ export class WorldServer extends World
 
     private setupWorld()
     {
-        this.createDefaultMap(7, 10)
+        this.createDefaultMap(16, 16)
      
         
         this.setPlayerClientSpawnEnabled(false)

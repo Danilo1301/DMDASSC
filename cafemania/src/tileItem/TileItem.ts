@@ -1,4 +1,4 @@
-import { TileItemInfo, TileItemPlaceType, TileItemType } from "./TileItemInfo"
+import { TileItemInfo, TileItemPlaceType, TileItemRotationType, TileItemType } from "./TileItemInfo"
 import { v4 as uuidv4 } from 'uuid';
 import { TileItemRender } from "./TileItemRender";
 import { Tile } from "@cafemania/tile/Tile";
@@ -70,6 +70,11 @@ export class TileItem {
     }
 
     public setDirection(direction: Direction) {
+
+        if(this.getInfo().rotationType == TileItemRotationType.SIDE_ONLY) {
+            if(direction == Direction.NORTH || direction == Direction.WEST) return false;
+        }
+
         const result = this.tile.world.setTileItemDirection(this, direction)
 
         if(result)
@@ -103,8 +108,23 @@ export class TileItem {
         {
             this._tileItemRender = new TileItemRender(this.getInfo(), this)
 
-            if(this.getInfo().placeType == TileItemPlaceType.WALL || this.getInfo().type == TileItemType.DOOR)
-                this._tileItemRender.setDepth(-Tile.SIZE.y/3)
+            if(this.getInfo().placeType == TileItemPlaceType.WALL) {
+
+                if(this.getInfo().type == TileItemType.DOOR) {
+                    this._tileItemRender.setDepth(-Tile.SIZE.y/3)
+
+                } else {
+
+                    
+                }
+
+            }
+
+            if(this.getInfo().type == TileItemType.WALL) {
+                this._tileItemRender.setDepth(-2)
+                this._tileItemRender.updateSprites()
+            }
+
         
             this.setTileItemRenderSpritesToLayers()
 
@@ -153,7 +173,7 @@ export class TileItem {
         })
     }
 
-    protected updateSprites()
+    public updateSprites()
     {
         //console.log(`[TileItem : ${this.getInfo().name}] updateSprites`)
 
