@@ -61,13 +61,17 @@ const chat = new Chat(io.of('/api/chat'));
 
 
 
+
+/*
+
+
 console.log("Starting geckos...")
 
 import '@geckos.io/phaser-on-nodejs'
 global['phaserOnNodeFPS'] = 60
 
 
-/*
+
 console.log("Starting GameServer...")
 
 import GameServer from '@phaserGame/game/GameServer'
@@ -85,12 +89,3 @@ import { GameServer as Game1Server } from '../../game/src/game/GameServer'
 var game = new Game1Server(io.of("/api/game"))
 game.start()
 */
-
-
-
-console.log("Starting CafemaniaServer...")
-
-import { GameServer as CafemaniaServer } from '@cafemania/game/GameServer'
-
-var cafemania = new CafemaniaServer(io.of("/api/cafemania"))
-cafemania.start()

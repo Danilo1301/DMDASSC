@@ -17,7 +17,12 @@ const NavbarItem = function(text, href, active)
 
 const Navbar = function(props)
 {
-  const items = [["Projetos", "projetos"], ["Game", "game"], ["Cafemania", "cafemania"]]
+  const items = [
+    ["Projetos", "projetos"],
+    ["Game", "https://dmdassc-game.glitch.me"],
+    ["Cafemania", "cafemania"],
+    ["VoiceChat", "https://voice-chat-server.glitch.me"]
+  ]
 
   return (
     <>
