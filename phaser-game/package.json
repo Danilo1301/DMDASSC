@@ -1,7 +1,0 @@
-{
-  "scripts": {
-    "start": "node -r tsconfig-paths/register -r ts-node/register src/main.ts",
-    "dev": "webpack --config webpack.config.js --watch",
-    "build": "webpack --config webpack.config.js"
-  }
-}
