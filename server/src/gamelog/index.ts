@@ -29,16 +29,11 @@ class GameLog {
         app.get("/gamelog", (req, res) => {
             let str = ""; 
             for (const log of this._logs) {
-                str += `[00:00:00 27/01/2012 - ${log.service}] (${log.address}) ${log.message}\n`
+                str += `[${this.formatTime(new Date(log.time))} - ${log.service}] (${log.address}) ${log.message}\n`
             }
 
             res.end(str);
         });
-
-        this.addLog("cafemania", "127.0.0.1", "joined")
-        this.addLog("cafemania", "127.0.0.1", "sum")
-        this.addLog("cafemania", "47.0.0.1", "joined")
-        this.addLog("gm", "48.0.0.1", "joined")
     }
 
     public addLog(service: string, address: string, message: string) {
@@ -50,6 +45,14 @@ class GameLog {
         }
         this._logs.push(log);
         return log;
+    }
+
+    public formatTime(date: Date) {
+        const offset = date.getTimezoneOffset();
+        date = new Date(date.getTime() - (offset*60*1000))
+        const s = date.toISOString().split('T');
+        const timeStr = `${s[0]} ${s[1].split(".")[0]}`;
+        return timeStr;
     }
 }
 
