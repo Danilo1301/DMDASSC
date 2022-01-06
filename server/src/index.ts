@@ -3,6 +3,8 @@ import http from 'http';
 import socketio from 'socket.io';
 import path from 'path';
 
+const bodyParser = require('body-parser');
+
 const isDevelopment = (process.env.NODE_ENV || "development").trim() === 'development';
 const port = 3000;
 
@@ -11,6 +13,13 @@ console.log("index.ts | (ignoring)isDevelopment=", isDevelopment);
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
 const io: socketio.Server = new socketio.Server();
+
+
+// configure the app to use bodyParser()
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
 
 try { require("../env").load(); } catch (error) {}
 
@@ -38,9 +47,14 @@ steamBot.login();
 import TestApp from './testApp';
 const testApp = new TestApp(app, steamBot);
 
+//
+import GameLog from './gamelog';
+const gameLog = new GameLog(app);
+
 
 //app
 app.use(express.static(path.join(__dirname, "..", "public")));
+
 
 app.use('/static', express.static(path.join(__dirname, "..", "static")));
 
