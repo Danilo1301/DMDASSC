@@ -49,7 +49,7 @@ const testApp = new TestApp(app, steamBot);
 
 //
 import GameLog from './gamelog';
-const gameLog = new GameLog(app);
+const gameLog = new GameLog(app, discordBot);
 
 
 //app
