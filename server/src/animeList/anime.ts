@@ -5,5 +5,6 @@ export interface Anime {
     totalEpisodes: number 
     watchedOvas: number 
     totalOvas: number 
-    nextEpisodeDate?: number 
+    nextEpisodeDate?: number
+    lastUpdated: number
 }

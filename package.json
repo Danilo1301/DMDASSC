@@ -2,7 +2,9 @@
   "name": "dmdassc",
   "version": "1.0.0",
   "scripts": {
-    "start": "cd server && npm run start"
+    "start": "cd server && npm run start",
+    "dev": "cd server && npm run start",
+    "react": "cd react-client && npm run dev"
   },
   "author": "Danilo",
   "license": "ISC",

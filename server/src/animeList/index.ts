@@ -125,6 +125,7 @@ class AnimeList {
             anime.totalOvas = body.totalOvas;
             anime.watchedEpisodes = body.watchedEpisodes;
             anime.watchedOvas = body.watchedOvas;
+            anime.lastUpdated = Date.now()
 
             res.end();
 
@@ -170,7 +171,8 @@ class AnimeList {
             watchedEpisodes: 0,
             totalEpisodes: episodes,
             watchedOvas: 0,
-            totalOvas: 0
+            totalOvas: 0,
+            lastUpdated: Date.now()
         }
         return anime;
     }

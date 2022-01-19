@@ -11,7 +11,8 @@ export interface Anime {
   totalEpisodes: number 
   watchedOvas: number 
   totalOvas: number 
-  nextEpisodeDate?: number 
+  nextEpisodeDate?: number
+  lastUpdated: number
 }
 
 const requestAnimes = function(callback: (animes: Anime[]) => void) {
@@ -174,7 +175,11 @@ const List = function()
         
         <button className="col-auto btn-sm btn-primary mt-3 mb-3" onClick={handleNew}>Adicionar anime</button>
       {
-        animeList.map(anime => <Anime data={anime}/> )
+        animeList.sort((a, b) => {
+
+
+          return b.lastUpdated - a.lastUpdated;
+        }).map(anime => <Anime data={anime}/> )
       }
         
             
