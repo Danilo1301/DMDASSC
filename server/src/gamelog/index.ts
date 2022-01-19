@@ -1,5 +1,5 @@
 import express from 'express';
-import { DiscordBot } from 'src/discordBot';
+import { DiscordBot } from '../discordBot';
 import { Gamelog } from './test';
 
 interface ILog {
@@ -28,7 +28,10 @@ class GameLog {
             
             if(service && address) {
                 const log = this.addLog(service, address, message ? message : "", sendPing, isLocal);
-                discordBot.sendOwnerMessage(`[gamelog] ${this.formatLogMessage(log)}`);
+
+                if(sendPing) {
+                    discordBot.sendOwnerMessage(`[gamelog] ${this.formatLogMessage(log)}`);
+                }
             }
 
 
@@ -66,6 +69,7 @@ class GameLog {
             time: Date.now()
         }
         this._logs.push(log);
+        
         return log;
     }
 

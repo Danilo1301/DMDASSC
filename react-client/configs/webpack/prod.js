@@ -9,7 +9,8 @@ module.exports = merge(commonConfig, {
   mode: "production",
   entry: "./index.tsx",
   output: {
-    filename: "js/bundle.[contenthash].min.js",
+    //filename: "js/bundle.[contenthash].min.js",
+    filename: "js/bundle.min.js",
     path: resolve(path.join(__dirname, "..", "..", "..", "server", "static", "client")),
     publicPath: "/static/client/",
   },

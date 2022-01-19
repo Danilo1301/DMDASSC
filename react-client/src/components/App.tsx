@@ -1,43 +1,17 @@
 import * as React from "react";
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import AppSecret from "./app-secret/AppSecret";
+import { Route, Routes } from 'react-router-dom';
+import AnimeList from "./animeList/AnimeList";
+import Home from "./Home";
 
-const NavbarItem = function(text, href, active)
-{
-  const className = `nav-link ${active ? "bg-light" : ""}`
 
+const Navbar = function(props) {
   return (
     <>
-      <li className="nav-item">
-        <a className={className} href={href}>{text}</a>
-      </li>
-    </>
-  )
-}
-
-const Navbar = function(props)
-{
-  const items = [
-    ["Projetos", "projetos"],
-    ["Game", "game"],
-    ["Cafemania", "cafemania"],
-    ["VoiceChat", "voicechat"]
-  ]
-
-  return (
-    <>
-      <nav className="navbar shadow-sm">
+      <nav className="navbar bg-primary">
         <div className="container">
-          <a className="nav-link link-dark" href="/">DMDASSC</a>
+          <a className="nav-link link-light" href="/">DMDASSC</a>
           <ul className="nav">
-            
-            {
-              items.map((item, index) => {
-                const active = parseInt(props.activeItem) === index;
-
-                return NavbarItem(item[0], item[1], active);
-              })}
-        
+            <></>
           </ul>
         </div>
       </nav>
@@ -45,25 +19,26 @@ const Navbar = function(props)
   );
 }
 
-const App = function()
-{
+const App = function() {
   return (
-  <>
-    <Router>
-      <Switch>
-        <Route path="/login" exact>
-          <h1>LOGIN</h1>
-        </Route>
-        <Route path="/secret" exact>
-          <AppSecret/>
-        </Route>
-        <Route>
-          <Navbar activeItem='0'/>
-        </Route>
-      </Switch>
-    </Router>
-  </>
+    <>
+      <div className="App">
+        <Navbar/>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="animelist/*" element={<AnimeList />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 
 export default App;
+
+/*
+ <Routes>
+      <Route path="/" element={<App />}>
+        <Route path="animelist" element={<AnimeList />}></Route>
+      </Route>
+    </Routes>
+*/

@@ -36,12 +36,12 @@ io.on('connection', function (socket) {
 //
 import { DiscordBot } from './discordBot'
 const discordBot = new DiscordBot();
-discordBot.login();
+//discordBot.login();
 
 //
 import { SteamBot } from './steamBot';
 const steamBot = new SteamBot();
-steamBot.login();
+//steamBot.login();
 
 //
 import TestApp from './testApp';
@@ -50,6 +50,10 @@ const testApp = new TestApp(app, steamBot);
 //
 import GameLog from './gamelog';
 const gameLog = new GameLog(app, discordBot);
+
+//
+import AnimeList from './animeList';
+const animeList = new AnimeList(app);
 
 
 //app
