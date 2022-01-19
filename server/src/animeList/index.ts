@@ -26,7 +26,7 @@ class AnimeList {
     private _users = new Map<string, User>();
 
     public saveData() {
-        const animeListDir = path.join(__dirname, "..", "..", ".data", "animelist");
+        const animeListDir = path.join(__dirname, "..", "..", "..", ".data", "animelist");
         
         if(!fs.existsSync(animeListDir)) {
             fs.mkdirSync(animeListDir);
@@ -54,7 +54,7 @@ class AnimeList {
     }
     
     public loadData() {
-        const animeListDir = path.join(__dirname, "..", "..", ".data", "animelist");
+        const animeListDir = path.join(__dirname, "..", "..", "..", ".data", "animelist");
         const usersDir = animeListDir + "/users.json";
         
         if(!fs.existsSync(animeListDir)) fs.mkdirSync(animeListDir);
