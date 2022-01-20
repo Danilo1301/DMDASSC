@@ -206,4 +206,6 @@ class AnimeList {
     }
 }
 
+
+
 export default AnimeList;

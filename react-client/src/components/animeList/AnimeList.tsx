@@ -66,8 +66,16 @@ const Anime = function(props) {
   let badgeText = "Assistindo";
   
   if(onGoing) {
+    
+    let nextEpText = ": ?";
+    if(anime.nextEpisodeDate) {
+      const days = Math.ceil(daysBetween(new Date(), new Date(anime.nextEpisodeDate)));
+      nextEpText = " em " + days + " dias"
+    }
+    
+    
     badgeStyle = "info";
-    badgeText = "Novo episódio 19/01";
+    badgeText = "Novo episódio" + nextEpText;
   } else {
     if(watchedEpisodes == totalEpisodes) {
 
@@ -209,6 +217,25 @@ const AnimeList = function()
 
 export default AnimeList;
 
+function treatAsUTC(date: Date) {
+  var result = new Date(date);
+  result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+  return result;
+}
+
+function daysBetween(startDate, endDate) {
+  var millisecondsPerDay = 24 * 60 * 60 * 1000;
+  return (treatAsUTC(endDate).getTime() - treatAsUTC(startDate).getTime()) / millisecondsPerDay;
+}
+
+
+function formatTime(date: Date) {
+  const offset = date.getTimezoneOffset();
+  date = new Date(date.getTime() - (offset*60*1000))
+  const s = date.toISOString().split('T');
+  const timeStr = `${s[0]} ${s[1].split(".")[0]}`;
+  return timeStr;
+}
 
 function setCookie(name,value,days) {
   var expires = "";

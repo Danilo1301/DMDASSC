@@ -40,8 +40,10 @@ const AnimePage = function(props)
         setWatchedOvas(anime.watchedOvas)
         setTotalOvas(anime.totalOvas)
 
-        const date = new Date(anime.nextEpisodeDate || Date.now());
-        setNextEpisodeDate(date.toISOString().substr(0, 10));
+        if(anime.nextEpisodeDate) {
+          const date = new Date(anime.nextEpisodeDate);
+          setNextEpisodeDate(date.toISOString().substr(0, 10));
+        }
     });
   }
 
