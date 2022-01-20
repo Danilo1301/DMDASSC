@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Anime } from "./AnimeList";
+import { Anime, requestAccessKey } from "./AnimeList";
 
 const NotFound = function() {
   return (
@@ -90,13 +90,14 @@ const AnimePage = function(props)
       totalEpisodes: totalEpisodes,
       watchedOvas: watchedOvas,
       totalOvas: totalOvas,
-      nextEpisodeDate: nextEpisodeDate == "" ? undefined : new Date(nextEpisodeDate).getTime()
+      nextEpisodeDate: nextEpisodeDate == "" ? undefined : new Date(nextEpisodeDate).getTime(),
+      lastUpdated: Date.now()
     }
 
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(anime)
+      body: JSON.stringify({anime: anime, key: requestAccessKey()})
     };
 
     fetch('/api/animelist/anime/' + id + "/update", requestOptions)

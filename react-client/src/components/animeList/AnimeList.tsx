@@ -15,6 +15,7 @@ export interface Anime {
   lastUpdated: number
 }
 
+
 const requestAnimes = function(callback: (animes: Anime[]) => void) {
 
   const requestOptions = {
@@ -140,14 +141,16 @@ const List = function()
     })
   }
   
- 
+  const handleEraseKey = () => {
+    eraseCookie('animelist-key')
+  }
   
   const handleNew = () => {
     
     const requestOptions = {
-      method: 'GET',
-      //headers: { 'Content-Type': 'application/json' },
-      //body: JSON.stringify({ title: 'React Hooks POST Request Example' })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: requestAccessKey() })
     };
   
     fetch('/api/animelist/new', requestOptions)
@@ -174,6 +177,7 @@ const List = function()
       <div className="container">
         
         <button className="col-auto btn-sm btn-primary mt-3 mb-3" onClick={handleNew}>Adicionar anime</button>
+       
       {
         animeList.sort((a, b) => {
 
@@ -182,7 +186,7 @@ const List = function()
         }).map(anime => <Anime data={anime}/> )
       }
         
-            
+        <button className="col-auto btn-sm btn-primary mt-3 mb-3 ml-3" onClick={handleEraseKey}>Erase key</button>
       </div>
     </>
     
@@ -191,6 +195,7 @@ const List = function()
 
 const AnimeList = function()
 {
+
   return (
     <>
       <Routes>
@@ -203,3 +208,40 @@ const AnimeList = function()
 }
 
 export default AnimeList;
+
+
+function setCookie(name,value,days) {
+  var expires = "";
+  if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days*24*60*60*1000));
+      expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+      var c = ca[i];
+      while (c.charAt(0)==' ') c = c.substring(1,c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+function eraseCookie(name) {   
+  document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+export function requestAccessKey() {
+  
+  const key = getCookie("animelist-key");
+
+  if(key != null) return key;
+
+  const newKey = prompt("Insert key")
+
+  setCookie('animelist-key', newKey, 999);
+
+  return newKey;
+}

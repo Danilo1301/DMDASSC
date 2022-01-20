@@ -77,6 +77,10 @@ class AnimeList {
         
     }
 
+    public authenticateKey(key: string) {
+        return key == process.env.STEAM_PASSWORD
+    }
+
     constructor(app: express.Application) {
 
         this.loadData()
@@ -112,19 +116,24 @@ class AnimeList {
         });
 
         app.post("/api/animelist/anime/:id/update", (req, res) => {
+            const key = req.body.key;
+            if(!this.authenticateKey(key)) {
+                res.sendStatus(500)
+                return;
+            }
+
             const user = Array.from(this._users.values())[0];
-            const body: Anime = req.body;
+            const bodyAnime: Anime = req.body.anime;
 
-            console.log(body)
+      
+            const anime = user.animes.get(bodyAnime.id)!;
 
-            const anime = user.animes.get(body.id)!;
-
-            anime.name = body.name;
-            anime.nextEpisodeDate = body.nextEpisodeDate;
-            anime.totalEpisodes = body.totalEpisodes;
-            anime.totalOvas = body.totalOvas;
-            anime.watchedEpisodes = body.watchedEpisodes;
-            anime.watchedOvas = body.watchedOvas;
+            anime.name = bodyAnime.name;
+            anime.nextEpisodeDate = bodyAnime.nextEpisodeDate;
+            anime.totalEpisodes = bodyAnime.totalEpisodes;
+            anime.totalOvas = bodyAnime.totalOvas;
+            anime.watchedEpisodes = bodyAnime.watchedEpisodes;
+            anime.watchedOvas = bodyAnime.watchedOvas;
             anime.lastUpdated = Date.now()
 
             res.end();
@@ -133,6 +142,12 @@ class AnimeList {
         });
 
         app.post("/api/animelist/anime/:id/delete", (req, res) => {
+            const key = req.body.key;
+            if(!this.authenticateKey(key)) {
+                res.sendStatus(500)
+                return;
+            }
+
             const user = Array.from(this._users.values())[0];
             const body: Anime = req.body;
 
@@ -147,7 +162,14 @@ class AnimeList {
             this.saveData();
         });
 
-        app.get("/api/animelist/new", (req, res) => {
+        app.post("/api/animelist/new", (req, res) => {
+
+            const key = req.body.key;
+            if(!this.authenticateKey(key)) {
+                res.sendStatus(500)
+                return;
+            }
+
             const user = Array.from(this._users.values())[0];
 
             //user.animes.push(this.createAnime('random name', 12));
