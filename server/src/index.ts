@@ -36,12 +36,12 @@ io.on('connection', function (socket) {
 //
 import { DiscordBot } from './discordBot'
 const discordBot = new DiscordBot();
-//discordBot.login();
+discordBot.login();
 
 //
 import { SteamBot } from './steamBot';
 const steamBot = new SteamBot();
-//steamBot.login();
+steamBot.login();
 
 //
 import TestApp from './testApp';
@@ -57,12 +57,21 @@ const animeList = new AnimeList(app);
 
 
 //app
+
 app.use(express.static(path.join(__dirname, "..", "public")));
-
-
 app.use('/static', express.static(path.join(__dirname, "..", "static")));
-
 app.get("/api", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
+
+app.get("*", (req, res, next) => {
+
+    if(req.url.startsWith("/favicon.ico") || req.url.startsWith("/assets/")) {
+
+    } else {
+        console.log(req.url)
+    }
+
+    next();
+})
 
 app.get("/cafemania", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "cafemania", "index.html")) );
 app.get("/game", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "game", "index.html")) );

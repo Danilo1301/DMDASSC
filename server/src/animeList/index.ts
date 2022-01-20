@@ -41,7 +41,7 @@ class AnimeList {
                 animes: Array.from(user.animes.values())
             }
 
-            console.log(data)
+            //console.log(data)
 
             json[user.id] = data;
             
@@ -50,7 +50,7 @@ class AnimeList {
         fs.writeFileSync(animeListDir + "/users.json", JSON.stringify(json))
         
 
-        console.log(animeListDir)
+        //console.log(animeListDir)
     }
     
     public loadData() {
@@ -62,12 +62,12 @@ class AnimeList {
 
         const json = JSON.parse( fs.readFileSync(animeListDir + "/users.json", "utf-8") );
         
-        console.log(json)
+        //console.log(json)
 
         for (const id in json) {
             const user = this.createUser(id);
 
-            console.log(json[id])
+            //console.log(json[id])
 
             for (const anime of json[id].animes) {
                 user.addAnime(anime)
@@ -153,7 +153,7 @@ class AnimeList {
 
             const id = req.params.id;
 
-            console.log("delete", id)
+            //console.log("delete", id)
            
             user.animes.delete(id);
 
@@ -178,7 +178,7 @@ class AnimeList {
 
             user.addAnime(anime)
 
-            console.log(req.body);
+            //console.log(req.body);
             res.json({id: anime.id});
 
             
