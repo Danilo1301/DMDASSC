@@ -33,7 +33,7 @@ const Home = function()
       <div className="container mt-3">
 
         <Section title="Jogos">
-          <PageItem text="Cafe Mania" href="https://cafemania.glitch.me"/>
+          <PageItem text="Cafe Mania" href="cafemania"/>
           <PageItem text="Game" href="game"/>
         </Section>
 
