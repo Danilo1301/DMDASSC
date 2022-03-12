@@ -33,16 +33,17 @@ const Home = function()
       <div className="container mt-3">
 
         <Section title="Jogos">
-          <PageItem text="Cafe Mania" href="cafemania"/>
+          <PageItem text="Cafe Mania" href="https://cafemania.glitch.me"/>
           <PageItem text="Game" href="game"/>
         </Section>
 
         <Section title="Projetos">
+          <PageItem text="VehicleSirenLights (GTA SA Mod)" href="https://www.youtube.com/watch?v=6N7fDUZuDi4"/>
+          <PageItem text="Crab Game Mod" href="https://www.youtube.com/watch?v=UNDTeMtOLVY"/>
+          <PageItem text="Chat" href="https://dmdassc-chat1.glitch.me"/>
+          <PageItem text="Video Manager" href="https://github.com/Danilo1301/video-manager"/>
           <PageItem text="Voice Chat" href="voicechat"/>
           <PageItem text="Anime List" href="animelist"/>
-          <PageItem text="Video Manager" href="https://github.com/Danilo1301/video-manager"/>
-          <PageItem text="VehicleSirenLights (GTA SA Mod)" href="https://github.com/Danilo1301/vehicle-siren-light-gtasa"/>
-          <PageItem text="Chat" href="https://dmdassc-chat1.glitch.me"/>
         </Section>
         
       </div>
