@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 
 export class DiscordBot {
+    public static DEFAULT_CHANNEL = "663429290846847007";
+
     public get client() { return this._client; }
 
     private _client;
@@ -22,7 +24,11 @@ export class DiscordBot {
     }
 
     public sendOwnerMessage(message: string) {
-        this.client.channels.cache.get('663429290846847007').send(message);
+        this.client.channels.cache.get(DiscordBot.DEFAULT_CHANNEL).send(message);
+    }
+
+    public sendChannelMessage(channel:string, message: string) {
+        this.client.channels.cache.get(channel).send(message);
     }
 
     public login() {

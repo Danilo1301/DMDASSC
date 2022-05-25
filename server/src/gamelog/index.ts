@@ -11,10 +11,18 @@ interface ILog {
     time: number
 }
 
+const serviceChannels = [
+    ["crab-game-mod", "979150398558466058"],
+    ["redactle-pt", "979150364169355346"]
+]
+
 class GameLog {
     private _logs: ILog[] = [];
+    private _discordBot: DiscordBot;
 
     constructor(app: express.Application, discordBot: DiscordBot) {
+        this._discordBot = discordBot;
+
         app.post("/gamelog/log", (req, res) => {
             const body = req.body;
 
@@ -29,11 +37,9 @@ class GameLog {
             if(service && address) {
                 const log = this.addLog(service, address, message ? message : "", sendPing, isLocal);
 
-                if(sendPing) {
-                    discordBot.sendOwnerMessage(`[gamelog] ${this.formatLogMessage(log)}`);
-                }
+                if(sendPing) 
+                    this.sendLog(log);
             }
-
 
             res.send(req.body);    // echo the result back
         });
@@ -53,6 +59,20 @@ class GameLog {
 
             res.end("sent");
         });
+    }
+
+    private sendLog(log: ILog) {
+        const discordBot = this._discordBot;
+        const msg = this.formatLogMessage(log);
+
+        for (const sc of serviceChannels) {
+            if(sc[0] == log.service) {
+                discordBot.sendChannelMessage(sc[1], msg);
+                return;
+            }
+        }
+
+        discordBot.sendOwnerMessage(`[gamelog] ${msg}`);
     }
 
     private formatLogMessage(log: ILog) {
