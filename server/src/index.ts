@@ -57,6 +57,9 @@ const gameLog = new GameLog(app, discordBot);
 import AnimeList from './animeList';
 const animeList = new AnimeList(app);
 
+import Aternos from './aternos';
+const aternos = new Aternos(app);
+
 
 //app
 
@@ -78,6 +81,7 @@ app.get("*", (req, res, next) => {
 app.get("/cafemania", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "cafemania", "index.html")) );
 app.get("/game", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "game", "index.html")) );
 app.get("/voicechat", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "voicechat", "index.html")) );
+app.get("/aternos", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "aternos", "index.html")) );
 
 app.get("/notapi", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
