@@ -60,6 +60,8 @@ const animeList = new AnimeList(app);
 import Aternos from './aternos';
 const aternos = new Aternos(app);
 
+import PogChamp from './pogchamp';
+const pogChamp = new PogChamp(app);
 
 //app
 
