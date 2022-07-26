@@ -5,7 +5,7 @@ import fs from 'fs'
   
 class PogChamp {
     
-    public static days = 60;
+    public static days = 30;
 
     constructor(app: express.Application)
     {
@@ -33,7 +33,7 @@ class PogChamp {
             if(diff < 0) {
                 res.end("https://drive.google.com/file/d/10hcVwQRzG4VxpxNNyQLznMPQRdaiNp1g/view?usp=sharing");
             } else {
-                res.end(`Important message in: ${diff} ms`);
+                res.end(`Important message (some truths) in: ${diff} ms`);
             }
         });
     }
