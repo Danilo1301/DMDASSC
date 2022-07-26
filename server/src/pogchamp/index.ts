@@ -33,7 +33,7 @@ class PogChamp {
             if(diff < 0) {
                 res.end("https://drive.google.com/file/d/10hcVwQRzG4VxpxNNyQLznMPQRdaiNp1g/view?usp=sharing");
             } else {
-                res.end(`${diff} ms`);
+                res.end(`Important message in: ${diff} ms`);
             }
         });
     }
