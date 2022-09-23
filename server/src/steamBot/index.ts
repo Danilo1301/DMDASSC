@@ -32,10 +32,9 @@ export class SteamBot {
     public login() {
         const code = SteamTotp.generateAuthCode(process.env.STEAM_SHARED_SECRET);
 
-        console.log(process.env.STEAM_SHARED_SECRET)
-        console.log(code)
+        //console.log(process.env.STEAM_SHARED_SECRET)
+        //console.log(code)
 
-        /*
         const logOnOptions = {
             accountName: process.env.STEAM_USERNAME,
             password: process.env.STEAM_PASSWORD,
@@ -43,7 +42,6 @@ export class SteamBot {
         };
 
         this.client.logOn(logOnOptions);
-        */
     }
 
     public sendOwnerChatMessage(message: string) {
