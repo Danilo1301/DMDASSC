@@ -3,6 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { Anime } from './anime';
 import fs from 'fs'
 import path from 'path';
+import { PATH_DATA } from 'src/paths';
+
+const PATH_ANIMELIST = path.join(PATH_DATA, "animelist")
+const PATH_ANIMELIST_USERS = path.join(PATH_ANIMELIST, "users.json")
 
 class User {
     public get id() { return this._id; }
@@ -26,10 +30,8 @@ class AnimeList {
     private _users = new Map<string, User>();
 
     public saveData() {
-        const animeListDir = path.join(__dirname, "..", "..", "..", ".data", "animelist");
-        
-        if(!fs.existsSync(animeListDir)) {
-            fs.mkdirSync(animeListDir);
+        if(!fs.existsSync(PATH_ANIMELIST)) {
+            fs.mkdirSync(PATH_ANIMELIST);
         }
 
         const json: any = {};
@@ -47,20 +49,17 @@ class AnimeList {
             
         }
         
-        fs.writeFileSync(animeListDir + "/users.json", JSON.stringify(json))
+        fs.writeFileSync(PATH_ANIMELIST_USERS, JSON.stringify(json))
         
 
         //console.log(animeListDir)
     }
     
     public loadData() {
-        const animeListDir = path.join(__dirname, "..", "..", "..", ".data", "animelist");
-        const usersDir = animeListDir + "/users.json";
-        
-        if(!fs.existsSync(animeListDir)) fs.mkdirSync(animeListDir);
-        if(!fs.existsSync(usersDir)) return;
+        if(!fs.existsSync(PATH_ANIMELIST)) fs.mkdirSync(PATH_ANIMELIST);
+        if(!fs.existsSync(PATH_ANIMELIST_USERS)) return;
 
-        const json = JSON.parse( fs.readFileSync(animeListDir + "/users.json", "utf-8") );
+        const json = JSON.parse( fs.readFileSync(PATH_ANIMELIST_USERS, "utf-8") );
         
         //console.log(json)
 

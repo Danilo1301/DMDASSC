@@ -1,7 +1,9 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs'
+import { PATH_DATA } from 'src/paths';
 
+const PATH_POGCHAMP = path.join(PATH_DATA, "pogchamp.json")
   
 class PogChamp {
     
@@ -11,12 +13,8 @@ class PogChamp {
     {
         console.log("PogChamp starting");
 
-        const dir = path.join(__dirname, "..", "..", "..", ".data");
-        
-        const jsonDir = `${dir}\\pogchamp.json`;
-
-        if(!fs.existsSync(jsonDir)) {
-            fs.writeFileSync(jsonDir, `${(new Date()).getTime()}`)
+        if(!fs.existsSync(PATH_POGCHAMP)) {
+            fs.writeFileSync(PATH_POGCHAMP, `${(new Date()).getTime()}`)
         }
 
         const minTime = (1000 * 60 * 60 * 24 * PogChamp.days);
@@ -24,7 +22,7 @@ class PogChamp {
 
         app.get("/pogchamp", (req, res) => {
             const nowDate = new Date();
-            const time = parseInt(fs.readFileSync(jsonDir, "utf-8"));
+            const time = parseInt(fs.readFileSync(PATH_POGCHAMP, "utf-8"));
             const targetDate = new Date(new Date(time).getTime() + minTime);
             const diff = targetDate.getTime() - nowDate.getTime();
 
