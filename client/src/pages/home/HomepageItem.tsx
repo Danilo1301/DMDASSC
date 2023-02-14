@@ -2,7 +2,8 @@ export enum HomepageItemCategory {
     GAMES,
     PROJECTS,
     SCRATCH,
-    GTA_SA_MODS
+    GTA_SA_MODS,
+    PRINCIPAL
   }
   
   export interface HomepageItem {
@@ -11,7 +12,7 @@ export enum HomepageItemCategory {
     description: string
     image: string
     projectUrl: string
-    category: HomepageItemCategory
+    categories: HomepageItemCategory[]
     videoPreviewId?: string
     hidden?: boolean
 }

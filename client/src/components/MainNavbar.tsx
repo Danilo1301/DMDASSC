@@ -6,9 +6,9 @@ import NavDropdown from "react-bootstrap/esm/NavDropdown"
 const MainNavbar: React.FC = () =>
 (
     <>
-        <Navbar bg="dark" variant="dark">
+        <Navbar style={{backgroundColor: '#4b507c'}}>
             <Container>
-                <Navbar.Brand href="#home">
+                <Navbar.Brand className="text-light" href="#home">
                     {
                         /*
                         <img
@@ -23,6 +23,13 @@ const MainNavbar: React.FC = () =>
                     DMDASSC
                 </Navbar.Brand>
 
+                
+            </Container>
+        </Navbar>
+    </>
+)
+
+/*
                 <Navbar.Collapse id="navbar-dark-example" className="justify-content-end">
                     <Nav>
                         <NavDropdown
@@ -42,9 +49,6 @@ const MainNavbar: React.FC = () =>
                         </NavDropdown>
                     </Nav>
                 </Navbar.Collapse>
-            </Container>
-        </Navbar>
-    </>
-)
+*/
 
 export default MainNavbar
