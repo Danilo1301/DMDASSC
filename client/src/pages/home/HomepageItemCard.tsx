@@ -103,7 +103,7 @@ export const HomepageItemCardList: React.FC<IHomepageItemCardListProps> = (props
     return (
         <>
             <ListGroup className="my-2 mt-5">
-                <ListGroup.Item style={{backgroundColor: '#73b2f6'}}>{props.title}</ListGroup.Item>
+                <ListGroup.Item style={{backgroundColor: '#73b2f6'}}><b>{props.title}</b></ListGroup.Item>
             </ListGroup>
 
             <Row xs={1} md={3} className="g-4">

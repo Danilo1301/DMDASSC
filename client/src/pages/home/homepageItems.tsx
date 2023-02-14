@@ -3,12 +3,13 @@ import { HomepageItem, HomepageItemCategory } from "./HomepageItem";
 export const homePageItems: HomepageItem[] =
 [
     {
-        title: "Cafemania 2",
+        title: "Cafemania",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/cafemania.png",
         projectUrl: "https://cafemania.danilomaioli.repl.co",
-        categories: [HomepageItemCategory.GAMES, HomepageItemCategory.PRINCIPAL]
+        categories: [HomepageItemCategory.GAMES, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "W2RUrSYOGoU"
     },
     {
         title: "GTA 2 Babaylonjs",
@@ -158,9 +159,10 @@ export const homePageItems: HomepageItem[] =
         title: "Giroflex Mobile VSL",
         shortDescription: "",
         description: "",
-        image: "",
+        image: "assets/thumbs/giroflex-mobile.png",
         projectUrl: "https://github.com/Danilo1301/libGiroflexVSL",
-        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL]
+        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "rjgJlM8OzWw"
     },
 
 
