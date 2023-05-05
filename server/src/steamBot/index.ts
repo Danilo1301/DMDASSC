@@ -30,6 +30,9 @@ export class SteamBot {
     }
 
     public login() {
+        console.log("[steamBot] * login canceled!")
+        return;
+        
         const code = SteamTotp.generateAuthCode(process.env.STEAM_SHARED_SECRET);
 
         //console.log(process.env.STEAM_SHARED_SECRET)

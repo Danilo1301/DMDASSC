@@ -81,6 +81,7 @@ class AnimeList {
     }
 
     constructor(app: express.Application) {
+        console.log("[animeList] constructor")
 
         this.loadData()
 

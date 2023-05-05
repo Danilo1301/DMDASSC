@@ -12,8 +12,8 @@ export const homePageItems: HomepageItem[] =
         videoPreviewId: "W2RUrSYOGoU"
     },
     {
-        title: "GTA 2 Babaylonjs",
-        shortDescription: "GTA 2 using babylonjs engine",
+        title: "GTA 2 (using Babaylonjs)",
+        shortDescription: "",
         description: "",
         image: "assets/thumbs/gta2-babylonjs.png",
         projectUrl: "https://gta2-babylonjs.glitch.me/",
@@ -51,8 +51,8 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/crabgame-server-mod.png",
         projectUrl: "https://www.youtube.com/watch?v=UNDTeMtOLVY",
-        videoPreviewId: "UNDTeMtOLVY",
-        categories: [HomepageItemCategory.PROJECTS]
+        categories: [HomepageItemCategory.PROJECTS],
+        videoPreviewId: "UNDTeMtOLVY"
     },
     {
         title: "Redactle-pt",
@@ -66,10 +66,9 @@ export const homePageItems: HomepageItem[] =
         title: "Animelist",
         shortDescription: "",
         description: "",
-        image: "",
+        image: "assets/thumbs/unknown-project.png",
         projectUrl: "/animelist",
-        categories: [HomepageItemCategory.PROJECTS],
-        hidden: true
+        categories: [HomepageItemCategory.PROJECTS]
     },
     {
         title: "Video Manager",
@@ -78,6 +77,7 @@ export const homePageItems: HomepageItem[] =
         image: "assets/thumbs/videomanager.png",
         projectUrl: "https://github.com/Danilo1301/video-manager",
         categories: [HomepageItemCategory.PROJECTS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "WlmxwY7mR3M"
     },
     {
         title: "Chat",
@@ -99,7 +99,7 @@ export const homePageItems: HomepageItem[] =
         title: "Youtube Playlist Check",
         shortDescription: "",
         description: "",
-        image: "",
+        image: "assets/thumbs/unknown-project.png",
         projectUrl: "https://github.com/Danilo1301/youtube-playlist-check",
         categories: [HomepageItemCategory.PROJECTS]
     },
@@ -111,14 +111,14 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/vehicle-siren-lights.png",
         projectUrl: "https://www.youtube.com/watch?v=sTG_e6sXQD4",
-        videoPreviewId: "sTG_e6sXQD4",
-        categories: [HomepageItemCategory.GTA_SA_MODS]
+        categories: [HomepageItemCategory.GTA_SA_MODS],
+        videoPreviewId: "sTG_e6sXQD4"
     },
     {
         title: "Neon Lights",
-        shortDescription: "A GTA San Andreas mod",
+        shortDescription: "",
         description: "",
-        image: "https://img.youtube.com/vi/nFGJpmpwkhY/0.jpg",
+        image: "assets/thumbs/neon-lights.png",
         projectUrl: "",
         categories: [HomepageItemCategory.GTA_SA_MODS],
         videoPreviewId: "nFGJpmpwkhY"
@@ -135,7 +135,7 @@ export const homePageItems: HomepageItem[] =
         title: "Hydra Thrust",
         shortDescription: "",
         description: "",
-        image: "",
+        image: "assets/thumbs/unknown-project.png",
         projectUrl: "https://github.com/Danilo1301/hydra-thrust",
         categories: [HomepageItemCategory.GTA_SA_MODS]
     },
@@ -143,7 +143,7 @@ export const homePageItems: HomepageItem[] =
         title: "Multi Siren",
         shortDescription: "",
         description: "",
-        image: "",
+        image: "assets/thumbs/unknown-project.png",
         projectUrl: "https://github.com/Danilo1301/multi-siren",
         categories: [HomepageItemCategory.GTA_SA_MODS]
     },
@@ -151,7 +151,7 @@ export const homePageItems: HomepageItem[] =
         title: "NSiren (old)",
         shortDescription: "",
         description: "",
-        image: "",
+        image: "assets/thumbs/unknown-project.png",
         projectUrl: "https://github.com/Danilo1301/Nsiren",
         categories: [HomepageItemCategory.GTA_SA_MODS]
     },
@@ -162,7 +162,7 @@ export const homePageItems: HomepageItem[] =
         image: "assets/thumbs/giroflex-mobile.png",
         projectUrl: "https://github.com/Danilo1301/libGiroflexVSL",
         categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
-        videoPreviewId: "rjgJlM8OzWw"
+        videoPreviewId: "pnYOUqGRV6Q"
     },
 
 

@@ -4,12 +4,15 @@ import express from 'express';
 import http from 'http';
 import socketio from 'socket.io';
 import path from 'path';
+import fs from 'fs';
 import { PATH_DATA, PATH_PUBLIC, PATH_REACT } from './paths';
 
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 require("./env")(`${PATH_DATA}/env.json`)
+
+if(!fs.existsSync("../.data")) fs.mkdirSync("../.data");
 
 const isDevelopment = (process.env.NODE_ENV || "development").trim() === 'development';
 const port = 3000;

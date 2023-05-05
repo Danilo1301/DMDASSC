@@ -1,15 +1,17 @@
-## Server
+# root
+`npm start` runs client/src/index.ts
 
-### `npm start`
+# /server
+`npm start` run src/index.ts
 
-run src/index.ts
+`npm run dev` nodemon src/index.ts
 
-### `npm run dev`
+# /client
 
-nodemon src/index.ts
+`npm start` start react app
 
-## Client
+`npm run build` build app
 
-### `npm start`
+# Dont forget
 
-start react app
+npm i on /server
