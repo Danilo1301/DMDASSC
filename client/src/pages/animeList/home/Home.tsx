@@ -86,7 +86,7 @@ const Home: React.FC = () => {
             </Row>
 
             {
-            animeList.map(anime => (
+            animeList.sort((a, b) => b.lastUpdated - a.lastUpdated ).map(anime => (
                 <AnimeItem key={anime.id} anime={anime}></AnimeItem>
             ))
             }
