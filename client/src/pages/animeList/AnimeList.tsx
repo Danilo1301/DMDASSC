@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import AnimePage from './AnimePage';
-import Home from './Home';
+import AnimePage from './animePage/AnimePage';
+import Home from './home/Home';
 
 // import { Container } from './styles';
 

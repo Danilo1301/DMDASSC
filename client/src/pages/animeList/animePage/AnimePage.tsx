@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/esm/Button'
 import Col from 'react-bootstrap/esm/Col'
 import Container from 'react-bootstrap/esm/Container'
@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/esm/Form'
 import InputGroup from 'react-bootstrap/esm/InputGroup'
 import Row from 'react-bootstrap/esm/Row'
 import { useParams } from 'react-router-dom'
-import { Anime } from '../../../../server/src/animeList/anime'
+import { Anime } from '../../../../../server/src/animeList/anime'
  
 // import { Container } from './styles'
 
@@ -33,12 +33,20 @@ const AnimePage: React.FC = () => {
     const params = useParams()
     const id = params.id
 
-    if(!id) return <>INVALID ID</>
+    const [anime, setAnime] = useState<Anime>();
 
-    getAnimeInfo(id).then(anime =>
+    const [animeName, setAnimeName] = useState("");
+    const [watchedEpisodes, setWatchedEpisodes] = useState(0);
+
+    if(!id) return <>INVALID ID</>
+    
+    getAnimeInfo(id).then(animeInfo =>
     {
-        console.log(anime)
+        setAnime(animeInfo)
+        setAnimeName(animeInfo.name)
     })
+        
+    if(!anime) return <>Loading anime...</>
 
     return (
         <>
@@ -47,14 +55,14 @@ const AnimePage: React.FC = () => {
                 <Row>
                     <span>Name</span>
                     <InputGroup className="mb-3">
-                        <Form.Control aria-label="Text input with checkbox" />
+                        <Form.Control aria-label="" value={animeName} onChange={e => setAnimeName(e.target.value)} />
                     </InputGroup>
                 </Row>
                 <Row>
                     <Col>
                         <span>Watched episodes</span>
                         <InputGroup className="mb-3">
-                            <Form.Control aria-label="Text input with checkbox" />
+                        <Form.Control aria-label="" value={watchedEpisodes} onChange={e => setWatchedEpisodes(parseInt(e.target.value))} />
                         </InputGroup>
                     </Col>
                     <Col>
