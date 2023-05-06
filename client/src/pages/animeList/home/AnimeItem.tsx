@@ -15,8 +15,7 @@ const AnimeItem: React.FC<AnimeItemProps> = (props) =>
     //onClickAnime
     const onClickAnime = () => {
         console.log("onClickAnime", anime);
-        alert("read-only page")
-        //window.location.href = "/animelist/anime/" + anime.id;
+        window.location.href = "/animelist/anime/" + anime.id;
     }
 
 

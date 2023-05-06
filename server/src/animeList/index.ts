@@ -143,13 +143,13 @@ class AnimeList {
 
         app.post("/api/animelist/anime/:id/delete", (req, res) => {
             const key = req.body.key;
+
             if(!this.authenticateKey(key)) {
                 res.sendStatus(500)
                 return;
             }
 
             const user = Array.from(this._users.values())[0];
-            const body: Anime = req.body;
 
             const id = req.params.id;
 
