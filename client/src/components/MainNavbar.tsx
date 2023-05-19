@@ -6,7 +6,7 @@ import NavDropdown from "react-bootstrap/esm/NavDropdown"
 const MainNavbar: React.FC = () =>
 (
     <>
-        <Navbar style={{backgroundColor: '#4b507c'}}>
+        <Navbar style={{backgroundColor: '#5d67c7'}}>
             <Container>
                 <Navbar.Brand className="text-light" href="#home">
                     {

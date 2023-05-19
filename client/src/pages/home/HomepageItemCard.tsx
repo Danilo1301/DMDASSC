@@ -35,84 +35,100 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
 
     return (
         <>
-            <Col>
-                <NavLink onClick={handleShow}>
-                    <Card>
-                        <Card.Img variant="top" src={homepageItem.image} />
-                        <Card.Body>
-                        <Card.Title>{homepageItem.title}</Card.Title>
-                        <Card.Text>
-                            {homepageItem.shortDescription}
-                        </Card.Text>
-                        </Card.Body>
-                    </Card>
-                </NavLink>
-            </Col>
+            <div className="row border p-0 m-0">
+                <div className="col-auto">
+                    <img src={homepageItem.image} className="bg-dark border float-left" width="300px" height="200px" alt="..."></img>
+                </div>
+                <div className="col">
+                    <div className="row" style={{height: '100%'}}>
+                        <div className="align-self-start p-2">
+                            <h2>{homepageItem.title}</h2>
+                            <div>{homepageItem.shortDescription}</div>
+                            <div>{homepageItem.description}</div>
+                        </div>
+                        <div className="align-self-end row">
+                            <div className="col-auto p-2">
+                                <button className="btn flex btn-primary" onClick={handleShow}>Show video</button>
+                            </div>
+                            <div className="col-auto p-2">
+                                <button className="btn btn-secondary" onClick={handleViewPage}>View page</button>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            
             <Modal show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{homepageItem.title}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {homepageItem.shortDescription}
-                    
-                    { homepageItem.videoPreviewId
-                        ? (<iframe width="100%" height="300px" src={ "https://www.youtube.com/embed/" + homepageItem.videoPreviewId } title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>) 
-                        : ""
-                    }
+            <Modal.Header closeButton>
+                <Modal.Title>{homepageItem.title}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {homepageItem.shortDescription}
+                
+                { homepageItem.videoPreviewId
+                    ? (<iframe width="100%" height="300px" src={ "https://www.youtube.com/embed/" + homepageItem.videoPreviewId } title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>) 
+                    : ""
+                }
 
-                    {homepageItem.description}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Close
-                    </Button>
-                    <Button variant="primary" onClick={handleViewPage}>
-                        View page
-                    </Button>
-                </Modal.Footer>
+                {homepageItem.description}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={handleViewPage}>
+                    View page
+                </Button>
+            </Modal.Footer>
             </Modal>
         </>
     )
 }
 
+/*
+<div className="bg-light" style={ {width: 200, height: 200} }>
+    <img src={'imageSrc'} width="100%" height="100%"></img>
+</div>
+                */
 
 /*
-* Homepage Item Card List
+<Col>
+<NavLink onClick={handleShow}>
+    <Card>
+        <Card.Img variant="top" src={homepageItem.image} />
+        <Card.Body>
+        <Card.Title>{homepageItem.title}</Card.Title>
+        <Card.Text>
+            {homepageItem.shortDescription}
+        </Card.Text>
+        </Card.Body>
+    </Card>
+</NavLink>
+</Col>
+
+<Modal show={show} onHide={handleClose}>
+<Modal.Header closeButton>
+    <Modal.Title>{homepageItem.title}</Modal.Title>
+</Modal.Header>
+<Modal.Body>
+    {homepageItem.shortDescription}
+    
+    { homepageItem.videoPreviewId
+        ? (<iframe width="100%" height="300px" src={ "https://www.youtube.com/embed/" + homepageItem.videoPreviewId } title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>) 
+        : ""
+    }
+
+    {homepageItem.description}
+</Modal.Body>
+<Modal.Footer>
+    <Button variant="secondary" onClick={handleClose}>
+        Close
+    </Button>
+    <Button variant="primary" onClick={handleViewPage}>
+        View page
+    </Button>
+</Modal.Footer>
+</Modal>
 */
-
-interface IHomepageItemCardListProps
-{
-    title: string
-    category: HomepageItemCategory
-}
-
-export const HomepageItemCardList: React.FC<IHomepageItemCardListProps> = (props) =>
-{
-    const items = homePageItems.filter(item => {
-        if(item.hidden) return false;
-
-        for(const category of item.categories)
-        {
-            if(category == props.category) return true;
-        }
-
-        return false;
-    })
-
-    return (
-        <>
-            <ListGroup className="my-2 mt-5">
-                <ListGroup.Item style={{backgroundColor: '#73b2f6'}}><b>{props.title}</b></ListGroup.Item>
-            </ListGroup>
-
-            <Row xs={1} md={3} className="g-4">
-                {items.map((homepageItem, idx) => (
-                <>
-                    <HomepageItemCard homepageItem={homepageItem}></HomepageItemCard>
-                </>
-                ))}
-            </Row>
-        </>
-    )
-}

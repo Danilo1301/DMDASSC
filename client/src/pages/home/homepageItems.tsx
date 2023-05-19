@@ -4,7 +4,7 @@ export const homePageItems: HomepageItem[] =
 [
     {
         title: "Cafemania",
-        shortDescription: "",
+        shortDescription: "Game made in Typescript using Phaser game engine",
         description: "",
         image: "assets/thumbs/cafemania.png",
         projectUrl: "https://cafemania.danilomaioli.repl.co",
@@ -72,7 +72,7 @@ export const homePageItems: HomepageItem[] =
     },
     {
         title: "Video Manager",
-        shortDescription: "",
+        shortDescription: "A NodeJS app that organizes best moments in videos",
         description: "",
         image: "assets/thumbs/videomanager.png",
         projectUrl: "https://github.com/Danilo1301/video-manager",
@@ -157,7 +157,7 @@ export const homePageItems: HomepageItem[] =
     },
     {
         title: "Giroflex Mobile VSL",
-        shortDescription: "",
+        shortDescription: "A GTA San Andreas mod that allows you to create your own police lights",
         description: "",
         image: "assets/thumbs/giroflex-mobile.png",
         projectUrl: "https://github.com/Danilo1301/libGiroflexVSL",

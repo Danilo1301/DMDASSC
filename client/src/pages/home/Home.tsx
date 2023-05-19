@@ -1,21 +1,20 @@
 import React, { useState } from 'react'
 
-import Container from 'react-bootstrap/esm/Container'
 import { HomepageItemCategory } from './HomepageItem'
-import { HomepageItemCardList } from './HomepageItemCard'
+import { HomepageItemCardList } from './IHomepageItemCardList'
 
 
 const Home: React.FC = () =>
 {
     return (
     <>
-        <Container className="mt-4">
-            <HomepageItemCardList title="Principais" category={HomepageItemCategory.PRINCIPAL}></HomepageItemCardList>
-            <HomepageItemCardList title="Jogos" category={HomepageItemCategory.GAMES}></HomepageItemCardList>
+        <div className="container mt-4">
+            <HomepageItemCardList title="Main projects" category={HomepageItemCategory.PRINCIPAL}></HomepageItemCardList>
+            <HomepageItemCardList title="Games" category={HomepageItemCategory.GAMES}></HomepageItemCardList>
             <HomepageItemCardList title="Projects" category={HomepageItemCategory.PROJECTS}></HomepageItemCardList>
             <HomepageItemCardList title="GTA SA Mods" category={HomepageItemCategory.GTA_SA_MODS}></HomepageItemCardList>
             <HomepageItemCardList title="Scratch" category={HomepageItemCategory.SCRATCH}></HomepageItemCardList>
-        </Container>
+        </div>
     </>
   )
 }
