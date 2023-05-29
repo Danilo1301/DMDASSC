@@ -76,7 +76,7 @@ const AnimeItem: React.FC<AnimeItemProps> = (props) =>
             <div className="border p-2" onClick={() => onClickAnime()}>
                 <div className="row">
                     <div className="col-auto">
-                        <div className="bg-light" style={ {width: 64, height: 64} }>
+                        <div className="bg-light" style={ { minWidth: 100, height: 128} }>
                             <img src={imageSrc} width="100%" height="100%"></img>
                         </div>
                     </div>
