@@ -1,7 +1,7 @@
 const request = require('request');
 
-export class Gamelog {
-    public static URL = "http://localhost:3000/gamelog/log";
+export class LogTest {
+    public static URL = "http://localhost:3000/api/log/add";
     public static SERVICE_NAME = "test";
 
     public static log(address: string, message: string, sendPing: boolean, isLocal: boolean) {
@@ -15,7 +15,7 @@ export class Gamelog {
             isLocal: isLocal
         }
 
-        console.log("[gamelog] post", url, data)
+        console.log("[log] post", url, data)
 
         request.post(
             url,
@@ -27,9 +27,7 @@ export class Gamelog {
                     return
                 }
 
-                if (response.statusCode == 200) {
-                    console.log("[gamelog] post ok");
-                }
+                console.log("[gamelog] post status: " + response.statusCode);
             }
         );
     }

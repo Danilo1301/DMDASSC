@@ -62,8 +62,8 @@ import TestApp from './testApp';
 const testApp = new TestApp(app, steamBot);
 
 //
-import GameLog from './gamelog';
-const gameLog = new GameLog(app, discordBot);
+import Log from './log';
+const log = new Log(app, discordBot);
 
 //
 import AnimeList from './animeList';
@@ -74,6 +74,9 @@ const aternos = new Aternos(app);
 
 import PogChamp from './pogchamp';
 const pogChamp = new PogChamp(app);
+
+import Notes from './notes';
+const notes = new Notes(app, log);
 
 //app
 app.use(express.static(PATH_PUBLIC));

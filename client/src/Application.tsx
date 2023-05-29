@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './pages/home/Home';
 import AnimeList from './pages/animeList/AnimeList';
 import MainNavbar from './components/MainNavbar';
+import Notes from './pages/notes/Notes';
 
 //https://react-bootstrap.netlify.app/components/figures/
 
@@ -20,6 +21,7 @@ const App: React.FC = () =>
         <Routes>
           <Route path="/" element={<Home/>}></Route>
           <Route path="/animelist*" element={<AnimeList/>}></Route>
+          <Route path="/notes*" element={<Notes/>}></Route>
         </Routes>
       </BrowserRouter>
     </>

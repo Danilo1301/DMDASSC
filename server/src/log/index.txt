@@ -45,6 +45,8 @@ class GameLog {
         });
 
         app.get("/gamelog", (req, res) => {
+            console.log("at /gamelog")
+
             let str = ""; 
             for (const log of this._logs) {
                 str += `${this.formatLogMessage(log)}\n`
