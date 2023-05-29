@@ -135,6 +135,7 @@ class AnimeList {
             anime.watchedEpisodes = bodyAnime.watchedEpisodes;
             anime.watchedOvas = bodyAnime.watchedOvas;
             anime.lastUpdated = Date.now()
+            anime.imageUrl = bodyAnime.imageUrl
 
             res.end();
 

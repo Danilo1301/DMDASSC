@@ -69,7 +69,7 @@ const AnimeItem: React.FC<AnimeItemProps> = (props) =>
     );
 
     //imageSrc
-    let imageSrc = "";
+    let imageSrc = anime.imageUrl || "";
       
     return (
         <>

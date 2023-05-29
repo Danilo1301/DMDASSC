@@ -7,4 +7,5 @@ export interface Anime {
     totalOvas: number 
     nextEpisodeDate?: number
     lastUpdated: number
+    imageUrl?: string
 }

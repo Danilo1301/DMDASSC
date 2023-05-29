@@ -50,6 +50,8 @@ const AnimePage: React.FC = () => {
 
     const [nextEpisode, setNextEpisode] = useState("");
 
+    const [imageUrl, setImageUrl] = useState("");
+
     //
 
     if(!id) return <>INVALID ID</>
@@ -68,11 +70,13 @@ const AnimePage: React.FC = () => {
             setTotalEpisodes(animeInfo.totalEpisodes)
             setWwatchedOvas(animeInfo.watchedOvas)
             setTotalOvas(animeInfo.totalOvas)
-
+            
             if(animeInfo.nextEpisodeDate) {
                 const date = new Date(animeInfo.nextEpisodeDate);
                 setNextEpisode(date.toISOString().substr(0, 10));
-              }
+            }
+
+            setImageUrl(animeInfo.imageUrl || "")
         })
     }
         
@@ -92,7 +96,8 @@ const AnimePage: React.FC = () => {
           watchedOvas: watchedOvas,
           totalOvas: totalOvas,
           nextEpisodeDate: nextEpisode == "" ? undefined : new Date(nextEpisode).getTime(),
-          lastUpdated: Date.now()
+          lastUpdated: Date.now(),
+          imageUrl: imageUrl
         }
     
         const requestOptions = {
@@ -118,7 +123,11 @@ const AnimePage: React.FC = () => {
     const handleDelete = () =>
     {
         console.log("delete")
-    
+
+        const promptResult = prompt("Delete?")
+        
+        if(promptResult == null) return;
+
         const requestOptions = {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -143,6 +152,7 @@ const AnimePage: React.FC = () => {
                         <Form.Control aria-label="" value={animeName} onChange={e => setAnimeName(e.target.value)} />
                     </InputGroup>
                 </Row>
+
                 <Row>
                     <Col>
                         <span>Watched episodes</span>
@@ -157,6 +167,7 @@ const AnimePage: React.FC = () => {
                         </InputGroup>
                     </Col>
                 </Row>
+
                 <Row>
                     <Col>
                         <span>Watched ovas</span>
@@ -171,6 +182,14 @@ const AnimePage: React.FC = () => {
                         </InputGroup>
                     </Col>
                 </Row>
+
+                <Row>
+                    <span>Image URL</span>
+                    <InputGroup className="mb-3">
+                        <Form.Control aria-label="" value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
+                    </InputGroup>
+                </Row>
+
                 <Row md={4}>
                     <span>Next episode</span>
                     <input type="date" value={nextEpisode} onChange={e => {
@@ -186,15 +205,18 @@ const AnimePage: React.FC = () => {
                     }}></input>
                     {nextEpisode}
                 </Row>
+               
+                
+
                 <Row className="mt-4">
                     <Col className="d-grid">
                         <Button variant="primary" onClick={handleSave}>
                             Save
                         </Button>
                     </Col>
-                    <Col md="auto" className="" onClick={handleDelete}>
-                        <Button variant="danger">
-                            Delete
+                    <Col md="auto" className="">
+                        <Button variant="danger" onClick={handleDelete}>
+                            X
                         </Button>
                     </Col>
                 </Row>
