@@ -7,16 +7,34 @@ export const homePageItems: HomepageItem[] =
         shortDescription: "Game made in Typescript using Phaser game engine",
         description: "",
         image: "assets/thumbs/cafemania.png",
-        projectUrl: "https://cafemania.danilomaioli.repl.co",
+        pageUrl: "https://cafemania.danilomaioli.repl.co",
         categories: [HomepageItemCategory.GAMES, HomepageItemCategory.PRINCIPAL],
-        videoPreviewId: "W2RUrSYOGoU"
+        videoPreviewId: "W2RUrSYOGoU",
+        githubUrl: "https://github.com/Danilo1301/cafemania",
+        hidden: false
+    },
+    {
+        title: "Hello Morgan",
+        shortDescription: "Game made with Scratch (2016)",
+        description: "",
+        image: "https://cdn2.scratch.mit.edu/get_image/project/131653700_144x108.png",
+        pageUrl: "https://scratch.mit.edu/projects/131653700/",
+        categories: [HomepageItemCategory.GAMES, HomepageItemCategory.SCRATCH]
+    },
+    {
+        title: "Uma Aventura no Espaço",
+        shortDescription: "Game made with Scratch (2015)",
+        description: "",
+        image: "https://uploads.scratch.mit.edu/get_image/project/85648310_100x80.png",
+        pageUrl: "https://scratch.mit.edu/projects/85648310/",
+        categories: [HomepageItemCategory.GAMES]
     },
     {
         title: "GTA 2 (using Babaylonjs)",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/gta2-babylonjs.png",
-        projectUrl: "https://gta2-babylonjs.glitch.me/",
+        pageUrl: "https://gta2-babylonjs.glitch.me/",
         categories: [HomepageItemCategory.GAMES]
     },
     {
@@ -24,42 +42,42 @@ export const homePageItems: HomepageItem[] =
         shortDescription: "",
         description: "",
         image: "assets/thumbs/roblox-top-down-game.png",
-        projectUrl: "https://www.roblox.com/games/10979611273/Top-down-game-test",
+        pageUrl: "https://www.roblox.com/games/10979611273/Top-down-game-test",
         categories: [HomepageItemCategory.GAMES]
     },
     {
-        title: "Hello Morgan",
-        shortDescription: "Game in Scratch (2016)",
+        title: "Video Manager",
+        shortDescription: "A NodeJS app that organizes best moments in videos",
         description: "",
-        image: "https://cdn2.scratch.mit.edu/get_image/project/131653700_144x108.png",
-        projectUrl: "https://scratch.mit.edu/projects/131653700/",
-        categories: [HomepageItemCategory.GAMES]
+        image: "assets/thumbs/videomanager.png",
+        categories: [HomepageItemCategory.PROJECTS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "WlmxwY7mR3M",
+        githubUrl: "https://github.com/Danilo1301/video-manager",
     },
     {
-        title: "Uma Aventura no Espaço",
-        shortDescription: "Game in Scratch (2015)",
-        description: "",
-        image: "https://uploads.scratch.mit.edu/get_image/project/85648310_100x80.png",
-        projectUrl: "https://scratch.mit.edu/projects/85648310/",
-        categories: [HomepageItemCategory.GAMES]
-    },
-    
-
-    {
-        title: "Crab Game Server Mod",
+        title: "Chat",
         shortDescription: "",
         description: "",
+        image: "assets/thumbs/chat.png",
+        pageUrl: "https://dmdassc-chat1.glitch.me",
+        categories: [HomepageItemCategory.PROJECTS]
+    },
+    {
+        title: "Crab Game Server Mod",
+        shortDescription: "A modification that adds commands and weapons for a game called Crab Game",
+        description: "",
         image: "assets/thumbs/crabgame-server-mod.png",
-        projectUrl: "https://www.youtube.com/watch?v=UNDTeMtOLVY",
+        pageUrl: "https://www.youtube.com/watch?v=UNDTeMtOLVY",
         categories: [HomepageItemCategory.PROJECTS],
-        videoPreviewId: "UNDTeMtOLVY"
+        videoPreviewId: "UNDTeMtOLVY",
+        githubUrl: "https://github.com/Danilo1301/crab-game-server-mod"
     },
     {
         title: "Redactle-pt",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/redactle-pt.png",
-        projectUrl: "https://redactle-pt.glitch.me",
+        pageUrl: "https://redactle-pt.glitch.me",
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
@@ -67,24 +85,7 @@ export const homePageItems: HomepageItem[] =
         shortDescription: "",
         description: "",
         image: "assets/thumbs/unknown-project.png",
-        projectUrl: "/animelist",
-        categories: [HomepageItemCategory.PROJECTS]
-    },
-    {
-        title: "Video Manager",
-        shortDescription: "A NodeJS app that organizes best moments in videos",
-        description: "",
-        image: "assets/thumbs/videomanager.png",
-        projectUrl: "https://github.com/Danilo1301/video-manager",
-        categories: [HomepageItemCategory.PROJECTS, HomepageItemCategory.PRINCIPAL],
-        videoPreviewId: "WlmxwY7mR3M"
-    },
-    {
-        title: "Chat",
-        shortDescription: "",
-        description: "",
-        image: "assets/thumbs/chat.png",
-        projectUrl: "https://dmdassc-chat1.glitch.me",
+        pageUrl: "/animelist",
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
@@ -92,7 +93,7 @@ export const homePageItems: HomepageItem[] =
         shortDescription: "",
         description: "",
         image: "assets/thumbs/voice-chat.png",
-        projectUrl: "https://voice-chat-server.glitch.me",
+        pageUrl: "https://voice-chat-server.glitch.me",
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
@@ -100,26 +101,36 @@ export const homePageItems: HomepageItem[] =
         shortDescription: "",
         description: "",
         image: "assets/thumbs/unknown-project.png",
-        projectUrl: "https://github.com/Danilo1301/youtube-playlist-check",
-        categories: [HomepageItemCategory.PROJECTS]
+        categories: [HomepageItemCategory.PROJECTS],
+        githubUrl: "https://github.com/Danilo1301/youtube-playlist-check"
     },
-
-
+    {
+        title: "Giroflex Mobile VSL",
+        shortDescription: "A GTA San Andreas mod that allows you to create your own police lights",
+        description: "",
+        image: "assets/thumbs/giroflex-mobile.png",
+        pageUrl: undefined,
+        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "pnYOUqGRV6Q",
+        githubUrl: "https://github.com/Danilo1301/GTASA_libGiroflexVSL",
+        hidden: false
+    },
     {
         title: "Vehicle Siren Lights",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/vehicle-siren-lights.png",
-        projectUrl: "https://www.youtube.com/watch?v=sTG_e6sXQD4",
+        pageUrl: "https://www.youtube.com/watch?v=sTG_e6sXQD4",
         categories: [HomepageItemCategory.GTA_SA_MODS],
-        videoPreviewId: "sTG_e6sXQD4"
+        videoPreviewId: "sTG_e6sXQD4",
+        githubUrl: "https://github.com/Danilo1301/vehicle-siren-lights-v2"
     },
     {
         title: "Neon Lights",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/neon-lights.png",
-        projectUrl: "",
+        pageUrl: undefined,
         categories: [HomepageItemCategory.GTA_SA_MODS],
         videoPreviewId: "nFGJpmpwkhY"
     },
@@ -128,60 +139,57 @@ export const homePageItems: HomepageItem[] =
         shortDescription: "",
         description: "",
         image: "assets/thumbs/hydra-missile.png",
-        projectUrl: "https://github.com/Danilo1301/hydra-missile",
-        categories: [HomepageItemCategory.GTA_SA_MODS]
+        categories: [HomepageItemCategory.GTA_SA_MODS],
+        videoPreviewId: "VDC6f95FV8w",
+        githubUrl: "https://github.com/Danilo1301/hydra-missile"
     },
     {
         title: "Hydra Thrust",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/unknown-project.png",
-        projectUrl: "https://github.com/Danilo1301/hydra-thrust",
-        categories: [HomepageItemCategory.GTA_SA_MODS]
+        categories: [HomepageItemCategory.GTA_SA_MODS],
+        githubUrl: "https://github.com/Danilo1301/hydra-thrust"
     },
     {
         title: "Multi Siren",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/unknown-project.png",
-        projectUrl: "https://github.com/Danilo1301/multi-siren",
-        categories: [HomepageItemCategory.GTA_SA_MODS]
+        categories: [HomepageItemCategory.GTA_SA_MODS],
+        githubUrl: "https://github.com/Danilo1301/multi-siren"
     },
     {
         title: "NSiren (old)",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/unknown-project.png",
-        projectUrl: "https://github.com/Danilo1301/Nsiren",
-        categories: [HomepageItemCategory.GTA_SA_MODS]
+        pageUrl: undefined,
+        categories: [HomepageItemCategory.GTA_SA_MODS],
+        videoPreviewId: undefined,
+        githubUrl: "https://github.com/Danilo1301/Nsiren",
+        hidden: false
     },
-    {
-        title: "Giroflex Mobile VSL",
-        shortDescription: "A GTA San Andreas mod that allows you to create your own police lights",
-        description: "",
-        image: "assets/thumbs/giroflex-mobile.png",
-        projectUrl: "https://github.com/Danilo1301/libGiroflexVSL",
-        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
-        videoPreviewId: "pnYOUqGRV6Q"
-    },
-
-
     {
         title: "Dorime Multiplayer",
         shortDescription: "Game in Scratch (2020)",
         description: "",
         image: "https://cdn2.scratch.mit.edu/get_image/project/370860246_100x80.png",
-        projectUrl: "https://scratch.mit.edu/projects/370860246/",
-        categories: [HomepageItemCategory.SCRATCH]
+        pageUrl: "https://scratch.mit.edu/projects/370860246/",
+        categories: [HomepageItemCategory.SCRATCH],
+        videoPreviewId: undefined,
+        githubUrl: undefined,
+        hidden: false
     },
     {
         title: "Desvie (Webcam)",
         shortDescription: "Game in Scratch (2020)",
         description: "",
         image: "https://cdn2.scratch.mit.edu/get_image/project/467722147_100x80.png",
-        projectUrl: "https://scratch.mit.edu/projects/467722147/",
-        categories: [HomepageItemCategory.SCRATCH]
+        pageUrl: "https://scratch.mit.edu/projects/467722147/",
+        categories: [HomepageItemCategory.SCRATCH],
+        videoPreviewId: undefined,
+        githubUrl: undefined,
+        hidden: false
     },
-    
-    
 ]

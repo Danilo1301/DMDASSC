@@ -29,7 +29,12 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
     const handleShow = () => setShow(true);
 
     const handleViewPage = () => {
-        const url = homepageItem.projectUrl
+        const url = homepageItem.pageUrl!
+        window.open(url, '_blank')?.focus()
+    }
+
+    const handleViewGithub = () => {
+        const url = homepageItem.githubUrl!
         window.open(url, '_blank')?.focus()
     }
 
@@ -47,13 +52,31 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
                             <div>{homepageItem.description}</div>
                         </div>
                         <div className="align-self-end row">
-                            <div className="col-auto p-2">
-                                <button className="btn flex btn-primary" onClick={handleShow}>Show video</button>
-                            </div>
-                            <div className="col-auto p-2">
-                                <button className="btn btn-secondary" onClick={handleViewPage}>View page</button>
-                            </div>
-                           
+                            {
+                                homepageItem.videoPreviewId != undefined ?
+                                <>
+                                <div className="col-auto p-2">
+                                    <button className="btn flex btn-primary" onClick={handleShow}><i className="fa fa-youtube"></i> Show video</button>
+                                </div>
+                                </> : <></>
+                            }
+                            {
+                                homepageItem.pageUrl != undefined ?
+                                <>
+                                <div className="col-auto p-2">
+                                    <button className="btn btn-secondary" onClick={handleViewPage}><i className="fa fa-file"></i> View page</button>
+                                </div>
+                                </> : <></>
+                            }
+                            {
+                                homepageItem.githubUrl != undefined ?
+                                <>
+                                <div className="col-auto p-2">
+                                    <button className="btn btn-secondary" onClick={handleViewGithub}><i className="fa fa-github"></i> Github</button>
+                                </div>
+                                </> : <></>
+                            }
+                            
                         </div>
                     </div>
                 </div>
@@ -65,12 +88,13 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
                 <Modal.Title>{homepageItem.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {homepageItem.shortDescription}
-                
-                { homepageItem.videoPreviewId
-                    ? (<iframe width="100%" height="300px" src={ "https://www.youtube.com/embed/" + homepageItem.videoPreviewId } title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>) 
-                    : ""
-                }
+                <div> {homepageItem.shortDescription} </div>
+                <div>
+                    { homepageItem.videoPreviewId
+                        ? <iframe width="100%" height="300px" className='mt-4' src={ "https://www.youtube.com/embed/" + homepageItem.videoPreviewId } title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe> 
+                        : ""
+                    }
+                </div>
 
                 {homepageItem.description}
             </Modal.Body>

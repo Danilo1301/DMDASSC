@@ -1,13 +1,6 @@
-import React, { useState } from 'react'
-import Button from 'react-bootstrap/esm/Button'
-import Card from 'react-bootstrap/esm/Card'
-import Col from 'react-bootstrap/esm/Col'
-import Container from 'react-bootstrap/esm/Container'
-import ListGroup from 'react-bootstrap/esm/ListGroup'
-import Modal from 'react-bootstrap/esm/Modal'
-import NavLink from 'react-bootstrap/esm/NavLink'
-import Row from 'react-bootstrap/esm/Row'
-import { HomepageItem, HomepageItemCategory } from './HomepageItem'
+import React from 'react'
+
+import { HomepageItemCategory } from './HomepageItem'
 import { homePageItems } from './homepageItems'
 import { HomepageItemCard } from './HomepageItemCard'
 
@@ -24,7 +17,7 @@ export const HomepageItemCardList: React.FC<IHomepageItemCardListProps> = (props
 
         for(const category of item.categories)
         {
-            if(category == props.category) return true;
+            if(category === props.category) return true;
         }
 
         return false;
@@ -32,15 +25,15 @@ export const HomepageItemCardList: React.FC<IHomepageItemCardListProps> = (props
 
     return (
         <>
-            <ul className="list-group mt-4">
+            <ul className="list-group" style={{marginBottom: 120}}>
 
-                <a href="#" className="list-group-item list-group-item-action active">
-                    <h5 className="mb-1">{props.title}</h5>
-                    <small className="">{items.length} projects</small>
-                </a>
+                <div className="p-2 bg-primary">
+                    <h5 className="text-light mb-1">{props.title}</h5>
+                    <small className="text-light">{items.length} projects</small>
+                </div>
 
                 {items.map((homepageItem, idx) => (
-                    <li className="list-group-item p-4">
+                    <li className="list-group-item p-2">
                         <HomepageItemCard homepageItem={homepageItem}></HomepageItemCard>
                     </li>
                 ))}

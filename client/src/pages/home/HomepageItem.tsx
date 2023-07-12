@@ -11,8 +11,9 @@ export enum HomepageItemCategory {
     shortDescription: string
     description: string
     image: string
-    projectUrl: string
+    pageUrl?: string
     categories: HomepageItemCategory[]
     videoPreviewId?: string
+    githubUrl?: string
     hidden?: boolean
 }
