@@ -105,7 +105,7 @@ export const homePageItems: HomepageItem[] =
         githubUrl: "https://github.com/Danilo1301/youtube-playlist-check"
     },
     {
-        title: "Giroflex Mobile VSL",
+        title: "Giroflex VSL (Mobile)",
         shortDescription: "A GTA San Andreas mod that allows you to create your own police lights",
         description: "",
         image: "assets/thumbs/giroflex-mobile.png",
@@ -113,6 +113,17 @@ export const homePageItems: HomepageItem[] =
         categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
         videoPreviewId: "pnYOUqGRV6Q",
         githubUrl: "https://github.com/Danilo1301/GTASA_libGiroflexVSL",
+        hidden: false
+    },
+    {
+        title: "Giroflex VSL - Pattern helper",
+        shortDescription: "A web page that allows you to create your own police lights for my mod called 'Giroflex VSL'",
+        description: "",
+        image: "assets/thumbs/giroflex-vsl-pattern.png",
+        pageUrl: "https://giroflex-mobile-pattern-v2.glitch.me/",
+        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "KZkaiiXhtLU",
+        githubUrl: undefined,
         hidden: false
     },
     {
