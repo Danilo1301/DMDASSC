@@ -23,7 +23,7 @@
     "start": "SET PORT=3001&&react-scripts start",
     "start-server": "webpack serve --config=configs/webpack/dev.js",
     "start-watch": "webpack --config=configs/webpack/prod.js --watch",
-    "build": "SET BUILD_PATH=./../server/react&&react-scripts build",
+    "build": "SET BUILD_PATH=./../public/client&&react-scripts build",
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject"
   },

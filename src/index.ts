@@ -12,7 +12,7 @@ const cors = require('cors');
 
 require("./env")(`${PATH_DATA}/env.json`)
 
-if(!fs.existsSync("../.data")) fs.mkdirSync("../.data");
+if(!fs.existsSync(PATH_DATA)) fs.mkdirSync(PATH_DATA);
 
 const isDevelopment = (process.env.NODE_ENV || "development").trim() === 'development';
 const port = 3000;
